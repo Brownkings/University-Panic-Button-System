@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}User Feedback & Evaluation - UPBS{% endblock %}
+
+{% block content %}
+<div style="max-width: 650px; margin: 0 auto;">
+
+    <!-- Feedback Submission Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">⭐ System & Response Feedback</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+                    Help us improve campus emergency response times and interface usability.
+                </p>
+            </div>
+            {% if alert %}
+                <span class="badge badge-resolved">Alert #{{ alert.id }}</span>
+            {% endif %}
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% if alert %}
+                <input type="hidden" name="alert_id" value="{{ alert.id }}">
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">How would you rate the overall response quality and speed? *</label>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                        <input type="radio" name="rating" value="5" checked>
+                        <span>⭐⭐⭐⭐⭐ (5 - Excellent)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                        <input type="radio" name="rating" value="4">
+                        <span>⭐⭐⭐⭐ (4 - Good)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                        <input type="radio" name="rating" value="3">
+                        <span>⭐⭐⭐ (3 - Neutral)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                        <input type="radio" name="rating" value="2">
+                        <span>⭐⭐ (2 - Slow)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                        <input type="radio" name="rating" value="1">
+                        <span>⭐ (1 - Poor)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label class="form-label" for="comments">Suggestions for Continuous Improvement *</label>
+                <textarea id="comments" name="comments" class="form-control" placeholder="What worked well? How can we make the panic button or response faster?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-save-green" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem; margin-top: 1rem;">
+                Submit Feedback
+            </button>
+        </form>
+    </div>
+
+    <!-- Community Feedback Feed -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <h3 class="card-title">💬 Recent User Experiences</h3>
+        </div>
+
+        <div>
+            {% for fb in recent_feedbacks %}
+                <div style="border-bottom: 1px solid var(--bg-card-border); padding: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #ffffff;">{{ fb.user.full_name }}</strong>
+                            <span style="color: #fbbf24; margin-left: 0.5rem;">
+                                {% if fb.rating == 5 %}★★★★★{% elif fb.rating == 4 %}★★★★☆{% elif fb.rating == 3 %}★★★☆☆{% elif fb.rating == 2 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+                            </span>
+                        </div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ fb.created_at|date:"d M Y" }}</span>
+                    </div>
+                    <p style="margin-top: 0.5rem; color: #cbd5e1; font-size: 0.9rem;">
+                        "{{ fb.comments }}"
+                    </p>
+                </div>
+            {% empty %}
+                <p style="color: var(--text-muted); text-align: center; padding: 1rem;">No feedback submitted yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UPBS - University Panic Button System{% endblock %}</title>
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Leaflet Maps CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet Maps JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="nav-brand">
+            <span class="brand-badge">UPBS</span>
+            <span>Campus Safety</span>
+        </a>
+
+        <ul class="nav-links">
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'home' %}" class="nav-link">🚨 Panic</a></li>
+                <li><a href="{% url 'user_dashboard' %}" class="nav-link">📋 Tracker</a></li>
+                <li><a href="{% url 'incident_create' %}" class="nav-link">📝 Report</a></li>
+
+                {% if user.is_security or user.is_admin_user %}
+                    <li><a href="{% url 'security_dashboard' %}" class="nav-link" style="color: #f87171;">🛡️ Security Radar</a></li>
+                {% endif %}
+
+                {% if user.is_admin_user %}
+                    <li><a href="{% url 'reports_analytics' %}" class="nav-link" style="color: #60a5fa;">📊 Analytics</a></li>
+                    <li><a href="{% url 'user_management' %}" class="nav-link" style="color: #a78bfa;">👥 Users</a></li>
+                {% endif %}
+
+                <li><a href="{% url 'usability_test' %}" class="nav-link" style="color: #34d399;">⏱️ Usability Test</a></li>
+
+                <li>
+                    <span class="user-badge">
+                        {{ user.role.role_name|default:"USER" }}: {{ user.username }}
+                    </span>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}" class="nav-link" style="color: #ef4444;">Logout</a>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+                <li><a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.35rem 0.8rem; font-size: 0.85rem;">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+        {% if messages %}
+            <div style="margin-bottom: 1.5rem;">
+                {% for message in messages %}
+                    <div class="card" style="padding: 0.85rem 1.25rem; margin-bottom: 0.75rem; border-left: 4px solid {% if message.tags == 'success' %}#10b981{% elif message.tags == 'error' %}#ef4444{% else %}#3b82f6{% endif %}; background: rgba(30, 41, 59, 0.9);">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p><strong>NPRT630 Project</strong> | Techno Warriors (Brown Nkosi - 202474004, Palesa Ntsane - 202437528, Rethabile Pheko, Thapelo Ramphago)</p>
+        <p style="margin-top: 0.3rem; opacity: 0.75;">University Panic Button System &copy; 2026. Designed for rapid emergency dispatch & campus community protection.</p>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

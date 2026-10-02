@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Generation & Safety Analytics - UPBS{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+
+    <!-- Header & Action Bar -->
+    <div class="card" style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 class="card-title" style="font-size: 1.4rem;">
+                📊 Campus Safety Analytics & Report Generation
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+                Phase 3 Report Generation Specification | Sol Plaatje University
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'export_reports_csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline" style="font-size: 0.85rem;">
+                📥 Export CSV
+            </a>
+            <button onclick="window.print()" class="btn btn-primary" style="font-size: 0.85rem;">
+                🖨️ Print / Save PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="grid-4" style="margin-bottom: 1.5rem;">
+        <div class="kpi-card" style="border-top: 3px solid #3b82f6;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Total Alerts Logged</div>
+            <div class="kpi-number">{{ total_alerts }}</div>
+            <div style="font-size: 0.8rem; color: #60a5fa; margin-top: 0.2rem;">Across campus zones</div>
+        </div>
+
+        <div class="kpi-card" style="border-top: 3px solid #10b981;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Resolution Rate</div>
+            <div class="kpi-number">{{ resolution_rate }}%</div>
+            <div style="font-size: 0.8rem; color: #34d399; margin-top: 0.2rem;">{{ resolved_count }} resolved</div>
+        </div>
+
+        <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Avg Dispatch Time</div>
+            <div class="kpi-number">{{ avg_dispatch_minutes }}m</div>
+            <div style="font-size: 0.8rem; color: #fbbf24; margin-top: 0.2rem;">From panic trigger</div>
+        </div>
+
+        <div class="kpi-card" style="border-top: 3px solid #a78bfa;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">User Satisfaction</div>
+            <div class="kpi-number">{{ avg_rating }} <span style="font-size: 1.2rem;">★</span></div>
+            <div style="font-size: 0.8rem; color: #c4b5fd; margin-top: 0.2rem;">Out of 5.0 ({{ total_feedbacks }} reviews)</div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card">
+        <form method="GET" action="{% url 'reports_analytics' %}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Category / Type</label>
+                    <select name="category" class="form-control">
+                        <option value="">All Categories</option>
+                        <option value="STANDARD" {% if selected_cat == 'STANDARD' %}selected{% endif %}>Standard Emergency</option>
+                        <option value="MEDICAL" {% if selected_cat == 'MEDICAL' %}selected{% endif %}>Medical Trauma</option>
+                        <option value="FIRE" {% if selected_cat == 'FIRE' %}selected{% endif %}>Fire Outbreak</option>
+                        <option value="CRIME" {% if selected_cat == 'CRIME' %}selected{% endif %}>Crime / Active Threat</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="SENT" {% if selected_status == 'SENT' %}selected{% endif %}>Sent (Pending)</option>
+                        <option value="RECEIVED" {% if selected_status == 'RECEIVED' %}selected{% endif %}>Received</option>
+                        <option value="DISPATCHED" {% if selected_status == 'DISPATCHED' %}selected{% endif %}>Dispatched</option>
+                        <option value="RESOLVED" {% if selected_status == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Date From</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Date To</label>
+                    <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Filter</button>
+                    <a href="{% url 'reports_analytics' %}" class="btn btn-outline">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Records Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">📋 Detailed Emergency Records ({{ alerts.count }})</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Campus Location</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                        <th>Responding Officer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in alerts %}
+                        <tr>
+                            <td>#{{ a.id }}</td>
+                            <td>{{ a.user.full_name }} ({{ a.user.institutional_id }})</td>
+                            <td><strong>{{ a.get_alert_type_display }}</strong></td>
+                            <td>{{ a.location.description }}</td>
+                            <td>{{ a.timestamp|date:"H:i:s, d M Y" }}</td>
+                            <td>
+                                <span class="badge {% if a.status == 'SENT' %}badge-sent{% elif a.status == 'RECEIVED' %}badge-received{% elif a.status == 'DISPATCHED' %}badge-dispatched{% else %}badge-resolved{% endif %}">
+                                    {{ a.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% for r in a.responses.all %}
+                                    {{ r.officer.officer_name }}
+                                {% empty %}
+                                    <span style="color: var(--text-muted);">None</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted);">No records matching the selected criteria.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

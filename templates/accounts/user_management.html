@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management Panel - UPBS Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">👥 University User Management Panel</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Control role assignments, account statuses, and verification for campus safety personnel and students.
+            </p>
+        </div>
+        <span class="badge badge-received">Admin Access Only</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID / Username</th>
+                    <th>Full Name</th>
+                    <th>Institutional ID</th>
+                    <th>Email & Contact</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td><strong>{{ u.username }}</strong></td>
+                        <td>{{ u.full_name }}</td>
+                        <td><span style="font-family: monospace;">{{ u.institutional_id }}</span></td>
+                        <td>
+                            <div>{{ u.email }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ u.contact_number }}</div>
+                        </td>
+                        <td>
+                            <form method="POST" action="{% url 'update_user_role' u.id %}" style="display: flex; gap: 0.3rem;">
+                                {% csrf_token %}
+                                <select name="role_name" class="form-control" style="padding: 0.3rem 0.5rem; font-size: 0.85rem;" onchange="this.form.submit()">
+                                    {% for r in roles %}
+                                        <option value="{{ r.role_name }}" {% if u.role and u.role.role_name == r.role_name %}selected{% endif %}>
+                                            {{ r.get_role_name_display }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                            {% if u.is_verified %}
+                                <span class="badge badge-resolved">Verified</span>
+                            {% else %}
+                                <span class="badge badge-sent">Unverified</span>
+                            {% endif %}
+                            {% if u.is_active %}
+                                <span class="badge badge-received">Active</span>
+                            {% else %}
+                                <span class="badge badge-cancelled">Suspended</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'toggle_user_status' u.id %}" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                {% if u.is_active %}Suspend{% else %}Activate{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted);">No users found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

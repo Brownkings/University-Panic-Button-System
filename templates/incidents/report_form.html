@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Incident Report - UPBS{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <!-- Incident Entry Card -->
+    <div class="card">
+        <form method="POST" action="{% url 'incident_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Header with Iteration 2: Prominent Green Save Button positioned top-right -->
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">📝 Campus Incident Report Form</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+                        Log non-immediate safety concerns, theft, damages, or hazards with campus security.
+                    </p>
+                </div>
+                <!-- ITERATION 2 REQUIREMENT: Green save button at top-right -->
+                <button type="submit" class="btn btn-save-green" id="saveIncidentBtn">
+                    💾 Submit Report
+                </button>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="category">Incident Category *</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="THEFT">Theft / Burglary</option>
+                        <option value="HARASSMENT">Harassment / Gender-Based Violence</option>
+                        <option value="VANDALISM">Property Vandalism / Damage</option>
+                        <option value="MEDICAL">Medical Emergency / Injury</option>
+                        <option value="SUSPICIOUS_ACTIVITY">Suspicious Person / Activity</option>
+                        <option value="SAFETY_HAZARD">Campus Safety Hazard (Electrical/Fire)</option>
+                        <option value="OTHER">Other Incident</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="location_name">Campus Location / Area *</label>
+                    <input type="text" id="location_name" name="location_name" class="form-control" placeholder="e.g. Science Lab 3, North Cafeteria, East Residence" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Detailed Description of What Happened *</label>
+                <textarea id="description" name="description" class="form-control" placeholder="Provide as much detail as possible (time, involved persons, description of items, etc.)..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="media_file">Upload Evidence / Media (Optional: Photo or Video)</label>
+                <input type="file" id="media_file" name="media_file" class="form-control" accept="image/*,video/*">
+                <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.3rem; display: block;">
+                    Supported formats: PNG, JPG, JPEG, MP4 (Max 10 MB).
+                </small>
+            </div>
+
+            <!-- Bottom secondary submission button for mobile user convenience -->
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button type="submit" class="btn btn-save-green">
+                    💾 Submit Incident Report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- History of Submitted Reports -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <h3 class="card-title">📁 My Submitted Incident Reports</h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">{{ user_reports.count }} Submitted</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Date Submitted</th>
+                        <th>Status</th>
+                        <th>Evidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in user_reports %}
+                        <tr>
+                            <td>#{{ r.id }}</td>
+                            <td><strong>{{ r.get_category_display }}</strong></td>
+                            <td>{{ r.location_name }}</td>
+                            <td>{{ r.created_at|date:"H:i - d M Y" }}</td>
+                            <td>
+                                <span class="badge {% if r.status == 'SUBMITTED' %}badge-sent{% elif r.status == 'UNDER_REVIEW' %}badge-received{% elif r.status == 'ACTION_TAKEN' %}badge-dispatched{% else %}badge-resolved{% endif %}">
+                                    {{ r.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if r.media_file %}
+                                    <a href="{{ r.media_file.url }}" target="_blank" style="color: #60a5fa; font-size: 0.85rem;">View File</a>
+                                {% else %}
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">None</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted);">No reports submitted yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}User Emergency Tracker - UPBS{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+
+    {% if active_alert %}
+        <input type="hidden" id="currentAlertId" value="{{ active_alert.id }}">
+
+        <!-- Live Incident Tracker Card (Phase 3 Iteration 3) -->
+        <div class="card" style="border: 2px solid rgba(59, 130, 246, 0.4);">
+            <div class="card-header">
+                <div>
+                    <span class="badge {% if active_alert.status == 'SENT' %}badge-sent{% elif active_alert.status == 'RECEIVED' %}badge-received{% elif active_alert.status == 'DISPATCHED' %}badge-dispatched{% else %}badge-resolved{% endif %}">
+                        {{ active_alert.get_status_display }}
+                    </span>
+                    <h2 class="card-title" style="margin-top: 0.4rem; font-size: 1.4rem;">
+                        Live Alert #{{ active_alert.id }} — {{ active_alert.get_alert_type_display }}
+                    </h2>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Triggered At</div>
+                    <div style="font-weight: 600;">{{ active_alert.timestamp|date:"H:i:s, d M Y" }}</div>
+                </div>
+            </div>
+
+            <!-- 4-Stage Status Progress Timeline -->
+            <div class="timeline-container">
+                <div class="timeline-progress-bar">
+                    <div id="timelineFill" class="timeline-progress-fill" style="width: {% if active_alert.status == 'SENT' %}0%{% elif active_alert.status == 'RECEIVED' %}33%{% elif active_alert.status == 'DISPATCHED' %}66%{% elif active_alert.status == 'RESOLVED' %}100%{% endif %};"></div>
+                </div>
+
+                <div id="step-sent" class="timeline-step {% if active_alert.status == 'SENT' %}active{% else %}completed{% endif %}">
+                    <div class="timeline-node">1</div>
+                    <div class="timeline-label">Sent</div>
+                </div>
+
+                <div id="step-received" class="timeline-step {% if active_alert.status == 'RECEIVED' %}active{% elif active_alert.status == 'DISPATCHED' or active_alert.status == 'RESOLVED' %}completed{% endif %}">
+                    <div class="timeline-node">2</div>
+                    <div class="timeline-label">Received</div>
+                </div>
+
+                <div id="step-dispatched" class="timeline-step {% if active_alert.status == 'DISPATCHED' %}active{% elif active_alert.status == 'RESOLVED' %}completed{% endif %}">
+                    <div class="timeline-node">3</div>
+                    <div class="timeline-label">Dispatched</div>
+                </div>
+
+                <div id="step-resolved" class="timeline-step {% if active_alert.status == 'RESOLVED' %}completed{% endif %}">
+                    <div class="timeline-node">4</div>
+                    <div class="timeline-label">Resolved</div>
+                </div>
+            </div>
+
+            <div id="statusAnnouncement" style="text-align: center; font-weight: 700; color: #fcd34d; font-size: 1.05rem; margin: 1.25rem 0;">
+                {% if active_alert.status == 'SENT' %}
+                    📡 Alert Sent to Campus Security dispatch queue...
+                {% elif active_alert.status == 'RECEIVED' %}
+                    👁️ Alert Acknowledged by Control Room Operator.
+                {% elif active_alert.status == 'DISPATCHED' %}
+                    🚨 Security Patrol Dispatched! Stay calm and remain in place.
+                {% elif active_alert.status == 'RESOLVED' %}
+                    ✅ Incident Resolved by Responding Officers.
+                {% endif %}
+            </div>
+
+            <!-- Incident Metadata Details -->
+            <div class="grid-2" style="margin-top: 1rem; background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: var(--radius-sm);">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">PINPOINT LOCATION</div>
+                    <div style="font-weight: 600; color: #ffffff;">{{ active_alert.location.description }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        GPS: {{ active_alert.location.latitude }}, {{ active_alert.location.longitude }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">DISPATCH / RESPONSE NOTES</div>
+                    <div style="font-weight: 500; color: #cbd5e1;">
+                        {% for resp in active_alert.responses.all %}
+                            <div>👮 <strong>Officer:</strong> {{ resp.officer.officer_name }} ({{ resp.get_status_display }})</div>
+                            {% if resp.response_notes %}<div style="font-size: 0.85rem; font-style: italic;">"{{ resp.response_notes }}"</div>{% endif %}
+                        {% empty %}
+                            <span style="color: var(--text-muted);">Awaiting officer assignment...</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Button (Available when resolved or direct) -->
+            <div id="feedbackPrompt" style="margin-top: 1.25rem; text-align: center; {% if active_alert.status != 'RESOLVED' %}display: none;{% endif %}">
+                <a href="{% url 'feedback_create' active_alert.id %}" class="btn btn-save-green" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                    ⭐ Rate Response Quality & Give Feedback
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🛡️</div>
+            <h2 class="card-title" style="justify-content: center;">No Active Emergency</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0.5rem 0 1.5rem 0;">
+                You currently do not have any ongoing emergency dispatch requests.
+            </p>
+            <a href="{% url 'home' %}" class="btn btn-danger" style="padding: 0.75rem 1.5rem;">
+                Go to Panic Trigger
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Past Alert History Table -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <h3 class="card-title">📜 My Emergency Alert History</h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">{{ alerts_history.count }} Total Records</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in alerts_history %}
+                        <tr>
+                            <td>#{{ a.id }}</td>
+                            <td><strong>{{ a.get_alert_type_display }}</strong></td>
+                            <td>{{ a.location.description|truncatechars:35 }}</td>
+                            <td>{{ a.timestamp|date:"H:i - d M Y" }}</td>
+                            <td>
+                                <span class="badge {% if a.status == 'SENT' %}badge-sent{% elif a.status == 'RECEIVED' %}badge-received{% elif a.status == 'DISPATCHED' %}badge-dispatched{% elif a.status == 'RESOLVED' %}badge-resolved{% else %}badge-cancelled{% endif %}">
+                                    {{ a.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if a.feedbacks.exists %}
+                                    <span style="color: #fbbf24; font-size: 0.85rem;">★ {{ a.feedbacks.first.rating }}/5</span>
+                                {% elif a.status == 'RESOLVED' %}
+                                    <a href="{% url 'feedback_create' a.id %}" style="color: #60a5fa; font-size: 0.85rem;">Rate Now</a>
+                                {% else %}
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted);">No past alert records found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/timeline.js"></script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Security Command Radar - UPBS Dispatch Console{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <!-- Top Command Bar -->
+    <div class="card" style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 class="card-title" style="font-size: 1.4rem;">
+                🛡️ Campus Security Operations Console
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+                Live Emergency Radar & Fast Officer Dispatch Hub | Sol Plaatje University
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button id="soundToggle" class="btn btn-outline" style="font-size: 0.85rem;">
+                🔊 Sound Alerts: ON
+            </button>
+            <span class="badge badge-dispatched" style="padding: 0.5rem 0.8rem; font-size: 0.85rem;">
+                🔴 Live Radar Active
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Command Grid: Map & Live Feed -->
+    <div class="grid-2" style="grid-template-columns: 1fr 1fr; align-items: start;">
+
+        <!-- Left: Interactive Campus Map -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 1.1rem;">📍 Live Campus Radar Map</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Real-Time GPS Coordinates</span>
+            </div>
+            <div id="map"></div>
+            <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>● Blue Marker: Active Alert Location</span>
+                <span>Zoom / Pan enabled</span>
+            </div>
+        </div>
+
+        <!-- Right: Real-Time Alerts Feed -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title" style="font-size: 1.1rem;">🚨 Active Emergency Queue</h3>
+                    <span style="font-size: 0.8rem; color: #34d399;">● Auto-polling (2.5s)</span>
+                </div>
+                
+                <div id="alertsContainer">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        Loading active emergency alerts...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/security.js"></script>
+{% endblock %}

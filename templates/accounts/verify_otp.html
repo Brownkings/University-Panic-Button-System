@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Identity (OTP) - UPBS{% endblock %}
+
+{% block content %}
+<div style="max-width: 440px; margin: 3rem auto;">
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔐</div>
+        <h2 class="card-title" style="justify-content: center; margin-bottom: 0.5rem;">Two-Factor Verification</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            A 6-digit One-Time Pin has been sent to your registered mobile device: <strong>{{ user_phone }}</strong>
+        </p>
+
+        {% if debug_otp %}
+            <div style="background: rgba(16, 185, 129, 0.15); border: 1px dashed #10b981; padding: 0.6rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; color: #34d399;">
+                Simulation Code for Testing: <strong>{{ debug_otp }}</strong>
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="otp_code" maxlength="6" class="form-control" style="font-size: 2rem; letter-spacing: 0.4em; text-align: center; font-weight: 700;" placeholder="000000" autofocus required>
+            </div>
+
+            <button type="submit" class="btn btn-save-green" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1.05rem;">
+                Verify & Activate Account
+            </button>
+        </form>
+
+        <p style="margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+            Didn't receive code? <a href="{% url 'resend_otp' %}" style="color: #60a5fa;">Resend SMS</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
