@@ -19,3 +19,4 @@ services:
         sync: false # Set this in Render Dashboard using your Supabase connection string
       - key: SECURE_SSL_REDIRECT
         value: "True"
+

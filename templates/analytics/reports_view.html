@@ -3,58 +3,114 @@
 {% block title %}Report Generation & Safety Analytics - UPBS{% endblock %}
 
 {% block content %}
-<div style="max-width: 1100px; margin: 0 auto;">
+<div style="max-width: 1120px; margin: 0 auto;">
 
-    <!-- Header & Action Bar -->
-    <div class="card" style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <!-- Executive Header & Action Bar -->
+    <div class="card" style="padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border: 1px solid var(--bg-card-border);">
         <div>
-            <h1 class="card-title" style="font-size: 1.4rem;">
-                📊 Campus Safety Analytics & Report Generation
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #60a5fa; margin-bottom: 0.3rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>Executive Safety Telemetry &amp; Audit Console</span>
+            </div>
+            <h1 class="card-title" style="font-size: 1.4rem; letter-spacing: -0.01em;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <span>Campus Safety Analytics &amp; Report Generation</span>
             </h1>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
                 Phase 3 Report Generation Specification | Sol Plaatje University
             </p>
         </div>
 
-        <div style="display: flex; gap: 0.75rem;">
-            <a href="{% url 'export_reports_csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline" style="font-size: 0.85rem;">
-                📥 Export CSV
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="{% url 'export_reports_csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline" style="font-size: 0.85rem; border: 1px solid var(--bg-card-border);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Export CSV</span>
             </a>
-            <button onclick="window.print()" class="btn btn-primary" style="font-size: 0.85rem;">
-                🖨️ Print / Save PDF
+            <button type="button" onclick="window.print()" class="btn btn-primary" style="font-size: 0.85rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>Print / Save PDF</span>
             </button>
         </div>
     </div>
 
-    <!-- Summary KPI Cards -->
+    <!-- Summary KPI Cards (1px structural borders, top-right SVG icons, tabular numerals) -->
     <div class="grid-4" style="margin-bottom: 1.5rem;">
-        <div class="kpi-card" style="border-top: 3px solid #3b82f6;">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Total Alerts Logged</div>
-            <div class="kpi-number">{{ total_alerts }}</div>
-            <div style="font-size: 0.8rem; color: #60a5fa; margin-top: 0.2rem;">Across campus zones</div>
+        <div class="kpi-card" style="text-align: left; border: 1px solid var(--bg-card-border); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total Alerts Logged</div>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.25); color: #60a5fa;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </span>
+            </div>
+            <div class="kpi-number" style="font-variant-numeric: tabular-nums; margin-top: 0.6rem;">{{ total_alerts }}</div>
+            <div style="font-size: 0.78rem; color: #60a5fa; margin-top: 0.35rem;">Across campus zones</div>
         </div>
 
-        <div class="kpi-card" style="border-top: 3px solid #10b981;">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Resolution Rate</div>
-            <div class="kpi-number">{{ resolution_rate }}%</div>
-            <div style="font-size: 0.8rem; color: #34d399; margin-top: 0.2rem;">{{ resolved_count }} resolved</div>
+        <div class="kpi-card" style="text-align: left; border: 1px solid var(--bg-card-border); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Resolution Rate</div>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </span>
+            </div>
+            <div class="kpi-number" style="font-variant-numeric: tabular-nums; margin-top: 0.6rem;">{{ resolution_rate }}%</div>
+            <div style="font-size: 0.78rem; color: #34d399; margin-top: 0.35rem; font-variant-numeric: tabular-nums;">{{ resolved_count }} resolved</div>
         </div>
 
-        <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Avg Dispatch Time</div>
-            <div class="kpi-number">{{ avg_dispatch_minutes }}m</div>
-            <div style="font-size: 0.8rem; color: #fbbf24; margin-top: 0.2rem;">From panic trigger</div>
+        <div class="kpi-card" style="text-align: left; border: 1px solid var(--bg-card-border); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Avg Dispatch Time</div>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); color: #fbbf24;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </span>
+            </div>
+            <div class="kpi-number" style="font-variant-numeric: tabular-nums; margin-top: 0.6rem;">{{ avg_dispatch_minutes }}m</div>
+            <div style="font-size: 0.78rem; color: #fbbf24; margin-top: 0.35rem;">From panic trigger</div>
         </div>
 
-        <div class="kpi-card" style="border-top: 3px solid #a78bfa;">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">User Satisfaction</div>
-            <div class="kpi-number">{{ avg_rating }} <span style="font-size: 1.2rem;">★</span></div>
-            <div style="font-size: 0.8rem; color: #c4b5fd; margin-top: 0.2rem;">Out of 5.0 ({{ total_feedbacks }} reviews)</div>
+        <div class="kpi-card" style="text-align: left; border: 1px solid var(--bg-card-border); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">User Satisfaction</div>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: rgba(167, 139, 250, 0.12); border: 1px solid rgba(167, 139, 250, 0.25); color: #c4b5fd;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </span>
+            </div>
+            <div class="kpi-number" style="font-variant-numeric: tabular-nums; margin-top: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
+                <span>{{ avg_rating }}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+            </div>
+            <div style="font-size: 0.78rem; color: #c4b5fd; margin-top: 0.35rem; font-variant-numeric: tabular-nums;">Out of 5.0 ({{ total_feedbacks }} reviews)</div>
         </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="card">
+    <!-- Structured Filter Toolbar -->
+    <div class="card" style="border: 1px solid var(--bg-card-border);">
         <form method="GET" action="{% url 'reports_analytics' %}">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
                 <div class="form-group" style="margin-bottom: 0;">
@@ -90,17 +146,39 @@
                 </div>
 
                 <div style="display: flex; gap: 0.5rem;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Filter</button>
-                    <a href="{% url 'reports_analytics' %}" class="btn btn-outline">Reset</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        <span>Filter</span>
+                    </button>
+                    <a href="{% url 'reports_analytics' %}" class="btn btn-outline" style="border: 1px solid var(--bg-card-border);">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        <span>Reset</span>
+                    </a>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Data Records Table -->
-    <div class="card">
+    <!-- Detailed Incident Audit Table -->
+    <div class="card" style="border: 1px solid var(--bg-card-border);">
         <div class="card-header">
-            <h3 class="card-title">📋 Detailed Emergency Records ({{ alerts.count }})</h3>
+            <h3 class="card-title" style="font-size: 1.1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="16" x2="15" y2="16"></line>
+                </svg>
+                <span style="font-variant-numeric: tabular-nums;">Detailed Emergency Records ({{ alerts.count }})</span>
+            </h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted); font-variant-numeric: tabular-nums;">
+                Audit Log Stream
+            </span>
         </div>
 
         <div class="table-responsive">
@@ -119,11 +197,11 @@
                 <tbody>
                     {% for a in alerts %}
                         <tr>
-                            <td>#{{ a.id }}</td>
-                            <td>{{ a.user.full_name }} ({{ a.user.institutional_id }})</td>
+                            <td style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-variant-numeric: tabular-nums; color: #94a3b8;">#{{ a.id }}</td>
+                            <td>{{ a.user.full_name }} <span style="color: var(--text-muted); font-variant-numeric: tabular-nums;">({{ a.user.institutional_id }})</span></td>
                             <td><strong>{{ a.get_alert_type_display }}</strong></td>
                             <td>{{ a.location.description }}</td>
-                            <td>{{ a.timestamp|date:"H:i:s, d M Y" }}</td>
+                            <td style="font-variant-numeric: tabular-nums; color: #cbd5e1; font-size: 0.88rem;">{{ a.timestamp|date:"H:i:s, d M Y" }}</td>
                             <td>
                                 <span class="badge {% if a.status == 'SENT' %}badge-sent{% elif a.status == 'RECEIVED' %}badge-received{% elif a.status == 'DISPATCHED' %}badge-dispatched{% else %}badge-resolved{% endif %}">
                                     {{ a.get_status_display }}
@@ -139,7 +217,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="7" style="text-align: center; color: var(--text-muted);">No records matching the selected criteria.</td>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">No records matching the selected criteria.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

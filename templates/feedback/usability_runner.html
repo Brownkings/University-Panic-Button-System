@@ -3,21 +3,50 @@
 {% block title %}Usability Testing Suite - Phase 4 Verification{% endblock %}
 
 {% block content %}
-<div style="max-width: 900px; margin: 0 auto;">
+<div style="max-width: 960px; margin: 0 auto;">
 
-    <div class="card" style="border-left: 4px solid #10b981;">
-        <h1 class="card-title" style="font-size: 1.4rem;">
-            ⏱️ Empirical Usability Testing Benchmark
-        </h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">
-            NPRT630 Phase 4 Rubric Compliance: <em>"Include usability testing alongside unit tests. Measure task completion times, error rates, user satisfaction."</em>
-        </p>
+    <!-- Header Card (Clean 1px border, official SVG stopwatch/check header) -->
+    <div class="card" style="border: 1px solid var(--bg-card-border); display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #34d399; margin-bottom: 0.35rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Empirical Usability Telemetry &amp; SUS Benchmark Suite</span>
+            </div>
+            <h1 class="card-title" style="font-size: 1.4rem; letter-spacing: -0.01em;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="13" r="8"></circle>
+                    <path d="M12 9v4l2 2"></path>
+                    <path d="M5 3L2 6"></path>
+                    <path d="M22 6l-3-3"></path>
+                    <path d="M10 2h4"></path>
+                </svg>
+                <span>Empirical Usability Testing Benchmark</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; line-height: 1.45;">
+                NPRT630 Phase 4 Rubric Compliance: <em>"Include usability testing alongside unit tests. Measure task completion times, error rates, user satisfaction."</em>
+            </p>
+        </div>
+        <span style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.78rem; font-weight: 600; white-space: nowrap;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>ISO 9241-11 / SUS Protocol</span>
+        </span>
     </div>
 
     <!-- Active Usability Test Runner Widget -->
-    <div class="card">
+    <div class="card" style="border: 1px solid var(--bg-card-border);">
         <div class="card-header">
-            <h2 class="card-title" style="font-size: 1.2rem;">🚀 Live Test Stopwatch & Error Tracker</h2>
+            <h2 class="card-title" style="font-size: 1.15rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Live Test Stopwatch &amp; Error Tracker</span>
+            </h2>
             <span id="testStatusBadge" class="badge badge-received">Ready to Test</span>
         </div>
 
@@ -25,34 +54,59 @@
             <div>
                 <label class="form-label" for="taskSelect">Selected Evaluation Task:</label>
                 <select id="taskSelect" class="form-control" style="font-weight: 600;">
-                    <option value="Trigger Emergency Alert (Panic Button)">Task 1: Locate & Trigger Panic Button</option>
+                    <option value="Trigger Emergency Alert (Panic Button)">Task 1: Locate &amp; Trigger Panic Button</option>
                     <option value="3-Second Abort / Cancel False Alarm">Task 2: Abort False Alarm Within 3s Window</option>
-                    <option value="Security Officer Acknowledge & Dispatch">Task 3: Security Console Alert Claim & Dispatch</option>
+                    <option value="Security Officer Acknowledge & Dispatch">Task 3: Security Console Alert Claim &amp; Dispatch</option>
                     <option value="Submit Incident Report with Media">Task 4: Submit Incident Report Form (Iteration 2 Green Save)</option>
                     <option value="Track Alert Status on Live Timeline">Task 5: Interpret Live 4-Stage Timeline (Iteration 3)</option>
                 </select>
 
-                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                    <button id="startTimerBtn" class="btn btn-primary" onclick="startTimer()">▶ Start Task</button>
-                    <button id="errorBtn" class="btn btn-danger" onclick="recordError()" disabled>⚠️ Log Mistake / Error (+1)</button>
-                    <button id="stopTimerBtn" class="btn btn-save-green" onclick="stopTimer()" disabled>⏹ Complete & Save Metric</button>
+                <div style="margin-top: 1.15rem; display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                    <button id="startTimerBtn" type="button" class="btn btn-primary" onclick="startTimer()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <span>Start Task</span>
+                    </button>
+                    <button id="errorBtn" type="button" class="btn btn-danger" onclick="recordError()" disabled>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>Log Mistake / Error (+1)</span>
+                    </button>
+                    <button id="stopTimerBtn" type="button" class="btn btn-save-green" onclick="stopTimer()" disabled style="background: #10b981; border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        </svg>
+                        <span>Complete &amp; Save Metric</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Stopwatch Display -->
-            <div style="text-align: center; background: rgba(15, 23, 42, 0.8); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
-                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Elapsed Time</div>
-                <div id="stopwatchDisplay" style="font-size: 3rem; font-family: monospace; font-weight: 800; color: #60a5fa;">0.00s</div>
-                <div id="errorCountDisplay" style="font-size: 0.85rem; color: #f87171; margin-top: 0.2rem;">Errors: 0</div>
+            <!-- Precision Digital Stopwatch Readout -->
+            <div style="text-align: center; background: rgba(15, 23, 42, 0.85); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--bg-card-border);">
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Elapsed Time</div>
+                <div id="stopwatchDisplay" style="font-size: 2.85rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-variant-numeric: tabular-nums; font-weight: 800; color: #60a5fa; margin: 0.2rem 0;">0.00s</div>
+                <div id="errorCountDisplay" style="font-size: 0.85rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-variant-numeric: tabular-nums; font-weight: 600; color: #f87171; margin-top: 0.25rem;">Errors: 0</div>
             </div>
         </div>
     </div>
 
     <!-- Usability Results Summary Table -->
-    <div class="card">
+    <div class="card" style="border: 1px solid var(--bg-card-border);">
         <div class="card-header">
-            <h3 class="card-title">📈 Recorded Usability Session Metrics ({{ metrics.count }})</h3>
-            <span style="font-size: 0.85rem; color: #34d399;">Mean SUS Score: {{ avg_sus|floatformat:1 }}/100</span>
+            <h3 class="card-title" style="font-size: 1.1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <span style="font-variant-numeric: tabular-nums;">Recorded Usability Session Metrics ({{ metrics.count }})</span>
+            </h3>
+            <span style="font-size: 0.82rem; font-weight: 600; color: #34d399; font-variant-numeric: tabular-nums; padding: 0.25rem 0.65rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25);">
+                Mean SUS Score: {{ avg_sus|floatformat:1 }}/100
+            </span>
         </div>
 
         <div class="table-responsive">
@@ -73,12 +127,14 @@
                         <tr>
                             <td><strong>{{ m.task_name }}</strong></td>
                             <td>{{ m.user.username|default:"Anonymous Participant" }}</td>
-                            <td><span style="color: #60a5fa; font-weight: 700;">{{ m.completion_time_seconds|floatformat:2 }}s</span></td>
-                            <td>
+                            <td style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-variant-numeric: tabular-nums;">
+                                <span style="color: #60a5fa; font-weight: 700;">{{ m.completion_time_seconds|floatformat:2 }}s</span>
+                            </td>
+                            <td style="font-variant-numeric: tabular-nums;">
                                 {% if m.error_count == 0 %}
-                                    <span style="color: #34d399;">0 (Flawless)</span>
+                                    <span style="color: #34d399; font-weight: 600;">0 (Flawless)</span>
                                 {% else %}
-                                    <span style="color: #f87171;">{{ m.error_count }}</span>
+                                    <span style="color: #f87171; font-weight: 600;">{{ m.error_count }}</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -88,12 +144,12 @@
                                     <span class="badge badge-dispatched">Failed</span>
                                 {% endif %}
                             </td>
-                            <td>{{ m.sus_score|default:"-" }}</td>
-                            <td>{{ m.recorded_at|date:"H:i - d M" }}</td>
+                            <td style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-variant-numeric: tabular-nums;">{{ m.sus_score|default:"-" }}</td>
+                            <td style="font-variant-numeric: tabular-nums; color: #cbd5e1; font-size: 0.88rem;">{{ m.recorded_at|date:"H:i - d M" }}</td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="7" style="text-align: center; color: var(--text-muted);">No metrics recorded yet.</td>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">No metrics recorded yet.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

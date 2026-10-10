@@ -1,59 +1,95 @@
 {% extends 'base.html' %}
 
-{% block title %}Security Command Radar - UPBS Dispatch Console{% endblock %}
+{% block title %}CAD Operations Radar - UPBS Dispatch Console{% endblock %}
 
 {% block content %}
 {% csrf_token %}
 <div style="max-width: 1200px; margin: 0 auto;">
 
-    <!-- Top Command Bar -->
-    <div class="card" style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <!-- Top CAD Command Header -->
+    <div class="card" style="padding: 1rem 1.5rem; border: 1px solid rgba(148, 163, 184, 0.16); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <h1 class="card-title" style="font-size: 1.4rem;">
-                🛡️ Campus Security Operations Console
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #60a5fa; margin-bottom: 0.2rem;">
+                Computer-Aided Dispatch (CAD) Workstation
+            </div>
+            <h1 class="card-title" style="font-size: 1.35rem;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa;" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Campus Security Operations Console
             </h1>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
-                Live Emergency Radar & Fast Officer Dispatch Hub | Sol Plaatje University
+                Real-Time GIS Emergency Telemetry &amp; Tactical Unit Dispatch Hub | Sol Plaatje University
             </p>
         </div>
 
-        <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <button id="soundToggle" class="btn btn-outline" style="font-size: 0.85rem;">
-                🔊 Sound Alerts: ON
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button id="soundToggle" class="btn btn-outline" style="font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.45rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span>Sound Alerts: ON</span>
             </button>
-            <span class="badge badge-dispatched" style="padding: 0.5rem 0.8rem; font-size: 0.85rem;">
-                🔴 Live Radar Active
+            <span class="badge badge-dispatched" style="padding: 0.48rem 0.85rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.45rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 8px #ef4444;"></span>
+                Live CAD Radar Active
             </span>
         </div>
     </div>
 
-    <!-- Main Command Grid: Map & Live Feed -->
+    <!-- Main CAD Split Workstation Grid: GIS Map & Live Incident Queue -->
     <div class="grid-2" style="grid-template-columns: 1fr 1fr; align-items: start;">
 
-        <!-- Left: Interactive Campus Map -->
-        <div class="card">
+        <!-- Left Panel: Leaflet GIS Radar Map -->
+        <div class="card" style="border: 1px solid rgba(148, 163, 184, 0.16);">
             <div class="card-header">
-                <h3 class="card-title" style="font-size: 1.1rem;">📍 Live Campus Radar Map</h3>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Real-Time GPS Coordinates</span>
+                <h3 class="card-title" style="font-size: 1.05rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa;" aria-hidden="true">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
+                    </svg>
+                    GIS Tactical Radar Map
+                </h3>
+                <span style="font-size: 0.75rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: var(--text-muted); font-variant-numeric: tabular-nums;">
+                    WGS84 (-28.7420, 24.7651)
+                </span>
             </div>
             <div id="map"></div>
-            <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                <span>● Blue Marker: Active Alert Location</span>
-                <span>Zoom / Pan enabled</span>
+            <div style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px solid rgba(148, 163, 184, 0.12); font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <span style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa;" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Pin Marker: Active Incident Telemetry
+                </span>
+                <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">Interactive Pan / Zoom</span>
             </div>
         </div>
 
-        <!-- Right: Real-Time Alerts Feed -->
+        <!-- Right Panel: Real-Time Incident Queue -->
         <div>
-            <div class="card">
+            <div class="card" style="border: 1px solid rgba(148, 163, 184, 0.16);">
                 <div class="card-header">
-                    <h3 class="card-title" style="font-size: 1.1rem;">🚨 Active Emergency Queue</h3>
-                    <span style="font-size: 0.8rem; color: #34d399;">● Auto-polling (2.5s)</span>
+                    <h3 class="card-title" style="font-size: 1.05rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f87171;" aria-hidden="true">
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
+                        </svg>
+                        Active Incident Dispatch Queue
+                    </h3>
+                    <span style="font-size: 0.78rem; color: #34d399; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; font-variant-numeric: tabular-nums;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #34d399; display: inline-block;"></span>
+                        Telemetry Sync (2.5s)
+                    </span>
                 </div>
-                
+
                 <div id="alertsContainer">
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                        Loading active emergency alerts...
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                        Synchronizing active emergency incident stream...
                     </div>
                 </div>
             </div>

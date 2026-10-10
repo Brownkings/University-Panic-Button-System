@@ -9,13 +9,13 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', lambda req: redirect('home'), name='root_redirect'),
     path('', include('accounts.urls')),
     path('', include('alerts.urls')),
     path('', include('incidents.urls')),
     path('', include('analytics.urls')),
     path('', include('feedback.urls')),
+    path('admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:

@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}UPBS - University Panic Button System{% endblock %}</title>
-    
-    <!-- Core CSS -->
+    <title>{% block title %}UPBS — University Panic Button &amp; Emergency Dispatch System{% endblock %}</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Core Enterprise CSS -->
     <link rel="stylesheet" href="/static/css/style.css">
-    
+
     <!-- Leaflet Maps CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <!-- Leaflet Maps JS -->
@@ -17,41 +22,150 @@
 </head>
 <body>
 
-    <!-- Navigation Header -->
-    <nav class="navbar">
-        <a href="{% url 'home' %}" class="nav-brand">
-            <span class="brand-badge">UPBS</span>
-            <span>Campus Safety</span>
-        </a>
+    <!-- Enterprise Command Navigation Header -->
+    <nav class="navbar" aria-label="Primary Command Navigation">
+        <div class="nav-brand-group">
+            <a href="{% url 'home' %}" class="nav-brand">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M12 8v4"></path>
+                        <path d="M12 16h.01"></path>
+                    </svg>
+                </span>
+                <span class="brand-badge">UPBS</span>
+                <span class="brand-title">
+                    <span>Campus Safety Command</span>
+                    <span class="brand-subtitle">Critical Event Dispatch</span>
+                </span>
+            </a>
+
+            <div class="system-status-pill" title="Telemetry &amp; Dispatch Gateway Active">
+                <span class="status-dot"></span>
+                <span>SYSTEM ONLINE</span>
+            </div>
+        </div>
 
         <ul class="nav-links">
             {% if user.is_authenticated %}
-                <li><a href="{% url 'home' %}" class="nav-link">🚨 Panic</a></li>
-                <li><a href="{% url 'user_dashboard' %}" class="nav-link">📋 Tracker</a></li>
-                <li><a href="{% url 'incident_create' %}" class="nav-link">📝 Report</a></li>
+                <li>
+                    <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                            <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+                            <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+                        </svg>
+                        <span>Panic Console</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'user_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <span>Live Tracker</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'incident_create' %}" class="nav-link {% if request.resolver_match.url_name == 'incident_create' %}active{% endif %}">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        <span>Incident Report</span>
+                    </a>
+                </li>
 
                 {% if user.is_security or user.is_admin_user %}
-                    <li><a href="{% url 'security_dashboard' %}" class="nav-link" style="color: #f87171;">🛡️ Security Radar</a></li>
+                    <li>
+                        <a href="{% url 'security_dashboard' %}" class="nav-link nav-link-security {% if request.resolver_match.url_name == 'security_dashboard' %}active{% endif %}">
+                            <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <span>Security Radar</span>
+                        </a>
+                    </li>
                 {% endif %}
 
                 {% if user.is_admin_user %}
-                    <li><a href="{% url 'reports_analytics' %}" class="nav-link" style="color: #60a5fa;">📊 Analytics</a></li>
-                    <li><a href="{% url 'user_management' %}" class="nav-link" style="color: #a78bfa;">👥 Users</a></li>
+                    <li>
+                        <a href="{% url 'reports_analytics' %}" class="nav-link nav-link-analytics {% if request.resolver_match.url_name == 'reports_analytics' %}active{% endif %}">
+                            <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_management' %}" class="nav-link nav-link-users {% if request.resolver_match.url_name == 'user_management' %}active{% endif %}">
+                            <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span>Users</span>
+                        </a>
+                    </li>
                 {% endif %}
 
-                <li><a href="{% url 'usability_test' %}" class="nav-link" style="color: #34d399;">⏱️ Usability Test</a></li>
+                <li>
+                    <a href="{% url 'usability_test' %}" class="nav-link nav-link-usability {% if request.resolver_match.url_name == 'usability_test' %}active{% endif %}">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span>Usability Benchmark</span>
+                    </a>
+                </li>
+
+                <li class="nav-divider" aria-hidden="true"></li>
 
                 <li>
                     <span class="user-badge">
-                        {{ user.role.role_name|default:"USER" }}: {{ user.username }}
+                        <span class="role-pill">{{ user.role.role_name|default:"USER" }}</span>
+                        <span class="mono">{{ user.username }}</span>
                     </span>
                 </li>
                 <li>
-                    <a href="{% url 'logout' %}" class="nav-link" style="color: #ef4444;">Logout</a>
+                    <a href="{% url 'logout' %}" class="nav-link nav-link-logout" title="Sign out of session">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Logout</span>
+                    </a>
                 </li>
             {% else %}
-                <li><a href="{% url 'login' %}" class="nav-link">Login</a></li>
-                <li><a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.35rem 0.8rem; font-size: 0.85rem;">Register</a></li>
+                <li>
+                    <a href="{% url 'login' %}" class="nav-link">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        <span>Operator Login</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.82rem;">
+                        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                        <span>Register</span>
+                    </a>
+                </li>
             {% endif %}
         </ul>
     </nav>
@@ -59,10 +173,31 @@
     <!-- Main Content Container -->
     <main class="main-content">
         {% if messages %}
-            <div style="margin-bottom: 1.5rem;">
+            <div class="messages-stack" role="region" aria-label="System Notifications">
                 {% for message in messages %}
-                    <div class="card" style="padding: 0.85rem 1.25rem; margin-bottom: 0.75rem; border-left: 4px solid {% if message.tags == 'success' %}#10b981{% elif message.tags == 'error' %}#ef4444{% else %}#3b82f6{% endif %}; background: rgba(30, 41, 59, 0.9);">
-                        {{ message }}
+                    <div class="alert-banner {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+                        <div class="alert-banner-content">
+                            {% if message.tags == 'success' %}
+                                <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            {% elif message.tags == 'error' or message.tags == 'warning' %}
+                                <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                            {% else %}
+                                <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <span class="mono" style="font-size: 0.7rem; opacity: 0.75; text-transform: uppercase;">{{ message.tags|default:"SYSTEM" }}</span>
                     </div>
                 {% endfor %}
             </div>
@@ -71,10 +206,18 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    <!-- Institutional Footer -->
     <footer class="footer">
-        <p><strong>NPRT630 Project</strong> | Techno Warriors (Brown Nkosi - 202474004, Palesa Ntsane - 202437528, Rethabile Pheko, Thapelo Ramphago)</p>
-        <p style="margin-top: 0.3rem; opacity: 0.75;">University Panic Button System &copy; 2026. Designed for rapid emergency dispatch & campus community protection.</p>
+        <div class="footer-inner">
+            <div>
+                <strong style="color: var(--text-secondary);">NPRT630 Enterprise Project</strong>
+                <span style="margin: 0 0.4rem; opacity: 0.4;">|</span>
+                <span>Techno Warriors (Brown Nkosi - 202474004, Palesa Ntsane - 202437528, Rethabile Pheko, Thapelo Ramphago)</span>
+            </div>
+            <div class="footer-meta">
+                UPBS v2.4 &middot; Rapid Emergency Dispatch &amp; Campus Community Protection &copy; 2026
+            </div>
+        </div>
     </footer>
 
     {% block extra_scripts %}{% endblock %}

@@ -1,6 +1,6 @@
 /**
  * University Panic Button System (UPBS)
- * panic.js - Handles Geolocation, 3-Second Abort Window & Emergency Trigger
+ * panic.js - Handles Geolocation Telemetry, 3-Second Abort Interlock & Emergency Dispatch
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
         accuracy: 10.0
     };
 
+    const ICON_GPS_LOCKED = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const ICON_GPS_FALLBACK = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
     // 1. Acquire Geolocation on load
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -28,13 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 userCoords.longitude = pos.coords.longitude;
                 userCoords.accuracy = pos.coords.accuracy;
                 if (geoStatusEl) {
-                    geoStatusEl.innerHTML = `<span style="color: #34d399;">● GPS Locked (±${Math.round(pos.coords.accuracy)}m)</span>`;
+                    geoStatusEl.innerHTML = `<span style="color: #34d399; display: inline-flex; align-items: center; gap: 0.45rem; font-variant-numeric: tabular-nums;">${ICON_GPS_LOCKED} GPS Telemetry Locked (+/-${Math.round(pos.coords.accuracy)}m)</span>`;
                 }
             },
             (err) => {
                 console.warn("GPS unavailable or denied, using campus preset", err);
                 if (geoStatusEl) {
-                    geoStatusEl.innerHTML = `<span style="color: #fbbf24;">● GPS Off - Location manual/preset</span>`;
+                    geoStatusEl.innerHTML = `<span style="color: #fbbf24; display: inline-flex; align-items: center; gap: 0.45rem;">${ICON_GPS_FALLBACK} GPS Fallback Active (Manual Sector Preset)</span>`;
                 }
             },
             { enableHighAccuracy: true, timeout: 8000 }

@@ -15,3 +15,4 @@ echo "==> Seeding initial roles, admin, security, and demo accounts..."
 python manage.py seed_upbs
 
 echo "==> Build complete successfully!"
+
