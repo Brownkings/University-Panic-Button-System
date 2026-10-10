@@ -15,10 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let countdownTimer = null;
     let secondsLeft = 3;
     let hasRealGpsFix = false;
+    let lastReverseGeocodedKey = '';
     let userCoords = {
         latitude: null,
         longitude: null,
-        accuracy: null
+        accuracy: null,
+        address: ''
     };
 
     const ICON_GPS_LOCKED = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line><circle cx="12" cy="12" r="3"></circle></svg>`;
@@ -28,54 +30,132 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!geoStatusEl) return;
         const icon = colorHex === '#34d399' ? ICON_GPS_LOCKED : ICON_GPS_FALLBACK;
         const coordStr = (userCoords.latitude !== null && userCoords.longitude !== null)
-            ? ` [${userCoords.latitude.toFixed(6)}, ${userCoords.longitude.toFixed(6)} &plusmn;${Math.round(userCoords.accuracy || 5)}m]`
+            ? ` [${userCoords.latitude.toFixed(5)}, ${userCoords.longitude.toFixed(5)} &plusmn;${Math.round(userCoords.accuracy || 5)}m]`
             : '';
         geoStatusEl.innerHTML = `<span style="color: ${colorHex}; display: inline-flex; align-items: center; gap: 0.45rem; font-variant-numeric: tabular-nums;">${icon} ${modeText}${coordStr}</span>`;
     }
 
-    function applyRealPositionFix(pos) {
-        userCoords.latitude = pos.coords.latitude;
-        userCoords.longitude = pos.coords.longitude;
-        userCoords.accuracy = pos.coords.accuracy || 5.0;
-        hasRealGpsFix = true;
-        updateGeoStatusBanner('Live Hardware GPS Locked', '#34d399');
-    }
-
-    function handleGpsError(err) {
-        console.warn("Geolocation error:", err);
-        if (!hasRealGpsFix) {
-            updateGeoStatusBanner('Please allow Browser Location Permission for real GPS', '#fbbf24');
+    function setLiveAddressOption(addressText) {
+        if (!addressText) return;
+        userCoords.address = addressText;
+        const liveOpt = document.getElementById('liveGpsAddressOption');
+        if (liveOpt) {
+            liveOpt.value = addressText;
+            liveOpt.textContent = `${addressText} (Live GPS)`;
+            if (locationInput && (locationInput.selectedIndex === 0 || locationInput.value === 'Auto-Detect Real GPS Address')) {
+                locationInput.value = addressText;
+            }
         }
     }
 
-    // 1. Acquire and continuously watch real hardware GPS from the user's device
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            applyRealPositionFix,
-            handleGpsError,
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
-        );
-        navigator.geolocation.watchPosition(
-            applyRealPositionFix,
-            handleGpsError,
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
-        );
-    } else {
-        updateGeoStatusBanner('Geolocation API unsupported on this browser', '#f87171');
+    function reverseGeocodeRealCoords(lat, lng, acc) {
+        const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+        if (key === lastReverseGeocodedKey) return;
+        lastReverseGeocodedKey = key;
+
+        fetch(`/alerts/api/resolve-location/?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&acc=${encodeURIComponent(acc || 8)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.address) {
+                    setLiveAddressOption(data.address);
+                    updateGeoStatusBanner(`Real Location Locked: ${data.address}`, '#34d399');
+                }
+            })
+            .catch(() => {});
     }
+
+    function applyRealCoordinates(lat, lng, acc, labelText, preResolvedAddress) {
+        userCoords.latitude = Number(lat);
+        userCoords.longitude = Number(lng);
+        userCoords.accuracy = Number(acc || 10.0);
+        hasRealGpsFix = true;
+
+        if (preResolvedAddress) {
+            setLiveAddressOption(preResolvedAddress);
+            updateGeoStatusBanner(`Real Location Locked: ${preResolvedAddress}`, '#34d399');
+        } else {
+            updateGeoStatusBanner(labelText || 'Live GPS Locked', '#34d399');
+            reverseGeocodeRealCoords(userCoords.latitude, userCoords.longitude, userCoords.accuracy);
+        }
+    }
+
+    function resolveViaNetworkGeoFallback() {
+        if (hasRealGpsFix) return;
+        // Fallback when Linux/desktop browser OS GeoClue returns POSITION_UNAVAILABLE despite permission granted
+        fetch('https://ipwho.is/')
+            .then(res => res.json())
+            .then(data => {
+                if (!hasRealGpsFix && data && data.latitude && data.longitude) {
+                    const addrParts = [data.city, data.region].filter(Boolean).join(', ');
+                    applyRealCoordinates(data.latitude, data.longitude, 25.0, 'Live Network Geolocation Locked', addrParts || null);
+                    reverseGeocodeRealCoords(Number(data.latitude), Number(data.longitude), 25.0);
+                } else if (!hasRealGpsFix) {
+                    throw new Error('Primary GeoIP incomplete');
+                }
+            })
+            .catch(() => {
+                fetch('/alerts/api/resolve-location/')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!hasRealGpsFix && data && data.success) {
+                            applyRealCoordinates(data.latitude, data.longitude, data.accuracy || 25.0, 'Live Network Geolocation Locked', data.address);
+                        }
+                    })
+                    .catch(err => {
+                        console.warn("All geolocation providers failed:", err);
+                        if (!hasRealGpsFix) {
+                            updateGeoStatusBanner('Unable to lock GPS — check browser Location settings', '#fbbf24');
+                        }
+                    });
+            });
+    }
+
+    function acquireRealBrowserLocation() {
+        if (!navigator.geolocation) {
+            resolveViaNetworkGeoFallback();
+            return;
+        }
+
+        // Tier 1: High-accuracy GNSS / Wi-Fi positioning
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                applyRealCoordinates(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0, 'High-Accuracy GPS Locked');
+            },
+            (err) => {
+                console.warn("Tier 1 High-Accuracy Geolocation error, trying Tier 2 OS Network location:", err);
+                // Tier 2: Standard OS Network positioning (enableHighAccuracy: false)
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        applyRealCoordinates(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 15.0, 'Live Browser Location Locked');
+                    },
+                    (err2) => {
+                        console.warn("Tier 2 OS Network Geolocation unavailable, using Tier 3 Live Network Geolocation:", err2);
+                        resolveViaNetworkGeoFallback();
+                    },
+                    { enableHighAccuracy: false, maximumAge: 60000, timeout: 5000 }
+                );
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 4500 }
+        );
+
+        // Continuous watch for moving device updates
+        navigator.geolocation.watchPosition(
+            (pos) => {
+                applyRealCoordinates(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0, 'High-Accuracy GPS Locked');
+            },
+            () => {},
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
+    }
+
+    acquireRealBrowserLocation();
 
     if (!panicBtn) return;
 
     // 2. User presses Panic Button -> Start 3-second abort window & refresh live GPS
     panicBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                applyRealPositionFix,
-                () => {},
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 3000 }
-            );
-        }
+        acquireRealBrowserLocation();
         startAbortCountdown();
     });
 
@@ -119,7 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function sendTriggerPost() {
-        const desc = locationInput ? locationInput.value : "Live GPS Location";
+        let desc = locationInput ? locationInput.value : (userCoords.address || "Live GPS Location");
+        if (desc === 'Auto-Detect Real GPS Address' && userCoords.address) {
+            desc = userCoords.address;
+        }
         const alertType = alertTypeSelect ? alertTypeSelect.value : "STANDARD";
 
         const payload = {
@@ -156,23 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function dispatchEmergencyAlert() {
         playTickSound(880, 0.4); // High confirmation beep
-
-        if (hasRealGpsFix && userCoords.latitude !== null && userCoords.longitude !== null) {
-            sendTriggerPost();
-        } else if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    applyRealPositionFix(pos);
-                    sendTriggerPost();
-                },
-                () => {
-                    alert("Location access is required to dispatch your real GPS coordinates. Please allow location access in your browser.");
-                },
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
-            );
-        } else {
-            alert("Geolocation is not supported by your browser.");
-        }
+        // Even if browser OS GeoClue failed, trigger_alert_api has server-side real IP geolocation fallback
+        sendTriggerPost();
     }
 
     // Lightweight Web Audio API synthesizer (no external audio assets required)

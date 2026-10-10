@@ -47,9 +47,10 @@
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            Campus Sector / Building Zone (Auto-Detected or Override)
+            Detected Street Address / Location (Live GPS Reverse-Geocoded)
         </label>
         <select id="locationDescription" class="form-control">
+            <option id="liveGpsAddressOption" value="Auto-Detect Real GPS Address" selected>Acquiring Real Street Address from GPS...</option>
             <option value="Main Library - 2nd Floor Study Area">Main Library - 2nd Floor Study Area</option>
             <option value="Science Block B - Computer Labs">Science Block B - Computer Labs</option>
             <option value="East Student Residence - Block C">East Student Residence - Block C</option>
@@ -157,5 +158,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="/static/js/panic.js"></script>
+<script src="/static/js/panic.js?v=20261010-realgps2"></script>
 {% endblock %}

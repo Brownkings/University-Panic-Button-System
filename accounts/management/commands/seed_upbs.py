@@ -63,7 +63,7 @@ class Command(BaseCommand):
             sec_user.set_password("password123")
             sec_user.save()
 
-        officer, _ = SecurityOfficer.objects.update_or_create(
+        officer, _ = SecurityOfficer.objects.get_or_create(
             user=sec_user,
             defaults={
                 'officer_name': "Sergeant Thabo Dlamini",
@@ -92,7 +92,7 @@ class Command(BaseCommand):
             sec_user2.set_password("password123")
             sec_user2.save()
 
-        officer2, _ = SecurityOfficer.objects.update_or_create(
+        officer2, _ = SecurityOfficer.objects.get_or_create(
             user=sec_user2,
             defaults={
                 'officer_name': "Officer Rethabile Pheko",
@@ -121,7 +121,7 @@ class Command(BaseCommand):
             sec_user3.set_password("password123")
             sec_user3.save()
 
-        officer3, _ = SecurityOfficer.objects.update_or_create(
+        officer3, _ = SecurityOfficer.objects.get_or_create(
             user=sec_user3,
             defaults={
                 'officer_name': "Officer Thapelo Ramphago",

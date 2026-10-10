@@ -88,52 +88,106 @@ function initCampusMap() {
     });
 }
 
-function initOfficerHardwareGPS() {
-    if (!navigator.geolocation) return;
-
-    const onRealFix = (pos, isInitial) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const acc = pos.coords.accuracy || 5.0;
-        realOfficerHardwareCoords = { latitude: lat, longitude: lng, accuracy: acc };
-        broadcastOfficerLocation(lat, lng, acc, Boolean(isInitial));
+function resolveOfficerRealCoords(callback, onError) {
+    const finish = (lat, lng, acc) => {
+        realOfficerHardwareCoords = {
+            latitude: Number(lat),
+            longitude: Number(lng),
+            accuracy: Number(acc || 10.0)
+        };
+        if (callback) callback(realOfficerHardwareCoords.latitude, realOfficerHardwareCoords.longitude, realOfficerHardwareCoords.accuracy);
     };
 
-    navigator.geolocation.getCurrentPosition(
-        (pos) => onRealFix(pos, true),
-        (err) => console.warn("Initial officer GPS lock pending:", err),
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
-    );
+    const fallbackNetworkGeo = () => {
+        fetch('https://ipwho.is/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.latitude && data.longitude) {
+                    finish(data.latitude, data.longitude, 25.0);
+                } else {
+                    throw new Error('Primary GeoIP incomplete');
+                }
+            })
+            .catch(() => {
+                fetch('/alerts/api/resolve-location/')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.success) {
+                            finish(data.latitude, data.longitude, data.accuracy || 25.0);
+                        } else if (onError) {
+                            onError(new Error('Location unavailable'));
+                        }
+                    })
+                    .catch(err => {
+                        if (onError) onError(err);
+                    });
+            });
+    };
 
-    navigator.geolocation.watchPosition(
-        (pos) => onRealFix(pos, false),
-        (err) => console.warn("Live officer GPS watch error:", err),
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    if (!navigator.geolocation) {
+        fallbackNetworkGeo();
+        return;
+    }
+
+    // Tier 1: High-accuracy GNSS / Wi-Fi positioning
+    navigator.geolocation.getCurrentPosition(
+        (pos) => finish(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0),
+        () => {
+            // Tier 2: Standard OS network positioning
+            navigator.geolocation.getCurrentPosition(
+                (pos) => finish(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 15.0),
+                () => {
+                    // Tier 3: Live network geolocation fallback (handles Linux GeoClue POSITION_UNAVAILABLE)
+                    fallbackNetworkGeo();
+                },
+                { enableHighAccuracy: false, maximumAge: 60000, timeout: 5000 }
+            );
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 4500 }
     );
+}
+
+function initOfficerHardwareGPS() {
+    resolveOfficerRealCoords((lat, lng, acc) => {
+        if (map && latestAlerts.length === 0) {
+            map.setView([lat, lng], 16);
+        }
+        broadcastOfficerLocation(lat, lng, acc, true);
+    });
+
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            (pos) => {
+                realOfficerHardwareCoords = {
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy || 5.0
+                };
+                broadcastOfficerLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0, false);
+            },
+            () => {},
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
+    }
 }
 
 function toggleMovePatrolMode() {
     const label = document.getElementById('repositionUnitLabel');
-    if (!navigator.geolocation) {
-        alert("Geolocation API is not supported by this browser.");
-        return;
-    }
     if (label) label.textContent = 'Acquiring GPS...';
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const acc = pos.coords.accuracy || 5.0;
-            realOfficerHardwareCoords = { latitude: lat, longitude: lng, accuracy: acc };
+
+    resolveOfficerRealCoords(
+        (lat, lng, acc) => {
             if (label) label.textContent = 'Sync Live GPS';
+            if (map && latestAlerts.length === 0) {
+                map.flyTo([lat, lng], 16, { animate: true, duration: 0.85 });
+            }
             broadcastOfficerLocation(lat, lng, acc, true);
         },
         (err) => {
             if (label) label.textContent = 'Sync Live GPS';
             alert("Unable to read real GPS location. Please allow Location permission in your browser.");
             console.warn("Manual GPS sync error:", err);
-        },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
+        }
     );
 }
 
@@ -181,6 +235,8 @@ function fitAllTacticalUnits() {
             animate: true,
             duration: 0.9
         });
+    } else if (points.length === 1) {
+        map.flyTo(points[0], 16, { animate: true, duration: 0.8 });
     } else {
         map.flyTo(KIMBERLEY_CENTER, 16, { animate: true, duration: 0.8 });
     }

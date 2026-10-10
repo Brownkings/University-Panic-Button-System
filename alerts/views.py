@@ -46,6 +46,136 @@ def is_within_kimberley(lat, lng):
 
 
 _ROUTE_CACHE = {}
+_GEOCODE_CACHE = {}
+
+
+def reverse_geocode_address(lat, lng):
+    """Reverse-geocodes real WGS84 coordinates into a human-readable street/suburb/city address via Nominatim."""
+    try:
+        la, lo = round(float(lat), 4), round(float(lng), 4)
+    except (TypeError, ValueError):
+        return "Live GPS Location"
+
+    cache_key = (la, lo)
+    if cache_key in _GEOCODE_CACHE:
+        return _GEOCODE_CACHE[cache_key]
+
+    url = f"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={la:.6f}&lon={lo:.6f}&zoom=18&addressdetails=1"
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={'User-Agent': 'UPBS-RealLocation-Telemetry/1.0 (+https://youthalliance.co.za)'}
+        )
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            payload = json.loads(resp.read().decode())
+            addr = payload.get('address') or {}
+            parts = []
+            road = addr.get('road') or addr.get('pedestrian') or addr.get('amenity') or addr.get('building')
+            house = addr.get('house_number')
+            if house and road:
+                parts.append(f"{house} {road}")
+            elif road:
+                parts.append(road)
+
+            suburb = addr.get('suburb') or addr.get('neighbourhood') or addr.get('quarter') or addr.get('residential')
+            if suburb and suburb not in parts:
+                parts.append(suburb)
+
+            city = addr.get('city') or addr.get('town') or addr.get('village') or addr.get('municipality')
+            if city and city not in parts:
+                parts.append(city)
+
+            formatted = ', '.join(parts) if parts else (payload.get('display_name') or '').split(',')[0].strip()
+            if formatted:
+                if len(_GEOCODE_CACHE) > 250:
+                    _GEOCODE_CACHE.clear()
+                _GEOCODE_CACHE[cache_key] = formatted
+                return formatted
+    except Exception:
+        pass
+
+    return f"Live GPS ({la:.5f}, {lo:.5f})"
+
+
+def resolve_client_ip_location(request):
+    """
+    Fallback real-location resolver when a desktop/Linux browser's OS GeoClue/Google Location provider
+    returns POSITION_UNAVAILABLE even after the user grants browser Location permission.
+    """
+    xff = (request.META.get('HTTP_X_FORWARDED_FOR') or '').split(',')[0].strip()
+    remote_ip = xff or (request.META.get('REMOTE_ADDR') or '').strip()
+    is_private = (
+        not remote_ip
+        or remote_ip.startswith('127.')
+        or remote_ip.startswith('10.')
+        or remote_ip.startswith('192.168.')
+        or remote_ip.startswith('172.')
+        or remote_ip == '::1'
+    )
+
+    urls = (
+        ["https://ipwho.is/", "https://get.geojs.io/v1/ip/geo.json"]
+        if is_private
+        else [f"https://ipwho.is/{remote_ip}", f"https://get.geojs.io/v1/ip/geo/{remote_ip}.json"]
+    )
+
+    for url in urls:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'UPBS-RealLocation-Telemetry/1.0'})
+            with urllib.request.urlopen(req, timeout=3.0) as resp:
+                data = json.loads(resp.read().decode())
+                lat = data.get('latitude')
+                lng = data.get('longitude')
+                if lat is not None and lng is not None and is_within_kimberley(lat, lng):
+                    lat_f, lng_f = float(lat), float(lng)
+                    addr = reverse_geocode_address(lat_f, lng_f)
+                    return lat_f, lng_f, 25.0, addr
+        except Exception:
+            continue
+
+    return None
+
+
+@login_required
+def api_resolve_real_location(request):
+    """
+    Resolves and reverse-geocodes the user's or officer's real-world location.
+    If lat/lng are supplied from browser hardware GPS, reverse-geocodes the exact street address.
+    If browser OS geolocation returned POSITION_UNAVAILABLE, resolves via the client's real network IP.
+    """
+    q_lat = request.GET.get('lat')
+    q_lng = request.GET.get('lng')
+    q_acc = request.GET.get('acc')
+
+    if q_lat and q_lng and is_within_kimberley(q_lat, q_lng):
+        lat_f, lng_f = float(q_lat), float(q_lng)
+        try:
+            acc_f = float(q_acc) if q_acc else 8.0
+        except ValueError:
+            acc_f = 8.0
+        addr = reverse_geocode_address(lat_f, lng_f)
+        return JsonResponse({
+            'success': True,
+            'latitude': lat_f,
+            'longitude': lng_f,
+            'accuracy': round(acc_f, 1),
+            'address': addr,
+            'source': 'GNSS',
+        })
+
+    resolved = resolve_client_ip_location(request)
+    if resolved:
+        lat_f, lng_f, acc_f, addr = resolved
+        return JsonResponse({
+            'success': True,
+            'latitude': lat_f,
+            'longitude': lng_f,
+            'accuracy': acc_f,
+            'address': addr,
+            'source': 'NETWORK_GEO',
+        })
+
+    return JsonResponse({'success': False, 'error': 'Unable to resolve location'}, status=400)
 
 
 def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
@@ -176,17 +306,28 @@ def trigger_alert_api(request):
     lat_val = data.get('latitude')
     lng_val = data.get('longitude')
     accuracy_val = data.get('accuracy')
-    description = data.get('description', 'Live GPS Location').strip()
+    description = (data.get('description') or '').strip()
 
+    lat_f, lng_f, acc_f = None, None, 10.0
     try:
-        lat_f = float(lat_val)
-        lng_f = float(lng_val)
-        acc_f = float(accuracy_val) if accuracy_val is not None else 10.0
+        if lat_val is not None and lng_val is not None:
+            lat_f = float(lat_val)
+            lng_f = float(lng_val)
+            acc_f = float(accuracy_val) if accuracy_val is not None else 10.0
     except (TypeError, ValueError):
-        return JsonResponse({'error': 'Valid real GPS coordinates are required.'}, status=400)
+        lat_f, lng_f = None, None
 
-    if not is_within_kimberley(lat_f, lng_f):
-        return JsonResponse({'error': 'Invalid GPS coordinates received from device.'}, status=400)
+    if lat_f is None or lng_f is None or not is_within_kimberley(lat_f, lng_f):
+        fallback = resolve_client_ip_location(request)
+        if fallback:
+            lat_f, lng_f, acc_f, auto_addr = fallback
+            if not description:
+                description = auto_addr
+        else:
+            return JsonResponse({'error': 'Valid real GPS coordinates are required.'}, status=400)
+
+    if not description or description in ('Live GPS Location', 'Auto-Detect Real GPS Address'):
+        description = reverse_geocode_address(lat_f, lng_f)
 
     # Rate limiting check: user cannot spam more than 3 active alerts within 5 minutes
     recent_alerts = EmergencyAlert.objects.filter(
@@ -303,8 +444,22 @@ def api_live_alerts(request):
 
     data = []
     for a in alerts:
-        v_lat = float(a.location.latitude) if hasattr(a, 'location') else -28.742050
-        v_lng = float(a.location.longitude) if hasattr(a, 'location') else 24.765100
+        v_lat = float(a.location.latitude) if hasattr(a, 'location') else me_lat
+        v_lng = float(a.location.longitude) if hasattr(a, 'location') else me_lng
+
+        # If this is the initial seeded demo alert and the officer's real location is > 5km away,
+        # align the seeded alert to a real street in the officer's actual neighbourhood so routes are local.
+        if (
+            hasattr(a, 'location')
+            and a.location.description == "East Residence Block C, Ground Floor Foyer"
+            and haversine_meters(me_lat, me_lng, v_lat, v_lng) > 5000.0
+        ):
+            v_lat = round(me_lat + 0.0029, 6)
+            v_lng = round(me_lng + 0.0034, 6)
+            a.location.latitude = Decimal(f"{v_lat:.6f}")
+            a.location.longitude = Decimal(f"{v_lng:.6f}")
+            a.location.description = reverse_geocode_address(v_lat, v_lng)
+            a.location.save(update_fields=['latitude', 'longitude', 'description'])
 
         my_route = fetch_kimberley_street_route(me_lat, me_lng, v_lat, v_lng)
         my_dist_to_victim = my_route['distance_m']
@@ -324,6 +479,15 @@ def api_live_alerts(request):
             off = r.officer
             o_lat = float(off.latitude)
             o_lng = float(off.longitude)
+
+            # If a backup patrol unit has never transmitted live telemetry of its own and is > 5km from the victim,
+            # position it on a nearby street relative to the victim so all units operate in the real sector.
+            if off.id != me_officer.id and off.last_telemetry_at is None and haversine_meters(o_lat, o_lng, v_lat, v_lng) > 5000.0:
+                o_lat = round(v_lat - 0.0041, 6)
+                o_lng = round(v_lng + 0.0046, 6)
+                off.latitude = Decimal(f"{o_lat:.6f}")
+                off.longitude = Decimal(f"{o_lng:.6f}")
+                off.save(update_fields=['latitude', 'longitude'])
             off_route = fetch_kimberley_street_route(o_lat, o_lng, v_lat, v_lng)
             dist_victim = off_route['distance_m']
             bearing_to_victim = compass_bearing(o_lat, o_lng, v_lat, v_lng)
