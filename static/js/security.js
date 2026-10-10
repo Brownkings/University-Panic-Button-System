@@ -785,6 +785,10 @@ function openResolveModal(alertId) {
         if (badge) badge.textContent = `#${alertId}`;
         if (notesInput) notesInput.value = '';
         modal.style.display = 'flex';
+        modal.classList.add('active');
+        setTimeout(() => {
+            if (notesInput) notesInput.focus();
+        }, 60);
         return;
     }
 
@@ -804,7 +808,8 @@ function fillResolutionPreset(presetText) {
 function closeResolveModal() {
     const modal = document.getElementById('resolveModal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('active');
+        modal.style.display = '';
     }
 }
 
@@ -826,15 +831,28 @@ function submitResolutionRequest(alertId, notes) {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken || ''
         },
-        body: JSON.stringify({ status: 'RESOLVED', response_notes: notes })
+        body: JSON.stringify({
+            status: 'RESOLVED',
+            response_notes: notes,
+            officer_lat: currentOfficer ? currentOfficer.latitude : undefined,
+            officer_lng: currentOfficer ? currentOfficer.longitude : undefined
+        })
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            if (String(focusedAlertId) === String(alertId)) {
+                focusedAlertId = null;
+            }
+            if (map) map.closePopup();
             pollAlerts(null);
         } else {
             alert("Error resolving alert: " + (data.error || "Server rejected update"));
         }
+    })
+    .catch(err => {
+        console.error("Resolution request error:", err);
+        alert("Network error while resolving incident.");
     });
 }
 
