@@ -305,37 +305,13 @@ def api_live_alerts(request):
             o_lng = float(off.longitude)
             off_route = fetch_kimberley_street_route(o_lat, o_lng, v_lat, v_lng)
             dist_victim = off_route['distance_m']
-            bearing_victim = compass_bearing(o_lat, o_lng, v_lat, v_lng)
+            bearing_to_victim = compass_bearing(o_lat, o_lng, v_lat, v_lng)
+            bearing_from_victim = compass_bearing(v_lat, v_lng, o_lat, o_lng)
             eta_sec = 0 if r.status == AlertResponse.STATUS_ON_SCENE else off_route['eta_seconds']
-
-            dist_me = 0.0 if off.id == me_officer.id else haversine_meters(me_lat, me_lng, o_lat, o_lng)
-            bearing_me = "CO-LOCATED" if off.id == me_officer.id else compass_bearing(me_lat, me_lng, o_lat, o_lng)
-            me_to_off_route = None if off.id == me_officer.id else fetch_kimberley_street_route(me_lat, me_lng, o_lat, o_lng)
 
             if off.id == me_officer.id:
                 is_accepted_by_me = True
                 my_response_status = r.status
-
-            # Compute relative routes & distances from this attending officer to all other attending officers on the same case
-            peer_links = []
-            for peer_r in active_responses:
-                peer_off = peer_r.officer
-                if peer_off.id != off.id:
-                    p_lat = float(peer_off.latitude)
-                    p_lng = float(peer_off.longitude)
-                    peer_route = fetch_kimberley_street_route(o_lat, o_lng, p_lat, p_lng)
-                    peer_links.append({
-                        'peer_officer_id': peer_off.id,
-                        'peer_name': peer_off.officer_name,
-                        'peer_badge': peer_off.badge_number,
-                        'distance_m': peer_route['distance_m'],
-                        'direct_distance_m': haversine_meters(o_lat, o_lng, p_lat, p_lng),
-                        'bearing': compass_bearing(o_lat, o_lng, p_lat, p_lng),
-                        'peer_latitude': p_lat,
-                        'peer_longitude': p_lng,
-                        'route_coords': peer_route['coords'],
-                        'route_summary': peer_route['route_summary'],
-                    })
 
             attending_list.append({
                 'officer_id': off.id,
@@ -350,15 +326,15 @@ def api_live_alerts(request):
                 'accuracy_meters': float(off.accuracy_meters or 4.0),
                 'last_telemetry_formatted': off.last_telemetry_at.strftime('%H:%M:%S') if off.last_telemetry_at else '',
                 'distance_to_victim_m': dist_victim,
-                'bearing_to_victim': bearing_victim,
+                'bearing_to_victim': bearing_to_victim,
+                'bearing_from_victim': bearing_from_victim,
                 'eta_seconds': eta_sec,
                 'route_coords': off_route['coords'],
                 'route_summary': off_route['route_summary'],
-                'distance_to_me_m': me_to_off_route['distance_m'] if me_to_off_route else dist_me,
-                'bearing_from_me': bearing_me,
-                'me_to_officer_route_coords': me_to_off_route['coords'] if me_to_off_route else [],
-                'peer_links': peer_links,
             })
+
+        # Sort attending officers by distance to the victim (closest responder first)
+        attending_list.sort(key=lambda item: item['distance_to_victim_m'])
 
         data.append({
             'id': a.id,
