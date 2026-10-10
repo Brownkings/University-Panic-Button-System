@@ -173,6 +173,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
 ]
 
+# Referrer Policy: Required so cross-origin GIS map tile requests (Leaflet/OSM/CARTO)
+# include the origin Referer header and are not blocked with HTTP 403.
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
 # Production Security & SSL
 if not DEBUG and os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 't'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

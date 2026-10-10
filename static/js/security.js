@@ -38,13 +38,41 @@ function initCampusMap() {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
-    // Centered at Campus coordinates
+    // Centered at Sol Plaatje University Campus coordinates (Kimberley)
     map = L.map('map').setView([-28.742050, 24.765100], 16);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Primary high-availability tactical dark radar basemap (CARTO CDN)
+    const tacticalDarkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 20,
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO | UPBS CAD Radar'
+    });
+
+    // High-contrast daylight street basemap (CARTO Voyager CDN)
+    const streetVoyagerLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 20,
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO | UPBS CAD Radar'
+    });
+
+    // Standard OpenStreetMap layer (supported via strict-origin-when-cross-origin referrer policy)
+    const osmStandardLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: 'OpenStreetMap contributors | UPBS Campus Security'
-    }).addTo(map);
+        attribution: '&copy; OpenStreetMap contributors | UPBS Campus Security'
+    });
+
+    // Default to High-Contrast Street Voyager for clear campus building visibility, with Tactical Dark & OSM switchable
+    streetVoyagerLayer.addTo(map);
+
+    L.control.layers(
+        {
+            'Campus Street Map (CARTO HD)': streetVoyagerLayer,
+            'Tactical Dark Radar (CARTO)': tacticalDarkLayer,
+            'Standard OSM': osmStandardLayer
+        },
+        null,
+        { position: 'topright' }
+    ).addTo(map);
 }
 
 function startLiveAlertPolling() {
