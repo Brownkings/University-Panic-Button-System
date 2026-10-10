@@ -203,8 +203,14 @@ function fitAlertAndResponders(alertObj) {
     if (currentOfficer) {
         points.push([currentOfficer.latitude, currentOfficer.longitude]);
     }
+    if (alertObj.my_route_coords && alertObj.my_route_coords.length > 0) {
+        alertObj.my_route_coords.forEach(pt => points.push(pt));
+    }
     (alertObj.attending_officers || []).forEach(o => {
         points.push([o.latitude, o.longitude]);
+        if (o.route_coords && o.route_coords.length > 0) {
+            o.route_coords.forEach(pt => points.push(pt));
+        }
     });
 
     const drawerCollapsed = document.getElementById('mdtViewport')?.classList.contains('drawer-collapsed');
@@ -215,6 +221,36 @@ function fitAlertAndResponders(alertObj) {
         animate: true,
         duration: 0.95
     });
+}
+
+function getRouteMidpoint(coords, fallbackLat1, fallbackLng1, fallbackLat2, fallbackLng2) {
+    if (Array.isArray(coords) && coords.length >= 2) {
+        const midIdx = Math.floor(coords.length / 2);
+        return coords[midIdx];
+    }
+    return [(fallbackLat1 + fallbackLat2) / 2, (fallbackLng1 + fallbackLng2) / 2];
+}
+
+function drawTacticalStreetRoute(coords, color, weight, isDashed, glowOpacity) {
+    if (!vectorLayerGroup || !Array.isArray(coords) || coords.length < 2) return;
+    // Outer navigation glow casing
+    L.polyline(coords, {
+        color: color,
+        weight: weight + 5,
+        opacity: glowOpacity || 0.24,
+        lineCap: 'round',
+        lineJoin: 'round'
+    }).addTo(vectorLayerGroup);
+
+    // Inner street-following route line
+    L.polyline(coords, {
+        color: color,
+        weight: weight,
+        dashArray: isDashed ? '8, 6' : null,
+        opacity: 0.96,
+        lineCap: 'round',
+        lineJoin: 'round'
+    }).addTo(vectorLayerGroup);
 }
 
 function flyToCampusSector(lat, lng, zoomLevel) {
@@ -346,7 +382,6 @@ function renderAlertList(alerts) {
         const responders = a.attending_officers || [];
         let broadcastHtml = '';
 
-        // Always show current officer's relative vector to victim + broadcast matrix of all attending officers
         let responderRowsHtml = '';
         responders.forEach(r => {
             const unitTag = r.is_me
@@ -358,8 +393,8 @@ function renderAlertList(alerts) {
             let peerRelativeHtml = '';
             if (!r.is_me) {
                 peerRelativeHtml += `
-                    <div style="color: #fde68a; font-family: var(--font-mono); font-size: 0.7rem; margin-top: 0.18rem;">
-                        ↔ Relative to Your Unit: <strong>${r.distance_to_me_m}m</strong> (${r.bearing_from_me})
+                    <div style="color: #fde68a; font-family: var(--font-mono); font-size: 0.7rem; margin-top: 0.16rem;">
+                        ↔ Route to Your Unit: <strong>${r.distance_to_me_m}m</strong> (${r.bearing_from_me})
                     </div>
                 `;
             }
@@ -367,7 +402,7 @@ function renderAlertList(alerts) {
                 r.peer_links.forEach(pl => {
                     peerRelativeHtml += `
                         <div style="color: #cbd5e1; font-family: var(--font-mono); font-size: 0.69rem; margin-top: 0.12rem;">
-                            ↔ Relative to ${pl.peer_badge}: <strong>${pl.distance_m}m</strong> (${pl.bearing})
+                            ↔ Route to ${pl.peer_badge}: <strong>${pl.distance_m}m</strong> (${pl.bearing})
                         </div>
                     `;
                 });
@@ -379,10 +414,11 @@ function renderAlertList(alerts) {
                         <span style="font-weight: 700; color: #f8fafc;">${r.officer_name} <span style="font-family: var(--font-mono); color: #94a3b8; font-size: 0.72rem;">(${r.badge_number})</span></span>
                         ${unitTag}
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.72rem; color: #38bdf8; margin-top: 0.2rem;">
-                        <span>→ To Victim: <strong>${r.distance_to_victim_m}m</strong> ${r.bearing_to_victim}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.72rem; color: #38bdf8; margin-top: 0.18rem;">
+                        <span>→ Route to Victim: <strong>${r.distance_to_victim_m}m</strong> ${r.bearing_to_victim}</span>
                         <span style="color: #34d399; font-weight: 700;">${etaText}</span>
                     </div>
+                    ${r.route_summary ? `<div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.12rem;">Via: <span style="color: #e2e8f0;">${r.route_summary}</span></div>` : ''}
                     ${peerRelativeHtml}
                 </div>
             `;
@@ -391,12 +427,13 @@ function renderAlertList(alerts) {
         broadcastHtml = `
             <div class="mdt-broadcast-box">
                 <div class="mdt-broadcast-header">
-                    <span>Tactical Relative Telemetry (${responders.length} Attending)</span>
-                    <span>LIVE GPS</span>
+                    <span>Live Street Route &amp; Broadcast (${responders.length} Attending)</span>
+                    <span>OSRM + GPS</span>
                 </div>
                 ${!a.is_accepted_by_me ? `
                     <div style="font-family: var(--font-mono); font-size: 0.72rem; color: #93c5fd; padding-bottom: ${responders.length ? '0.4rem' : '0'}; border-bottom: ${responders.length ? '1px dashed rgba(148, 163, 184, 0.14)' : 'none'};">
-                        Your Unit → Victim: <strong>${a.my_distance_to_victim_m}m</strong> ${a.my_bearing_to_victim} (ETA ~${a.my_eta_seconds}s)
+                        <div>Your Route → Victim: <strong>${a.my_distance_to_victim_m}m</strong> ${a.my_bearing_to_victim} (ETA ~${a.my_eta_seconds}s)</div>
+                        ${a.my_route_summary ? `<div style="font-family: var(--font-sans); font-size: 0.7rem; color: #94a3b8; margin-top: 0.12rem;">Via: <span style="color: #e2e8f0;">${a.my_route_summary}</span></div>` : ''}
                     </div>
                 ` : ''}
                 ${responderRowsHtml}
@@ -442,7 +479,7 @@ function renderAlertList(alerts) {
                     ` : `
                         <button type="button" class="btn btn-primary" onclick="acceptCase(${a.id})" title="Re-broadcast GPS &amp; dynamically fit map to Victim and Attending Units">
                             ${SVG_CROSSHAIR}
-                            Sync &amp; Fit Radar
+                            Sync &amp; Fit Route
                         </button>
                         ${a.my_response_status !== 'ON_SCENE' ? `
                             <button type="button" class="btn btn-outline" style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8;" onclick="updateAlertStatus(${a.id}, 'ON_SCENE')">
@@ -467,7 +504,7 @@ function renderAlertList(alerts) {
                     ${!a.is_accepted_by_me ? `
                         <button type="button" class="btn btn-outline" onclick="zoomToAlert(${a.latitude}, ${a.longitude}, ${a.id})">
                             ${SVG_CROSSHAIR}
-                            Frame Relative Map
+                            Frame Relative Route
                         </button>
                     ` : ''}
                 </div>
@@ -526,11 +563,11 @@ function buildVictimPopupHtml(a) {
                 ${a.location_description}
             </div>
             <div style="font-size: 0.75rem; font-family: var(--font-mono); color: #93c5fd; margin-bottom: 0.55rem;">
-                Your Unit Distance: <strong>${a.my_distance_to_victim_m}m</strong> (${a.my_bearing_to_victim})
+                Route Distance: <strong>${a.my_distance_to_victim_m}m</strong> (ETA ~${a.my_eta_seconds}s)
             </div>
             <div style="display: flex; gap: 0.4rem;">
                 <button type="button" class="btn btn-primary" style="min-height: 34px; font-size: 0.75rem; padding: 0.3rem 0.6rem; flex: 1;" onclick="acceptCase(${a.id})">
-                    ${a.is_accepted_by_me ? 'Sync Radar' : 'Accept Case'}
+                    ${a.is_accepted_by_me ? 'Sync Route' : 'Accept Case'}
                 </button>
                 <button type="button" class="btn btn-save-green" style="min-height: 34px; font-size: 0.75rem; padding: 0.3rem 0.6rem; flex: 1;" onclick="openResolveModal(${a.id})">Resolve</button>
             </div>
@@ -552,7 +589,6 @@ function updateMapMarkersAndVectors(alerts) {
         }
     });
 
-    // Track all officers that should be rendered on the map (current officer + attending officers)
     const officersToRender = new Map();
     if (currentOfficer) {
         officersToRender.set(currentOfficer.officer_id, {
@@ -583,27 +619,27 @@ function updateMapMarkersAndVectors(alerts) {
 
         const responders = a.attending_officers || [];
 
-        // If current officer has not accepted yet, still draw a subtle preview vector from current officer to victim
+        // If current officer has not accepted yet, draw street-following preview route from current officer to victim
         if (!a.is_accepted_by_me && currentOfficer) {
-            const previewLine = L.polyline(
-                [[currentOfficer.latitude, currentOfficer.longitude], [a.latitude, a.longitude]],
-                { color: '#60a5fa', weight: 2, dashArray: '5, 7', opacity: 0.75 }
-            ).addTo(vectorLayerGroup);
+            const myCoords = (a.my_route_coords && a.my_route_coords.length >= 2)
+                ? a.my_route_coords
+                : [[currentOfficer.latitude, currentOfficer.longitude], [a.latitude, a.longitude]];
 
-            const midLat = (currentOfficer.latitude + a.latitude) / 2;
-            const midLng = (currentOfficer.longitude + a.longitude) / 2;
+            drawTacticalStreetRoute(myCoords, '#3b82f6', 4, true, 0.22);
+
+            const [midLat, midLng] = getRouteMidpoint(myCoords, currentOfficer.latitude, currentOfficer.longitude, a.latitude, a.longitude);
             L.marker([midLat, midLng], {
                 icon: L.divIcon({
                     className: '',
-                    html: `<div class="mdt-vector-label">YOU → VICTIM: ${a.my_distance_to_victim_m}m (${a.my_bearing_to_victim})</div>`,
-                    iconSize: [180, 24],
-                    iconAnchor: [90, 12]
+                    html: `<div class="mdt-vector-label">YOU → VICTIM: ${a.my_distance_to_victim_m}m • ETA ${a.my_eta_seconds}s</div>`,
+                    iconSize: [195, 24],
+                    iconAnchor: [97, 12]
                 }),
                 interactive: false
             }).addTo(vectorLayerGroup);
         }
 
-        // Draw vectors for all attending officers -> victim, and between attending officers
+        // Draw street-following driving routes for all attending officers -> victim, and between attending officers
         const drawnPeerPairs = new Set();
         responders.forEach(r => {
             officersToRender.set(r.officer_id, {
@@ -612,62 +648,62 @@ function updateMapMarkersAndVectors(alerts) {
             });
 
             const lineColor = r.is_me ? '#38bdf8' : '#10b981';
-            L.polyline(
-                [[r.latitude, r.longitude], [a.latitude, a.longitude]],
-                { color: lineColor, weight: 3, dashArray: '8, 6', opacity: 0.95 }
-            ).addTo(vectorLayerGroup);
+            const rCoords = (r.route_coords && r.route_coords.length >= 2)
+                ? r.route_coords
+                : [[r.latitude, r.longitude], [a.latitude, a.longitude]];
 
-            const midLat = (r.latitude + a.latitude) / 2;
-            const midLng = (r.longitude + a.longitude) / 2;
+            drawTacticalStreetRoute(rCoords, lineColor, 5, false, 0.30);
+
+            const [midLat, midLng] = getRouteMidpoint(rCoords, r.latitude, r.longitude, a.latitude, a.longitude);
             L.marker([midLat, midLng], {
                 icon: L.divIcon({
                     className: '',
                     html: `<div class="mdt-vector-label" style="border-color: ${lineColor};">${r.badge_number} → VICTIM: ${r.distance_to_victim_m}m • ETA ${r.eta_seconds}s</div>`,
-                    iconSize: [210, 24],
-                    iconAnchor: [105, 12]
+                    iconSize: [215, 24],
+                    iconAnchor: [107, 12]
                 }),
                 interactive: false
             }).addTo(vectorLayerGroup);
 
-            // Draw inter-officer relative vector lines (Officer <-> Other Attending Officer)
+            // Draw inter-officer street route (Attending Officer <-> Other Attending Officer)
             (r.peer_links || []).forEach(pl => {
                 const pairKey = [r.officer_id, pl.peer_officer_id].sort().join('-');
                 if (!drawnPeerPairs.has(pairKey)) {
                     drawnPeerPairs.add(pairKey);
-                    L.polyline(
-                        [[r.latitude, r.longitude], [pl.peer_latitude, pl.peer_longitude]],
-                        { color: '#f59e0b', weight: 2, dashArray: '3, 6', opacity: 0.85 }
-                    ).addTo(vectorLayerGroup);
+                    const pCoords = (pl.route_coords && pl.route_coords.length >= 2)
+                        ? pl.route_coords
+                        : [[r.latitude, r.longitude], [pl.peer_latitude, pl.peer_longitude]];
 
-                    const pMidLat = (r.latitude + pl.peer_latitude) / 2;
-                    const pMidLng = (r.longitude + pl.peer_longitude) / 2;
+                    drawTacticalStreetRoute(pCoords, '#f59e0b', 3.5, true, 0.18);
+
+                    const [pMidLat, pMidLng] = getRouteMidpoint(pCoords, r.latitude, r.longitude, pl.peer_latitude, pl.peer_longitude);
                     L.marker([pMidLat, pMidLng], {
                         icon: L.divIcon({
                             className: '',
                             html: `<div class="mdt-vector-label peer-vector">${r.badge_number} ↔ ${pl.peer_badge}: ${pl.distance_m}m</div>`,
-                            iconSize: [190, 22],
-                            iconAnchor: [95, 11]
+                            iconSize: [195, 22],
+                            iconAnchor: [97, 11]
                         }),
                         interactive: false
                     }).addTo(vectorLayerGroup);
                 }
             });
 
-            // Also draw relative line between current officer (if not yet accepted) and attending officers
+            // Also draw street route between current officer (if not yet accepted) and attending officers
             if (!a.is_accepted_by_me && currentOfficer && !r.is_me) {
-                L.polyline(
-                    [[currentOfficer.latitude, currentOfficer.longitude], [r.latitude, r.longitude]],
-                    { color: '#f59e0b', weight: 2, dashArray: '3, 6', opacity: 0.8 }
-                ).addTo(vectorLayerGroup);
+                const meToPeerCoords = (r.me_to_officer_route_coords && r.me_to_officer_route_coords.length >= 2)
+                    ? r.me_to_officer_route_coords
+                    : [[currentOfficer.latitude, currentOfficer.longitude], [r.latitude, r.longitude]];
 
-                const pMidLat = (currentOfficer.latitude + r.latitude) / 2;
-                const pMidLng = (currentOfficer.longitude + r.longitude) / 2;
+                drawTacticalStreetRoute(meToPeerCoords, '#f59e0b', 3, true, 0.16);
+
+                const [pMidLat, pMidLng] = getRouteMidpoint(meToPeerCoords, currentOfficer.latitude, currentOfficer.longitude, r.latitude, r.longitude);
                 L.marker([pMidLat, pMidLng], {
                     icon: L.divIcon({
                         className: '',
                         html: `<div class="mdt-vector-label peer-vector">YOU ↔ ${r.badge_number}: ${r.distance_to_me_m}m</div>`,
-                        iconSize: [175, 22],
-                        iconAnchor: [87, 11]
+                        iconSize: [180, 22],
+                        iconAnchor: [90, 11]
                     }),
                     interactive: false
                 }).addTo(vectorLayerGroup);

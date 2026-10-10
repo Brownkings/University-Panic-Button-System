@@ -43,6 +43,81 @@ def is_within_kimberley(lat, lng):
         return False
 
 
+_ROUTE_CACHE = {}
+
+
+def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
+    """
+    Computes the real Kimberley street driving route between two coordinates using OSRM
+    with an in-memory cache and instant orthogonal campus-grid fallback.
+    Returns {'coords': [[lat, lng], ...], 'distance_m': float, 'eta_seconds': int, 'route_summary': str}
+    """
+    la1, lo1, la2, lo2 = float(lat1), float(lon1), float(lat2), float(lon2)
+    cache_key = (round(la1, 4), round(lo1, 4), round(la2, 4), round(lo2, 4))
+    if cache_key in _ROUTE_CACHE:
+        return _ROUTE_CACHE[cache_key]
+
+    direct_dist = haversine_meters(la1, lo1, la2, lo2)
+    if direct_dist < 15.0:
+        res = {
+            'coords': [[la1, lo1], [la2, lo2]],
+            'distance_m': direct_dist,
+            'eta_seconds': 5,
+            'route_summary': 'Direct On-Site Approach',
+        }
+        _ROUTE_CACHE[cache_key] = res
+        return res
+
+    url = (
+        f"https://router.project-osrm.org/route/v1/driving/"
+        f"{lo1:.6f},{la1:.6f};{lo2:.6f},{la2:.6f}?overview=full&geometries=geojson&steps=true"
+    )
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'UPBS-Kimberley-CAD/1.0'})
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            payload = json.loads(resp.read().decode())
+            if payload.get('routes'):
+                route = payload['routes'][0]
+                raw_coords = route['geometry']['coordinates']
+                leaflet_coords = [[la1, lo1]] + [[pt[1], pt[0]] for pt in raw_coords] + [[la2, lo2]]
+                road_dist = round(max(float(route.get('distance', direct_dist)), direct_dist), 1)
+                eta_sec = max(10, int(round(road_dist / 9.5)))
+
+                streets = []
+                for leg in route.get('legs', []):
+                    for step in leg.get('steps', []):
+                        name = (step.get('name') or '').strip()
+                        if name and (not streets or streets[-1] != name):
+                            streets.append(name.replace('Street', 'St').replace('Road', 'Rd').replace('Avenue', 'Ave'))
+
+                summary = ' → '.join(streets[:4]) if streets else 'Kimberley Campus Arterial Route'
+                res = {
+                    'coords': leaflet_coords,
+                    'distance_m': road_dist,
+                    'eta_seconds': eta_sec,
+                    'route_summary': summary,
+                }
+                if len(_ROUTE_CACHE) > 250:
+                    _ROUTE_CACHE.clear()
+                _ROUTE_CACHE[cache_key] = res
+                return res
+    except Exception:
+        pass
+
+    # Fallback campus street-grid L-route if offline
+    mid_lat = (la1 + la2) / 2.0
+    fallback_coords = [[la1, lo1], [mid_lat, lo1], [mid_lat, lo2], [la2, lo2]]
+    road_dist = round(direct_dist * 1.25, 1)
+    res = {
+        'coords': fallback_coords,
+        'distance_m': road_dist,
+        'eta_seconds': max(10, int(round(road_dist / 9.5))),
+        'route_summary': 'Campus Perimeter Road',
+    }
+    _ROUTE_CACHE[cache_key] = res
+    return res
+
+
 def get_or_create_officer_profile(user):
     """Retrieves or initializes the SecurityOfficer telemetry record for the authenticated operator."""
     officer = getattr(user, 'officer_profile', None)
@@ -210,9 +285,10 @@ def api_live_alerts(request):
         v_lat = float(a.location.latitude) if hasattr(a, 'location') else -28.742050
         v_lng = float(a.location.longitude) if hasattr(a, 'location') else 24.765100
 
-        my_dist_to_victim = haversine_meters(me_lat, me_lng, v_lat, v_lng)
+        my_route = fetch_kimberley_street_route(me_lat, me_lng, v_lat, v_lng)
+        my_dist_to_victim = my_route['distance_m']
         my_bearing_to_victim = compass_bearing(me_lat, me_lng, v_lat, v_lng)
-        my_eta_sec = max(10, int(round(my_dist_to_victim / 8.5)))  # ~30 km/h campus patrol response speed
+        my_eta_sec = my_route['eta_seconds']
 
         active_responses = [
             r for r in a.responses.all()
@@ -227,32 +303,38 @@ def api_live_alerts(request):
             off = r.officer
             o_lat = float(off.latitude)
             o_lng = float(off.longitude)
-            dist_victim = haversine_meters(o_lat, o_lng, v_lat, v_lng)
+            off_route = fetch_kimberley_street_route(o_lat, o_lng, v_lat, v_lng)
+            dist_victim = off_route['distance_m']
             bearing_victim = compass_bearing(o_lat, o_lng, v_lat, v_lng)
-            eta_sec = 0 if r.status == AlertResponse.STATUS_ON_SCENE else max(8, int(round(dist_victim / 8.5)))
+            eta_sec = 0 if r.status == AlertResponse.STATUS_ON_SCENE else off_route['eta_seconds']
 
             dist_me = 0.0 if off.id == me_officer.id else haversine_meters(me_lat, me_lng, o_lat, o_lng)
             bearing_me = "CO-LOCATED" if off.id == me_officer.id else compass_bearing(me_lat, me_lng, o_lat, o_lng)
+            me_to_off_route = None if off.id == me_officer.id else fetch_kimberley_street_route(me_lat, me_lng, o_lat, o_lng)
 
             if off.id == me_officer.id:
                 is_accepted_by_me = True
                 my_response_status = r.status
 
-            # Compute relative distances from this attending officer to all other attending officers on the same case
+            # Compute relative routes & distances from this attending officer to all other attending officers on the same case
             peer_links = []
             for peer_r in active_responses:
                 peer_off = peer_r.officer
                 if peer_off.id != off.id:
                     p_lat = float(peer_off.latitude)
                     p_lng = float(peer_off.longitude)
+                    peer_route = fetch_kimberley_street_route(o_lat, o_lng, p_lat, p_lng)
                     peer_links.append({
                         'peer_officer_id': peer_off.id,
                         'peer_name': peer_off.officer_name,
                         'peer_badge': peer_off.badge_number,
-                        'distance_m': haversine_meters(o_lat, o_lng, p_lat, p_lng),
+                        'distance_m': peer_route['distance_m'],
+                        'direct_distance_m': haversine_meters(o_lat, o_lng, p_lat, p_lng),
                         'bearing': compass_bearing(o_lat, o_lng, p_lat, p_lng),
                         'peer_latitude': p_lat,
                         'peer_longitude': p_lng,
+                        'route_coords': peer_route['coords'],
+                        'route_summary': peer_route['route_summary'],
                     })
 
             attending_list.append({
@@ -270,8 +352,11 @@ def api_live_alerts(request):
                 'distance_to_victim_m': dist_victim,
                 'bearing_to_victim': bearing_victim,
                 'eta_seconds': eta_sec,
-                'distance_to_me_m': dist_me,
+                'route_coords': off_route['coords'],
+                'route_summary': off_route['route_summary'],
+                'distance_to_me_m': me_to_off_route['distance_m'] if me_to_off_route else dist_me,
                 'bearing_from_me': bearing_me,
+                'me_to_officer_route_coords': me_to_off_route['coords'] if me_to_off_route else [],
                 'peer_links': peer_links,
             })
 
@@ -291,6 +376,8 @@ def api_live_alerts(request):
             'my_distance_to_victim_m': my_dist_to_victim,
             'my_bearing_to_victim': my_bearing_to_victim,
             'my_eta_seconds': my_eta_sec,
+            'my_route_coords': my_route['coords'],
+            'my_route_summary': my_route['route_summary'],
             'attending_officers': attending_list,
         })
 
