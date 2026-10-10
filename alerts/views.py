@@ -70,14 +70,23 @@ def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
 
     url = (
         f"https://router.project-osrm.org/route/v1/driving/"
-        f"{lo1:.6f},{la1:.6f};{lo2:.6f},{la2:.6f}?overview=full&geometries=geojson&steps=true"
+        f"{lo1:.6f},{la1:.6f};{lo2:.6f},{la2:.6f}"
+        f"?overview=full&geometries=geojson&steps=true&alternatives=true&continue_straight=false"
     )
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'UPBS-Kimberley-CAD/1.0'})
         with urllib.request.urlopen(req, timeout=2.5) as resp:
             payload = json.loads(resp.read().decode())
-            if payload.get('routes'):
-                route = payload['routes'][0]
+            routes = payload.get('routes') or []
+            if routes:
+                # Explicitly select the shortest physical street route among all candidate alternatives
+                route = min(
+                    routes,
+                    key=lambda r: (
+                        float(r.get('distance', float('inf'))),
+                        float(r.get('duration', float('inf'))),
+                    ),
+                )
                 raw_coords = route['geometry']['coordinates']
                 leaflet_coords = [[la1, lo1]] + [[pt[1], pt[0]] for pt in raw_coords] + [[la2, lo2]]
                 road_dist = round(max(float(route.get('distance', direct_dist)), direct_dist), 1)
