@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: upbs-campus-safety
+    runtime: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn upbs_project.wsgi:application
+    plan: free
+    healthCheckPath: /login/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: DJANGO_SETTINGS_MODULE
+        value: upbs_project.settings
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # Set this in Render Dashboard using your Supabase connection string
+      - key: SECURE_SSL_REDIRECT
+        value: "True"

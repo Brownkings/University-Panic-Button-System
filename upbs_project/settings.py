@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,18 +21,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p2$z!ie^zcfgv=v-a^@+(2zxhoqx84g^0zi6)24jvcubqjtipx'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-p2$z!ie^zcfgv=v-a^@+(2zxhoqx84g^0zi6)24jvcubqjtipx')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'youthalliance.co.za',
+    'www.youthalliance.co.za',
+    '.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Additional allowed hosts from environment if specified
+ADDITIONAL_HOSTS = os.environ.get('ADDITIONAL_HOSTS', '')
+if ADDITIONAL_HOSTS:
+    ALLOWED_HOSTS.extend([h.strip() for h in ADDITIONAL_HOSTS.split(',') if h.strip()])
 
 
 # Application definition
-
-import os
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -38,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     # UPBS Core Apps
     'accounts.apps.AccountsConfig',
@@ -49,6 +63,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,15 +93,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'upbs_project.wsgi.application'
 
 
-# Database
+# Database Configuration (Supabase PostgreSQL via DATABASE_URL or SQLite fallback)
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Custom User Model (Phase 3 Specification)
@@ -130,6 +155,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media Files (Incident uploads, evidence)
 MEDIA_URL = '/media/'
@@ -140,6 +166,21 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'role_redirect'
 LOGOUT_REDIRECT_URL = 'login'
 
+# CSRF Trusted Origins for Custom Domain & Render
+CSRF_TRUSTED_ORIGINS = [
+    'https://youthalliance.co.za',
+    'https://www.youthalliance.co.za',
+    'https://*.onrender.com',
+]
+
+# Production Security & SSL
+if not DEBUG and os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 't'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 

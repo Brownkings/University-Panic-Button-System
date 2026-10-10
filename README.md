@@ -162,3 +162,49 @@ Navigate to **`http://127.0.0.1:8000/usability-test/`** while logged in:
 | **User Management Panel** | `/admin/users/` | Role assignments, account suspension/activation toggles |
 | **Feedback Interface** | `/feedback/` | 5-star rating system and qualitative feedback suggestions |
 | **Usability Testing Runner** | `/usability-test/` | Live stopwatch, error tracking, and SUS benchmark logging |
+
+---
+
+## 9. Production Deployment Guide (Render + Supabase + Custom Domain)
+
+### A. Database Provisioning (Supabase PostgreSQL)
+1. Go to [Supabase](https://supabase.com/) and create a new project (e.g. `upbs-campus-db`).
+2. Navigate to **Project Settings** $\rightarrow$ **Database** $\rightarrow$ **Connection string**.
+3. Select **URI** mode:
+   * **Recommended:** Use the **Session Mode** Pooler or Direct Connection string (`port 5432`):
+     ```
+     postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+     ```
+4. Copy this URI string to use as `DATABASE_URL` in Render.
+
+### B. Hosting Deployment (Render Web Service)
+1. Push your repository to GitHub.
+2. Log into [Render](https://render.com/) and click **New +** $\rightarrow$ **Web Service**.
+3. Select your GitHub repository.
+4. Configure service settings:
+   * **Name:** `upbs-campus-safety`
+   * **Runtime:** `Python 3`
+   * **Build Command:** `./build.sh`
+   * **Start Command:** `gunicorn upbs_project.wsgi:application`
+5. In **Environment Variables**, add:
+   * `PYTHON_VERSION`: `3.12.3`
+   * `DJANGO_SETTINGS_MODULE`: `upbs_project.settings`
+   * `DEBUG`: `False`
+   * `SECRET_KEY`: `<click Generate for a secure key>`
+   * `DATABASE_URL`: `<paste your Supabase PostgreSQL URI from Step A>`
+   * `SECURE_SSL_REDIRECT`: `True`
+6. Click **Create Web Service**. Render will execute `./build.sh` (which installs packages, collects WhiteNoise static files, runs migrations against Supabase, and seeds the initial demo accounts).
+
+### C. Custom Domain Configuration (`youthalliance.co.za`)
+1. In the Render Dashboard, open your web service $\rightarrow$ **Settings** $\rightarrow$ **Custom Domains**.
+2. Click **Add Custom Domain** and enter:
+   * `youthalliance.co.za`
+   * `www.youthalliance.co.za`
+3. In your Domain Registrar / DNS Management panel (where `youthalliance.co.za` is registered, e.g. Cloudflare, Namecheap, Domains.co.za, Afrihost, GoDaddy):
+   * **Point `www`:** Add a `CNAME` record with Host `www` targeting your Render service (e.g. `upbs-campus-safety.onrender.com`).
+   * **Point root domain `@` (`youthalliance.co.za`):**
+     * If your DNS provider supports **CNAME Flattening / ALIAS / ANAME** (e.g. Cloudflare): Point `@` to `upbs-campus-safety.onrender.com`.
+     * If your DNS provider only supports standard **A Records**: Set the `A` record for `@` to the IP address displayed by Render in the Custom Domains tab (typically `216.24.57.1`).
+4. **Disconnect Old App:** Removing or replacing the old DNS records automatically disconnects the old app and routes all incoming traffic to this UPBS project.
+5. Render will automatically issue a free, auto-renewing Let's Encrypt SSL/TLS certificate once DNS propagation verifies (typically 5–30 minutes).
+
