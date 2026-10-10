@@ -74,27 +74,11 @@ function initCampusMap() {
         minZoom: 14,
         maxZoom: 18,
         bounds: kimberleyBounds,
-        attribution: 'Kimberley Campus GIS | &copy; OpenStreetMap contributors'
-    });
-
-    const kimberleySatelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        minZoom: 14,
-        maxZoom: 18,
-        bounds: kimberleyBounds,
-        attribution: 'Kimberley Aerial | &copy; Esri'
+        attribution: 'Kimberley Campus Tactical Dark GIS | &copy; OpenStreetMap contributors'
     });
 
     kimberleyStreetLayer.addTo(map);
     vectorLayerGroup = L.layerGroup().addTo(map);
-
-    L.control.layers(
-        {
-            'Kimberley Campus Street Map': kimberleyStreetLayer,
-            'Kimberley Satellite Imagery': kimberleySatelliteLayer
-        },
-        null,
-        { position: 'topleft' }
-    ).addTo(map);
 
     const topLeftCorner = document.querySelector('.leaflet-top.leaflet-left');
     if (topLeftCorner) {
