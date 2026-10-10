@@ -109,13 +109,13 @@ function initOfficerHardwareGPS() {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
             const acc = pos.coords.accuracy || 5.0;
-            // Only overwrite if device is physically inside Kimberley campus bounds
-            if (lat >= -28.765 && lat <= -28.720 && lng >= 24.740 && lng <= 24.790) {
+            // Only overwrite if device is physically inside Kimberley campus bounds with high-precision GNSS lock (<= 100m)
+            if (acc <= 100.0 && lat >= -28.765 && lat <= -28.720 && lng >= 24.740 && lng <= 24.790) {
                 broadcastOfficerLocation(lat, lng, acc, false);
             }
         },
         () => {},
-        { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
 }
 

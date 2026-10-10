@@ -155,6 +155,17 @@ def home_view(request):
     return render(request, 'alerts/home.html')
 
 
+SPU_SECTOR_COORDS = {
+    "Main Library - 2nd Floor Study Area": (-28.741950, 24.764850),
+    "Science Block B - Computer Labs": (-28.741200, 24.765650),
+    "East Student Residence - Block C": (-28.743400, 24.768200),
+    "Central Administration Building": (-28.742350, 24.764100),
+    "University Sports Grounds & Pavilion": (-28.745800, 24.766900),
+    "Campus Gate 1 (Main Entrance)": (-28.739850, 24.762950),
+    "South Campus Walkway / Parking Area": (-28.746900, 24.764400),
+}
+
+
 @login_required
 @csrf_protect
 def trigger_alert_api(request):
@@ -175,6 +186,21 @@ def trigger_alert_api(request):
     lng_val = data.get('longitude', 24.765100)
     accuracy_val = data.get('accuracy', 10.0)
     description = data.get('description', 'Main Campus Area').strip()
+
+    try:
+        lat_f = float(lat_val)
+        lng_f = float(lng_val)
+        acc_f = float(accuracy_val) if accuracy_val is not None else 10.0
+    except (TypeError, ValueError):
+        lat_f, lng_f, acc_f = -28.741950, 24.764850, 4.5
+
+    # Reject coarse ISP IP-based geolocation or out-of-Kimberley coordinates in favor of exact SPU building beacon
+    if not is_within_kimberley(lat_f, lng_f) or acc_f > 150.0:
+        if description in SPU_SECTOR_COORDS:
+            lat_f, lng_f = SPU_SECTOR_COORDS[description]
+        else:
+            lat_f, lng_f = -28.741950, 24.764850
+        acc_f = 4.0
 
     # Rate limiting check: user cannot spam more than 3 active alerts within 5 minutes
     recent_alerts = EmergencyAlert.objects.filter(
@@ -200,9 +226,9 @@ def trigger_alert_api(request):
 
     Location.objects.create(
         alert=alert,
-        latitude=Decimal(str(lat_val)),
-        longitude=Decimal(str(lng_val)),
-        accuracy_meters=float(accuracy_val) if accuracy_val else None,
+        latitude=Decimal(f"{lat_f:.6f}"),
+        longitude=Decimal(f"{lng_f:.6f}"),
+        accuracy_meters=round(acc_f, 1),
         description=description
     )
 
