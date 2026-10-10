@@ -46,7 +46,7 @@ class Command(BaseCommand):
             admin_user.save()
         self.stdout.write(self.style.SUCCESS(f"✓ Admin account ready: {admin_user.username} (password123)"))
 
-        # 3. Create Security Officer
+        # 3. Create Security Officers (Multi-Unit Kimberley Campus Patrol Fleet)
         sec_user, created = User.objects.get_or_create(
             username="officer1",
             defaults={
@@ -63,16 +63,77 @@ class Command(BaseCommand):
             sec_user.set_password("password123")
             sec_user.save()
 
-        officer, _ = SecurityOfficer.objects.get_or_create(
+        officer, _ = SecurityOfficer.objects.update_or_create(
             user=sec_user,
             defaults={
                 'officer_name': "Sergeant Thabo Dlamini",
                 'badge_number': "SPU-SEC-402",
                 'on_duty': True,
-                'current_post': "Central Security Command Post"
+                'current_post': "Unit Alpha-01 • North Campus Patrol",
+                'latitude': Decimal("-28.740650"),
+                'longitude': Decimal("24.763400"),
+                'accuracy_meters': 3.8,
             }
         )
-        self.stdout.write(self.style.SUCCESS(f"✓ Security Officer ready: {sec_user.username} (password123)"))
+
+        sec_user2, created2 = User.objects.get_or_create(
+            username="officer2",
+            defaults={
+                'full_name': "Officer Rethabile Pheko",
+                'institutional_id': "202345683",
+                'email': "security2@campus.ac.za",
+                'contact_number': "+27829992222",
+                'role': roles[Role.SECURITY],
+                'is_staff': True,
+                'is_verified': True,
+            }
+        )
+        if created2:
+            sec_user2.set_password("password123")
+            sec_user2.save()
+
+        officer2, _ = SecurityOfficer.objects.update_or_create(
+            user=sec_user2,
+            defaults={
+                'officer_name': "Officer Rethabile Pheko",
+                'badge_number': "SPU-SEC-408",
+                'on_duty': True,
+                'current_post': "Unit Bravo-02 • South Residence Sector",
+                'latitude': Decimal("-28.744550"),
+                'longitude': Decimal("24.766100"),
+                'accuracy_meters': 4.1,
+            }
+        )
+
+        sec_user3, created3 = User.objects.get_or_create(
+            username="officer3",
+            defaults={
+                'full_name': "Officer Thapelo Ramphago",
+                'institutional_id': "202411369",
+                'email': "security3@campus.ac.za",
+                'contact_number': "+27829993333",
+                'role': roles[Role.SECURITY],
+                'is_staff': True,
+                'is_verified': True,
+            }
+        )
+        if created3:
+            sec_user3.set_password("password123")
+            sec_user3.save()
+
+        officer3, _ = SecurityOfficer.objects.update_or_create(
+            user=sec_user3,
+            defaults={
+                'officer_name': "Officer Thapelo Ramphago",
+                'badge_number': "SPU-SEC-415",
+                'on_duty': True,
+                'current_post': "Unit Charlie-03 • East Engineering Gate",
+                'latitude': Decimal("-28.741900"),
+                'longitude': Decimal("24.767150"),
+                'accuracy_meters': 3.5,
+            }
+        )
+        self.stdout.write(self.style.SUCCESS(f"✓ Security Patrol Fleet ready: {sec_user.username}, {sec_user2.username}, {sec_user3.username} (password123)"))
 
         # 4. Create Students (Group Members context: Brown Nkosi & Palesa Ntsane)
         student1, created = User.objects.get_or_create(
@@ -178,10 +239,10 @@ class Command(BaseCommand):
             )
             AlertResponse.objects.create(
                 alert=alert2,
-                officer=officer,
+                officer=officer2,
                 dispatched_at=time_recent + timedelta(minutes=1),
                 acknowledged_at=time_recent + timedelta(minutes=2),
-                response_notes="First aid kit dispatched with medical response unit. En route.",
+                response_notes="Unit Bravo-02 en route with trauma kit.",
                 status=AlertResponse.STATUS_EN_ROUTE
             )
             Notification.objects.create(
@@ -191,6 +252,20 @@ class Command(BaseCommand):
                 message="MEDICAL EMERGENCY: Palesa Ntsane at East Res Block C.",
                 delivery_status=Notification.STATUS_DELIVERED
             )
+
+        # Ensure any existing active DISPATCHED alert has Unit Bravo-02 (officer2) co-responding
+        # and leave officer1 unaccepted initially so officer1 can test clicking "Accept Case & Broadcast My Location"
+        for active_disp in EmergencyAlert.objects.filter(status=EmergencyAlert.STATUS_DISPATCHED):
+            AlertResponse.objects.get_or_create(
+                alert=active_disp,
+                officer=officer2,
+                defaults={
+                    'acknowledged_at': timezone.now(),
+                    'response_notes': 'Unit Bravo-02 co-responding on tactical broadcast channel.',
+                    'status': AlertResponse.STATUS_EN_ROUTE,
+                }
+            )
+            AlertResponse.objects.filter(alert=active_disp, officer=officer).delete()
 
         self.stdout.write(self.style.SUCCESS("✓ Sample Emergency Alerts and Locations populated."))
 

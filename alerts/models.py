@@ -91,13 +91,17 @@ class Location(models.Model):
 class SecurityOfficer(models.Model):
     """
     SecurityOfficer entity as specified in Phase 3 Section 3.3.
-    Campus security personnel responsible for responding to alerts.
+    Campus security personnel responsible for responding to alerts with live MDT GPS telemetry.
     """
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='officer_profile')
     officer_name = models.CharField(max_length=100)
     badge_number = models.CharField(max_length=30, unique=True)
     on_duty = models.BooleanField(default=True, db_index=True)
     current_post = models.CharField(max_length=100, blank=True, default="Central Security Desk")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, default=-28.740650, help_text="Live Patrol Unit GPS Latitude")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, default=24.763400, help_text="Live Patrol Unit GPS Longitude")
+    accuracy_meters = models.FloatField(default=4.5, help_text="Live GPS horizontal accuracy in meters")
+    last_telemetry_at = models.DateTimeField(default=timezone.now, help_text="Last GPS broadcast timestamp")
 
     def save(self, *args, **kwargs):
         if not self.officer_name and self.user:
