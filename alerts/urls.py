@@ -9,4 +9,5 @@ urlpatterns = [
     path('alerts/api/live/', views.api_live_alerts, name='api_live_alerts'),
     path('alerts/api/status/<int:alert_id>/', views.api_alert_status, name='api_alert_status'),
     path('alerts/api/update-status/<int:alert_id>/', views.api_update_alert_status, name='api_update_alert_status'),
+    path('alerts/tiles/kimberley/<int:z>/<int:x>/<int:y>.png', views.kimberley_map_tile, name='kimberley_map_tile'),
 ]

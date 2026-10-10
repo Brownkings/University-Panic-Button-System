@@ -1,8 +1,11 @@
 import json
+import urllib.request
 from decimal import Decimal
+from pathlib import Path
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_protect
 from django.utils import timezone
 from .models import PanicDevice, EmergencyAlert, Location, SecurityOfficer, AlertResponse, Notification
@@ -235,3 +238,51 @@ def api_update_alert_status(request, alert_id):
         'alert_id': alert.id,
         'new_status': alert.status
     })
+
+
+def kimberley_map_tile(request, z, x, y):
+    """
+    Serves self-hosted Kimberley Campus GIS map tiles directly from static/tiles/kimberley/{z}/{x}/{y}.png.
+    If a higher zoom tile (z=17..18) within Kimberley is requested, fetches and caches it server-side
+    so the browser never encounters third-party API key prompts or 403 Referer blocks.
+    """
+    if z < 13 or z > 19:
+        return HttpResponseNotFound("Zoom level outside Kimberley campus bounds.")
+
+    local_tile = Path(settings.BASE_DIR) / 'static' / 'tiles' / 'kimberley' / str(z) / str(x) / f"{y}.png"
+    if local_tile.exists():
+        return HttpResponse(
+            local_tile.read_bytes(),
+            content_type='image/png',
+            headers={'Cache-Control': 'public, max-age=604800, immutable'}
+        )
+
+    # Fallback server-side fetch for zoom 17-18 within Kimberley
+    upstream_urls = [
+        f"https://tile.openstreetmap.de/{z}/{x}/{y}.png",
+        f"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    ]
+    for url in upstream_urls:
+        try:
+            req = urllib.request.Request(url, headers={
+                'User-Agent': 'UPBS-Campus-Safety-Kimberley/1.0 (+https://youthalliance.co.za)',
+                'Referer': 'https://youthalliance.co.za/'
+            })
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                data = resp.read()
+                if len(data) > 7500 or resp.status == 200:
+                    try:
+                        local_tile.parent.mkdir(parents=True, exist_ok=True)
+                        local_tile.write_bytes(data)
+                    except OSError:
+                        pass
+                    return HttpResponse(
+                        data,
+                        content_type='image/png',
+                        headers={'Cache-Control': 'public, max-age=604800'}
+                    )
+        except Exception:
+            continue
+
+    return HttpResponseNotFound("Kimberley tile unavailable.")
+

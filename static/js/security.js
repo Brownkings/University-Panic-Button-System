@@ -38,37 +38,43 @@ function initCampusMap() {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
-    // Centered at Sol Plaatje University Campus coordinates (Kimberley)
-    map = L.map('map').setView([-28.742050, 24.765100], 16);
+    // Strictly bounded to Kimberley / Sol Plaatje University Campus sector
+    const kimberleyBounds = L.latLngBounds(
+        L.latLng(-28.765, 24.740), // South-West Kimberley Campus boundary
+        L.latLng(-28.720, 24.790)  // North-East Kimberley Campus boundary
+    );
 
-    // Primary high-availability tactical dark radar basemap (CARTO CDN)
-    const tacticalDarkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO | UPBS CAD Radar'
+    map = L.map('map', {
+        center: [-28.742050, 24.765100],
+        zoom: 16,
+        minZoom: 14,
+        maxZoom: 18,
+        maxBounds: kimberleyBounds,
+        maxBoundsViscosity: 1.0
     });
 
-    // High-contrast daylight street basemap (CARTO Voyager CDN)
-    const streetVoyagerLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO | UPBS CAD Radar'
+    // Self-hosted Kimberley Campus Street Map (served locally — zero API keys or 403 blocks)
+    const kimberleyStreetLayer = L.tileLayer('/alerts/tiles/kimberley/{z}/{x}/{y}.png', {
+        minZoom: 14,
+        maxZoom: 18,
+        bounds: kimberleyBounds,
+        attribution: 'Kimberley Campus GIS | &copy; OpenStreetMap contributors'
     });
 
-    // Standard OpenStreetMap layer (supported via strict-origin-when-cross-origin referrer policy)
-    const osmStandardLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors | UPBS Campus Security'
+    // Kimberley Satellite / Aerial Imagery (Esri World Imagery — no API key required)
+    const kimberleySatelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        minZoom: 14,
+        maxZoom: 18,
+        bounds: kimberleyBounds,
+        attribution: 'Kimberley Aerial | &copy; Esri'
     });
 
-    // Default to High-Contrast Street Voyager for clear campus building visibility, with Tactical Dark & OSM switchable
-    streetVoyagerLayer.addTo(map);
+    kimberleyStreetLayer.addTo(map);
 
     L.control.layers(
         {
-            'Campus Street Map (CARTO HD)': streetVoyagerLayer,
-            'Tactical Dark Radar (CARTO)': tacticalDarkLayer,
-            'Standard OSM': osmStandardLayer
+            'Kimberley Campus Street Map': kimberleyStreetLayer,
+            'Kimberley Satellite Imagery': kimberleySatelliteLayer
         },
         null,
         { position: 'topright' }
