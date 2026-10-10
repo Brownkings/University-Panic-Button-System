@@ -97,6 +97,14 @@ function initCampusMap() {
         topLeftCorner.style.marginTop = '72px';
         topLeftCorner.style.marginLeft = '4px';
     }
+
+    // Ensure Leaflet recalculates full-bleed viewport dimensions immediately
+    setTimeout(() => {
+        if (map) map.invalidateSize();
+    }, 100);
+    window.addEventListener('resize', () => {
+        if (map) map.invalidateSize();
+    });
 }
 
 function recenterKimberleyCampus() {
