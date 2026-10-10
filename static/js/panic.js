@@ -12,139 +12,70 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationInput = document.getElementById('locationDescription');
     const alertTypeSelect = document.getElementById('alertTypeSelect');
 
-    // Exact Sol Plaatje University (Kimberley) building coordinates for sector precision & fallback
-    const SPU_SECTOR_COORDS = {
-        "Main Library - 2nd Floor Study Area": { lat: -28.741950, lng: 24.764850 },
-        "Science Block B - Computer Labs": { lat: -28.741200, lng: 24.765650 },
-        "East Student Residence - Block C": { lat: -28.743400, lng: 24.768200 },
-        "Central Administration Building": { lat: -28.742350, lng: 24.764100 },
-        "University Sports Grounds & Pavilion": { lat: -28.745800, lng: 24.766900 },
-        "Campus Gate 1 (Main Entrance)": { lat: -28.739850, lng: 24.762950 },
-        "South Campus Walkway / Parking Area": { lat: -28.746900, lng: 24.764400 }
-    };
-
     let countdownTimer = null;
     let secondsLeft = 3;
-    let hasHighAccuracyKimberleyLock = false;
-    let userManuallySelectedSector = false;
+    let hasRealGpsFix = false;
     let userCoords = {
-        latitude: -28.741950,
-        longitude: 24.764850,
-        accuracy: 4.5
+        latitude: null,
+        longitude: null,
+        accuracy: null
     };
 
     const ICON_GPS_LOCKED = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line><circle cx="12" cy="12" r="3"></circle></svg>`;
     const ICON_GPS_FALLBACK = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
 
-    function isWithinKimberleyCampus(lat, lng) {
-        return lat >= -28.765 && lat <= -28.720 && lng >= 24.740 && lng <= 24.790;
-    }
-
-    function haversineMeters(lat1, lon1, lat2, lon2) {
-        const R = 6371000.0;
-        const toRad = (deg) => (deg * Math.PI) / 180.0;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function findNearestSector(lat, lng) {
-        let bestSector = null;
-        let bestDist = Infinity;
-        for (const [sectorName, coords] of Object.entries(SPU_SECTOR_COORDS)) {
-            const d = haversineMeters(lat, lng, coords.lat, coords.lng);
-            if (d < bestDist) {
-                bestDist = d;
-                bestSector = sectorName;
-            }
-        }
-        return bestSector;
-    }
-
     function updateGeoStatusBanner(modeText, colorHex) {
         if (!geoStatusEl) return;
         const icon = colorHex === '#34d399' ? ICON_GPS_LOCKED : ICON_GPS_FALLBACK;
-        geoStatusEl.innerHTML = `<span style="color: ${colorHex}; display: inline-flex; align-items: center; gap: 0.45rem; font-variant-numeric: tabular-nums;">${icon} ${modeText} [${userCoords.latitude.toFixed(5)}, ${userCoords.longitude.toFixed(5)} &plusmn;${Math.round(userCoords.accuracy)}m]</span>`;
+        const coordStr = (userCoords.latitude !== null && userCoords.longitude !== null)
+            ? ` [${userCoords.latitude.toFixed(6)}, ${userCoords.longitude.toFixed(6)} &plusmn;${Math.round(userCoords.accuracy || 5)}m]`
+            : '';
+        geoStatusEl.innerHTML = `<span style="color: ${colorHex}; display: inline-flex; align-items: center; gap: 0.45rem; font-variant-numeric: tabular-nums;">${icon} ${modeText}${coordStr}</span>`;
     }
 
-    // Sync coordinates when user manually selects a campus building sector
-    if (locationInput) {
-        const initialSector = SPU_SECTOR_COORDS[locationInput.value];
-        if (initialSector) {
-            userCoords.latitude = initialSector.lat;
-            userCoords.longitude = initialSector.lng;
+    function applyRealPositionFix(pos) {
+        userCoords.latitude = pos.coords.latitude;
+        userCoords.longitude = pos.coords.longitude;
+        userCoords.accuracy = pos.coords.accuracy || 5.0;
+        hasRealGpsFix = true;
+        updateGeoStatusBanner('Live Hardware GPS Locked', '#34d399');
+    }
+
+    function handleGpsError(err) {
+        console.warn("Geolocation error:", err);
+        if (!hasRealGpsFix) {
+            updateGeoStatusBanner('Please allow Browser Location Permission for real GPS', '#fbbf24');
         }
-        locationInput.addEventListener('change', () => {
-            userManuallySelectedSector = true;
-            const chosen = SPU_SECTOR_COORDS[locationInput.value];
-            if (chosen && !hasHighAccuracyKimberleyLock) {
-                userCoords.latitude = chosen.lat;
-                userCoords.longitude = chosen.lng;
-                userCoords.accuracy = 4.0;
-                updateGeoStatusBanner('SPU Building Beacon Locked', '#34d399');
-            }
-        });
     }
 
-    // 1. Continuous High-Accuracy GNSS Watch (filters out coarse IP/cell-tower jumps)
+    // 1. Acquire and continuously watch real hardware GPS from the user's device
     if (navigator.geolocation) {
-        const handlePositionFix = (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const acc = pos.coords.accuracy || 10.0;
-
-            if (isWithinKimberleyCampus(lat, lng) && acc <= 120.0) {
-                // Only accept if this is our first real Kimberley lock, or accuracy improved / remained sharp (<= 30m)
-                if (!hasHighAccuracyKimberleyLock || acc <= userCoords.accuracy || acc <= 30.0) {
-                    hasHighAccuracyKimberleyLock = true;
-                    userCoords.latitude = lat;
-                    userCoords.longitude = lng;
-                    userCoords.accuracy = acc;
-
-                    if (locationInput && !userManuallySelectedSector) {
-                        const nearest = findNearestSector(lat, lng);
-                        if (nearest) locationInput.value = nearest;
-                    }
-                    updateGeoStatusBanner('High-Precision GNSS Locked', '#34d399');
-                }
-            } else if (!hasHighAccuracyKimberleyLock) {
-                // Device is outside Kimberley or using coarse ISP IP geolocation -> lock to selected SPU building beacon
-                const sectorCoords = locationInput ? SPU_SECTOR_COORDS[locationInput.value] : null;
-                if (sectorCoords) {
-                    userCoords.latitude = sectorCoords.lat;
-                    userCoords.longitude = sectorCoords.lng;
-                    userCoords.accuracy = 4.0;
-                }
-                updateGeoStatusBanner('SPU Campus Sector Beacon Locked', '#34d399');
-            }
-        };
-
-        navigator.geolocation.watchPosition(
-            handlePositionFix,
-            (err) => {
-                console.warn("Hardware GNSS unavailable, using SPU sector beacon coordinates:", err);
-                if (!hasHighAccuracyKimberleyLock) {
-                    const sectorCoords = locationInput ? SPU_SECTOR_COORDS[locationInput.value] : null;
-                    if (sectorCoords) {
-                        userCoords.latitude = sectorCoords.lat;
-                        userCoords.longitude = sectorCoords.lng;
-                        userCoords.accuracy = 4.5;
-                    }
-                    updateGeoStatusBanner('SPU Campus Sector Beacon Active', '#fbbf24');
-                }
-            },
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        navigator.geolocation.getCurrentPosition(
+            applyRealPositionFix,
+            handleGpsError,
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
         );
+        navigator.geolocation.watchPosition(
+            applyRealPositionFix,
+            handleGpsError,
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+        );
+    } else {
+        updateGeoStatusBanner('Geolocation API unsupported on this browser', '#f87171');
     }
 
     if (!panicBtn) return;
 
-    // 2. User presses Panic Button -> Start 3-second abort window
+    // 2. User presses Panic Button -> Start 3-second abort window & refresh live GPS
     panicBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                applyRealPositionFix,
+                () => {},
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 3000 }
+            );
+        }
         startAbortCountdown();
     });
 
@@ -187,18 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Alert Aborted: False alarm was safely cancelled.");
     }
 
-    function dispatchEmergencyAlert() {
-        playTickSound(880, 0.4); // High confirmation beep
-        
-        const desc = locationInput ? locationInput.value : "Main Library - 2nd Floor Study Area";
+    function sendTriggerPost() {
+        const desc = locationInput ? locationInput.value : "Live GPS Location";
         const alertType = alertTypeSelect ? alertTypeSelect.value : "STANDARD";
-
-        // If user manually selected a sector or lacks a sub-120m Kimberley GPS lock, ensure coordinates match the sector
-        if (!hasHighAccuracyKimberleyLock && SPU_SECTOR_COORDS[desc]) {
-            userCoords.latitude = SPU_SECTOR_COORDS[desc].lat;
-            userCoords.longitude = SPU_SECTOR_COORDS[desc].lng;
-            userCoords.accuracy = 4.0;
-        }
 
         const payload = {
             alert_type: alertType,
@@ -230,6 +152,27 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Emergency dispatch network error:", err);
             alert("Emergency dispatch failed. Please call Campus Security directly: +27 82 999 1111");
         });
+    }
+
+    function dispatchEmergencyAlert() {
+        playTickSound(880, 0.4); // High confirmation beep
+
+        if (hasRealGpsFix && userCoords.latitude !== null && userCoords.longitude !== null) {
+            sendTriggerPost();
+        } else if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    applyRealPositionFix(pos);
+                    sendTriggerPost();
+                },
+                () => {
+                    alert("Location access is required to dispatch your real GPS coordinates. Please allow location access in your browser.");
+                },
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
     }
 
     // Lightweight Web Audio API synthesizer (no external audio assets required)

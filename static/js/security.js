@@ -49,32 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+let realOfficerHardwareCoords = null;
+
 function initCampusMap() {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
-    const kimberleyBounds = L.latLngBounds(
-        L.latLng(-28.765, 24.740),
-        L.latLng(-28.720, 24.790)
-    );
-
     map = L.map('map', {
         center: KIMBERLEY_CENTER,
         zoom: 16,
-        minZoom: 14,
+        minZoom: 4,
         maxZoom: 18,
-        zoomControl: false,
-        maxBounds: kimberleyBounds,
-        maxBoundsViscosity: 1.0
+        zoomControl: false
     });
 
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
     const kimberleyStreetLayer = L.tileLayer('/alerts/tiles/kimberley/{z}/{x}/{y}.png', {
-        minZoom: 14,
+        minZoom: 4,
         maxZoom: 18,
-        bounds: kimberleyBounds,
-        attribution: 'Kimberley Campus Tactical Dark GIS | &copy; OpenStreetMap contributors'
+        attribution: 'Tactical Dark GIS | &copy; OpenStreetMap contributors'
     });
 
     kimberleyStreetLayer.addTo(map);
@@ -86,14 +80,6 @@ function initCampusMap() {
         topLeftCorner.style.marginLeft = '4px';
     }
 
-    // Allow officer to tap on map when "Set My GPS" mode is active
-    map.on('click', (e) => {
-        if (movePatrolMode) {
-            broadcastOfficerLocation(e.latlng.lat, e.latlng.lng, 3.0, true);
-            toggleMovePatrolMode(false);
-        }
-    });
-
     setTimeout(() => {
         if (map) map.invalidateSize();
     }, 100);
@@ -104,30 +90,51 @@ function initCampusMap() {
 
 function initOfficerHardwareGPS() {
     if (!navigator.geolocation) return;
+
+    const onRealFix = (pos, isInitial) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const acc = pos.coords.accuracy || 5.0;
+        realOfficerHardwareCoords = { latitude: lat, longitude: lng, accuracy: acc };
+        broadcastOfficerLocation(lat, lng, acc, Boolean(isInitial));
+    };
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => onRealFix(pos, true),
+        (err) => console.warn("Initial officer GPS lock pending:", err),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    );
+
     navigator.geolocation.watchPosition(
+        (pos) => onRealFix(pos, false),
+        (err) => console.warn("Live officer GPS watch error:", err),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    );
+}
+
+function toggleMovePatrolMode() {
+    const label = document.getElementById('repositionUnitLabel');
+    if (!navigator.geolocation) {
+        alert("Geolocation API is not supported by this browser.");
+        return;
+    }
+    if (label) label.textContent = 'Acquiring GPS...';
+    navigator.geolocation.getCurrentPosition(
         (pos) => {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
             const acc = pos.coords.accuracy || 5.0;
-            // Only overwrite if device is physically inside Kimberley campus bounds with high-precision GNSS lock (<= 100m)
-            if (acc <= 100.0 && lat >= -28.765 && lat <= -28.720 && lng >= 24.740 && lng <= 24.790) {
-                broadcastOfficerLocation(lat, lng, acc, false);
-            }
+            realOfficerHardwareCoords = { latitude: lat, longitude: lng, accuracy: acc };
+            if (label) label.textContent = 'Sync Live GPS';
+            broadcastOfficerLocation(lat, lng, acc, true);
         },
-        () => {},
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        (err) => {
+            if (label) label.textContent = 'Sync Live GPS';
+            alert("Unable to read real GPS location. Please allow Location permission in your browser.");
+            console.warn("Manual GPS sync error:", err);
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
     );
-}
-
-function toggleMovePatrolMode(forceState) {
-    movePatrolMode = typeof forceState === 'boolean' ? forceState : !movePatrolMode;
-    const btn = document.getElementById('repositionUnitBtn');
-    const label = document.getElementById('repositionUnitLabel');
-    const mapEl = document.getElementById('map');
-
-    if (btn) btn.classList.toggle('active-mode', movePatrolMode);
-    if (label) label.textContent = movePatrolMode ? 'Tap Map to Place Unit...' : 'Set My GPS';
-    if (mapEl) mapEl.style.cursor = movePatrolMode ? 'crosshair' : '';
 }
 
 function broadcastOfficerLocation(lat, lng, accuracy, adjustMapAfter) {
@@ -281,14 +288,23 @@ function startLiveAlertPolling() {
 }
 
 function pollAlerts(fitTargetAlertId) {
-    fetch('/alerts/api/live/')
+    let liveUrl = '/alerts/api/live/';
+    if (realOfficerHardwareCoords && realOfficerHardwareCoords.latitude != null && realOfficerHardwareCoords.longitude != null) {
+        const params = new URLSearchParams({
+            lat: String(realOfficerHardwareCoords.latitude),
+            lng: String(realOfficerHardwareCoords.longitude),
+            acc: String(realOfficerHardwareCoords.accuracy || 5.0)
+        });
+        liveUrl += `?${params.toString()}`;
+    }
+    fetch(liveUrl)
         .then(res => res.json())
         .then(data => {
             if (data.current_officer) {
                 currentOfficer = data.current_officer;
                 const unitLabel = document.getElementById('myUnitLabel');
                 if (unitLabel) {
-                    unitLabel.textContent = `${currentOfficer.badge_number} (${currentOfficer.latitude.toFixed(4)}, ${currentOfficer.longitude.toFixed(4)} ±${currentOfficer.accuracy_meters}m)`;
+                    unitLabel.textContent = `${currentOfficer.badge_number} (${currentOfficer.latitude.toFixed(5)}, ${currentOfficer.longitude.toFixed(5)} ±${Math.round(currentOfficer.accuracy_meters)}m)`;
                 }
             }
             if (data.on_duty_officers) {
@@ -575,7 +591,7 @@ function updateMapMarkersAndVectors(alerts) {
         officersToRender.set(currentOfficer.officer_id, {
             ...currentOfficer,
             is_me: true,
-            role_label: 'YOUR PATROL UNIT (DRAG TO MOVE)'
+            role_label: 'YOUR PATROL UNIT (LIVE GPS)'
         });
     }
 
@@ -666,10 +682,10 @@ function updateMapMarkersAndVectors(alerts) {
                     ${off.officer_name} (${off.badge_number})
                 </div>
                 <div style="font-size: 0.76rem; color: #cbd5e1;">
-                    ${off.current_post || 'Kimberley Mobile Patrol'}
+                    ${off.current_post || 'Mobile Patrol'}
                 </div>
                 <div style="font-size: 0.72rem; font-family: var(--font-mono); color: #94a3b8; margin-top: 0.25rem;">
-                    GPS: ${off.latitude.toFixed(5)}, ${off.longitude.toFixed(5)} (±${off.accuracy_meters || 4.0}m)
+                    GPS: ${off.latitude.toFixed(5)}, ${off.longitude.toFixed(5)} (±${Math.round(off.accuracy_meters || 4.0)}m)
                 </div>
             </div>
         `;
@@ -677,17 +693,10 @@ function updateMapMarkersAndVectors(alerts) {
         if (!officerMarkers[offId]) {
             const m = L.marker([off.latitude, off.longitude], {
                 icon: createOfficerMarkerIcon(off.is_me),
-                draggable: Boolean(off.is_me)
+                draggable: false
             })
                 .addTo(map)
                 .bindPopup(popupHtml);
-
-            if (off.is_me) {
-                m.on('dragend', (ev) => {
-                    const pos = ev.target.getLatLng();
-                    broadcastOfficerLocation(pos.lat, pos.lng, 3.0, true);
-                });
-            }
             officerMarkers[offId] = m;
         } else {
             officerMarkers[offId].setLatLng([off.latitude, off.longitude]);
@@ -696,14 +705,13 @@ function updateMapMarkersAndVectors(alerts) {
     });
 }
 
-function acceptCase(alertId) {
-    focusedAlertId = alertId;
+function submitAcceptCasePost(alertId, lat, lng, acc) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
     const payload = {
         status: 'DISPATCHED',
-        officer_lat: currentOfficer ? currentOfficer.latitude : undefined,
-        officer_lng: currentOfficer ? currentOfficer.longitude : undefined,
-        officer_accuracy: currentOfficer ? currentOfficer.accuracy_meters : 3.5
+        officer_lat: lat,
+        officer_lng: lng,
+        officer_accuracy: acc
     };
 
     fetch(`/alerts/api/update-status/${alertId}/`, {
@@ -717,12 +725,55 @@ function acceptCase(alertId) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            // Immediately poll and dynamically adjust the map to frame the Officer(s) relative to the Victim
             pollAlerts(alertId);
         } else {
             alert("Error accepting case: " + (data.error || "Server rejected update"));
         }
     });
+}
+
+function acceptCase(alertId) {
+    focusedAlertId = alertId;
+    if (realOfficerHardwareCoords && realOfficerHardwareCoords.latitude != null && realOfficerHardwareCoords.longitude != null) {
+        submitAcceptCasePost(
+            alertId,
+            realOfficerHardwareCoords.latitude,
+            realOfficerHardwareCoords.longitude,
+            realOfficerHardwareCoords.accuracy || 4.0
+        );
+    } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                realOfficerHardwareCoords = {
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy || 5.0
+                };
+                submitAcceptCasePost(
+                    alertId,
+                    pos.coords.latitude,
+                    pos.coords.longitude,
+                    pos.coords.accuracy || 5.0
+                );
+            },
+            () => {
+                submitAcceptCasePost(
+                    alertId,
+                    currentOfficer ? currentOfficer.latitude : undefined,
+                    currentOfficer ? currentOfficer.longitude : undefined,
+                    currentOfficer ? currentOfficer.accuracy_meters : 4.0
+                );
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 6000 }
+        );
+    } else {
+        submitAcceptCasePost(
+            alertId,
+            currentOfficer ? currentOfficer.latitude : undefined,
+            currentOfficer ? currentOfficer.longitude : undefined,
+            currentOfficer ? currentOfficer.accuracy_meters : 4.0
+        );
+    }
 }
 
 function checkForNewEmergencies(alerts) {

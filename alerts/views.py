@@ -35,10 +35,12 @@ def compass_bearing(lat1, lon1, lat2, lon2):
 
 
 def is_within_kimberley(lat, lng):
-    """Verifies coordinates fall within the Kimberley / Sol Plaatje University operational sector."""
+    """Validates real-world WGS84 GPS coordinates from browser/device hardware telemetry."""
     try:
         lat_f, lng_f = float(lat), float(lng)
-        return -28.780 <= lat_f <= -28.705 and 24.725 <= lng_f <= 24.805
+        if math.isnan(lat_f) or math.isnan(lng_f):
+            return False
+        return -90.0 <= lat_f <= 90.0 and -180.0 <= lng_f <= 180.0 and not (lat_f == 0.0 and lng_f == 0.0)
     except (TypeError, ValueError):
         return False
 
@@ -48,8 +50,8 @@ _ROUTE_CACHE = {}
 
 def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
     """
-    Computes the real Kimberley street driving route between two coordinates using OSRM
-    with an in-memory cache and instant orthogonal campus-grid fallback.
+    Computes the real street driving route between two coordinates using OSRM
+    with an in-memory cache and instant orthogonal grid fallback.
     Returns {'coords': [[lat, lng], ...], 'distance_m': float, 'eta_seconds': int, 'route_summary': str}
     """
     la1, lo1, la2, lo2 = float(lat1), float(lon1), float(lat2), float(lon2)
@@ -99,7 +101,7 @@ def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
                         if name and (not streets or streets[-1] != name):
                             streets.append(name.replace('Street', 'St').replace('Road', 'Rd').replace('Avenue', 'Ave'))
 
-                summary = ' → '.join(streets[:4]) if streets else 'Kimberley Campus Arterial Route'
+                summary = ' → '.join(streets[:4]) if streets else 'Direct Street Route'
                 res = {
                     'coords': leaflet_coords,
                     'distance_m': road_dist,
@@ -113,7 +115,7 @@ def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
     except Exception:
         pass
 
-    # Fallback campus street-grid L-route if offline
+    # Fallback street-grid L-route if offline
     mid_lat = (la1 + la2) / 2.0
     fallback_coords = [[la1, lo1], [mid_lat, lo1], [mid_lat, lo2], [la2, lo2]]
     road_dist = round(direct_dist * 1.25, 1)
@@ -121,7 +123,7 @@ def fetch_kimberley_street_route(lat1, lon1, lat2, lon2):
         'coords': fallback_coords,
         'distance_m': road_dist,
         'eta_seconds': max(10, int(round(road_dist / 9.5))),
-        'route_summary': 'Campus Perimeter Road',
+        'route_summary': 'Direct Street Approach',
     }
     _ROUTE_CACHE[cache_key] = res
     return res
@@ -155,23 +157,12 @@ def home_view(request):
     return render(request, 'alerts/home.html')
 
 
-SPU_SECTOR_COORDS = {
-    "Main Library - 2nd Floor Study Area": (-28.741950, 24.764850),
-    "Science Block B - Computer Labs": (-28.741200, 24.765650),
-    "East Student Residence - Block C": (-28.743400, 24.768200),
-    "Central Administration Building": (-28.742350, 24.764100),
-    "University Sports Grounds & Pavilion": (-28.745800, 24.766900),
-    "Campus Gate 1 (Main Entrance)": (-28.739850, 24.762950),
-    "South Campus Walkway / Parking Area": (-28.746900, 24.764400),
-}
-
-
 @login_required
 @csrf_protect
 def trigger_alert_api(request):
     """
     API endpoint invoked after 3-second countdown window concludes.
-    Creates EmergencyAlert, Location (1:1), PanicDevice linkage, and triggers Notification.
+    Creates EmergencyAlert, Location (1:1) using the user's real GPS coordinates, PanicDevice linkage, and triggers Notification.
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'POST request required'}, status=405)
@@ -182,25 +173,20 @@ def trigger_alert_api(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     alert_type = data.get('alert_type', EmergencyAlert.TYPE_STANDARD)
-    lat_val = data.get('latitude', -28.742050)
-    lng_val = data.get('longitude', 24.765100)
-    accuracy_val = data.get('accuracy', 10.0)
-    description = data.get('description', 'Main Campus Area').strip()
+    lat_val = data.get('latitude')
+    lng_val = data.get('longitude')
+    accuracy_val = data.get('accuracy')
+    description = data.get('description', 'Live GPS Location').strip()
 
     try:
         lat_f = float(lat_val)
         lng_f = float(lng_val)
         acc_f = float(accuracy_val) if accuracy_val is not None else 10.0
     except (TypeError, ValueError):
-        lat_f, lng_f, acc_f = -28.741950, 24.764850, 4.5
+        return JsonResponse({'error': 'Valid real GPS coordinates are required.'}, status=400)
 
-    # Reject coarse ISP IP-based geolocation or out-of-Kimberley coordinates in favor of exact SPU building beacon
-    if not is_within_kimberley(lat_f, lng_f) or acc_f > 150.0:
-        if description in SPU_SECTOR_COORDS:
-            lat_f, lng_f = SPU_SECTOR_COORDS[description]
-        else:
-            lat_f, lng_f = -28.741950, 24.764850
-        acc_f = 4.0
+    if not is_within_kimberley(lat_f, lng_f):
+        return JsonResponse({'error': 'Invalid GPS coordinates received from device.'}, status=400)
 
     # Rate limiting check: user cannot spam more than 3 active alerts within 5 minutes
     recent_alerts = EmergencyAlert.objects.filter(
@@ -605,12 +591,12 @@ def api_update_officer_location(request):
 
 def kimberley_map_tile(request, z, x, y):
     """
-    Serves self-hosted Kimberley Campus GIS map tiles directly from static/tiles/kimberley/{z}/{x}/{y}.png.
-    If a higher zoom tile (z=17..18) within Kimberley is requested, fetches and caches it server-side
-    so the browser never encounters third-party API key prompts or 403 Referer blocks.
+    Serves self-hosted GIS map tiles directly from static/tiles/kimberley/{z}/{x}/{y}.png.
+    If a tile outside the pre-cached bundle is requested for a real-world GPS location,
+    fetches and caches it server-side so the browser never encounters 403 or API key blocks.
     """
-    if z < 13 or z > 19:
-        return HttpResponseNotFound("Zoom level outside Kimberley campus bounds.")
+    if z < 1 or z > 19:
+        return HttpResponseNotFound("Zoom level outside valid bounds.")
 
     local_tile = Path(settings.BASE_DIR) / 'static' / 'tiles' / 'kimberley' / str(z) / str(x) / f"{y}.png"
     if local_tile.exists():
