@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-p2$z!ie^zcfgv=v-a^@+(2zxhoqx84g^0zi6)24jvcubqjtipx')
 
-DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = [
     'youthalliance.co.za',
@@ -31,6 +31,9 @@ ALLOWED_HOSTS = [
     '.onrender.com',
     'localhost',
     '127.0.0.1',
+    'testserver',
+    '0.0.0.0',
+    '10.0.2.2',
 ]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -41,6 +44,9 @@ if RENDER_EXTERNAL_HOSTNAME:
 ADDITIONAL_HOSTS = os.environ.get('ADDITIONAL_HOSTS', '')
 if ADDITIONAL_HOSTS:
     ALLOWED_HOSTS.extend([h.strip() for h in ADDITIONAL_HOSTS.split(',') if h.strip()])
+
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -166,11 +172,15 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'role_redirect'
 LOGOUT_REDIRECT_URL = 'login'
 
-# CSRF Trusted Origins for Custom Domain & Render
+# CSRF Trusted Origins for Custom Domain, Render & Local Evaluation
 CSRF_TRUSTED_ORIGINS = [
     'https://youthalliance.co.za',
     'https://www.youthalliance.co.za',
     'https://*.onrender.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://0.0.0.0:8000',
+    'http://10.0.2.2:8000',
 ]
 
 # Referrer Policy: Required so cross-origin GIS map tile requests (Leaflet/OSM/CARTO)

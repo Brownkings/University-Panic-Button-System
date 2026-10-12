@@ -15,6 +15,12 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 /media/
+staticfiles/
+
+# Android build artifacts
+android_student_portal/build/
+*.idsig
+/UPBS-Student-Portal.apk
 
 # Office temp locks
 .~lock.*
@@ -23,3 +29,5 @@ db.sqlite3-journal
 # IDEs
 .vscode/
 .idea/
+.env
+
