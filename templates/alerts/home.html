@@ -40,15 +40,38 @@
         </div>
     </div>
 
-    <!-- Campus Sector / Landmark Selector -->
-    <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem; border: 1px solid rgba(148, 163, 184, 0.16);">
-        <label for="locationDescription" class="form-label" style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 0.5rem;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa;" aria-hidden="true">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            Detected Street Address / Location (Live GPS Reverse-Geocoded)
-        </label>
+    <!-- Central High-Contrast SOS Actuator Terminal -->
+    <div class="panic-container" style="padding: 1.5rem 1rem 1.25rem 1rem;">
+        <div class="panic-pulse-wrapper">
+            <div class="pulse-wave"></div>
+            <div class="pulse-wave pulse-wave-delayed"></div>
+            <button id="panicBtn" class="btn-panic" aria-label="Trigger Campus Emergency Alert">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.1rem;" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>SOS PANIC</span>
+                <span class="subtext">PRESS TO DISPATCH</span>
+            </button>
+        </div>
+        <p class="panic-caption" style="color: var(--text-muted); font-size: 0.84rem; max-width: 420px; margin: 0.65rem auto 0 auto; line-height: 1.45;">
+            Initiates priority CAD telemetry transmission to Campus Security Operations. Protected by a <strong>3-second abort interlock</strong>.
+        </p>
+    </div>
+
+    <!-- Campus Sector / Landmark Selector & Live Dark-Mode GPS Radar -->
+    <div class="card" style="padding: 1rem 1.15rem; margin-bottom: 1.25rem; border: 1px solid rgba(148, 163, 184, 0.16);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.45rem;">
+            <label for="locationDescription" class="form-label" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa;" aria-hidden="true">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Detected Street Address (Live GPS)
+            </label>
+            <span class="mono" style="font-size: 0.68rem; color: #34d399; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.28); padding: 0.1rem 0.45rem; border-radius: 999px;">DARK GIS LIVE</span>
+        </div>
         <select id="locationDescription" class="form-control">
             <option id="liveGpsAddressOption" value="Auto-Detect Real GPS Address" selected>Acquiring Real Street Address from GPS...</option>
             <option value="Main Library - 2nd Floor Study Area">Main Library - 2nd Floor Study Area</option>
@@ -66,27 +89,7 @@
                 filter: invert(100%) hue-rotate(185deg) brightness(92%) contrast(94%) saturate(85%);
             }
         </style>
-        <div id="studentGpsMap" style="height: 210px; width: 100%; margin-top: 0.85rem; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.2); background: #0b111d; overflow: hidden;"></div>
-    </div>
-
-    <!-- Central High-Contrast SOS Actuator Terminal -->
-    <div class="panic-container" style="padding: 2.25rem 1rem;">
-        <div class="panic-pulse-wrapper">
-            <div class="pulse-wave"></div>
-            <div class="pulse-wave pulse-wave-delayed"></div>
-            <button id="panicBtn" class="btn-panic" aria-label="Trigger Campus Emergency Alert">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.15rem;" aria-hidden="true">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <span>SOS PANIC</span>
-                <span class="subtext">PRESS TO DISPATCH</span>
-            </button>
-        </div>
-        <p style="color: var(--text-muted); font-size: 0.875rem; max-width: 440px; margin: 1rem auto 0 auto; line-height: 1.5;">
-            Initiates priority CAD telemetry transmission to Campus Security Operations. Protected by a <strong>3-second abort interlock</strong> to prevent accidental activation.
-        </p>
+        <div id="studentGpsMap" style="height: 190px; width: 100%; margin-top: 0.75rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.2); background: #0b111d; overflow: hidden;"></div>
     </div>
 
     <!-- 3-Second Abort Interlock Modal -->
