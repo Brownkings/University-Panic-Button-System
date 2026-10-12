@@ -51,27 +51,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let realOfficerHardwareCoords = null;
 
+function syncViewportHeight() {
+    const navEl = document.querySelector('.navbar');
+    const viewportEl = document.getElementById('mdtViewport');
+    if (navEl && viewportEl) {
+        const navHeight = Math.max(navEl.offsetHeight || 61, 48);
+        viewportEl.style.top = `${navHeight}px`;
+        viewportEl.style.height = `calc(100vh - ${navHeight}px)`;
+    }
+    if (map) {
+        map.invalidateSize();
+    }
+}
+
 function initCampusMap() {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
+
+    syncViewportHeight();
 
     map = L.map('map', {
         center: KIMBERLEY_CENTER,
         zoom: 16,
         minZoom: 4,
         maxZoom: 18,
-        zoomControl: false
+        zoomControl: false,
+        preferCanvas: true
     });
 
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
-    const kimberleyStreetLayer = L.tileLayer('/alerts/tiles/kimberley/{z}/{x}/{y}.png', {
+    // Direct global CDN street tiles (renders in tactical dark mode via #map .leaflet-tile-pane CSS filter)
+    const primaryStreetLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         minZoom: 4,
         maxZoom: 18,
+        crossOrigin: true,
         attribution: 'Tactical Dark GIS | &copy; OpenStreetMap contributors'
     });
 
-    kimberleyStreetLayer.addTo(map);
+    primaryStreetLayer.on('tileerror', (errEvt) => {
+        const tile = errEvt.tile;
+        if (!tile) return;
+        const coords = errEvt.coords;
+        if (!tile.dataset.fallbackStage) {
+            tile.dataset.fallbackStage = '1';
+            tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${coords.z}/${coords.x}/${coords.y}.png`;
+        } else if (tile.dataset.fallbackStage === '1') {
+            tile.dataset.fallbackStage = '2';
+            tile.src = `/alerts/tiles/kimberley/${coords.z}/${coords.x}/${coords.y}.png`;
+        }
+    });
+
+    primaryStreetLayer.addTo(map);
     vectorLayerGroup = L.layerGroup().addTo(map);
 
     const topLeftCorner = document.querySelector('.leaflet-top.leaflet-left');
@@ -80,12 +111,18 @@ function initCampusMap() {
         topLeftCorner.style.marginLeft = '4px';
     }
 
-    setTimeout(() => {
-        if (map) map.invalidateSize();
-    }, 100);
-    window.addEventListener('resize', () => {
-        if (map) map.invalidateSize();
+    [100, 350, 800, 1500].forEach(delay => {
+        setTimeout(() => syncViewportHeight(), delay);
     });
+    window.addEventListener('load', () => syncViewportHeight());
+    window.addEventListener('resize', () => syncViewportHeight());
+
+    if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => {
+            if (map) map.invalidateSize();
+        });
+        ro.observe(mapEl);
+    }
 }
 
 function resolveOfficerRealCoords(callback, onError) {
@@ -216,6 +253,7 @@ function broadcastOfficerLocation(lat, lng, accuracy, adjustMapAfter) {
 
 function fitAllTacticalUnits() {
     if (!map) return;
+    map.invalidateSize();
     const points = [];
     latestAlerts.forEach(a => {
         points.push([a.latitude, a.longitude]);
@@ -232,18 +270,18 @@ function fitAllTacticalUnits() {
             paddingTopLeft: [75, 95],
             paddingBottomRight: [drawerCollapsed ? 60 : 435, 80],
             maxZoom: 17,
-            animate: true,
-            duration: 0.9
+            animate: false
         });
     } else if (points.length === 1) {
-        map.flyTo(points[0], 16, { animate: true, duration: 0.8 });
+        map.setView(points[0], 16, { animate: false });
     } else {
-        map.flyTo(KIMBERLEY_CENTER, 16, { animate: true, duration: 0.8 });
+        map.setView(KIMBERLEY_CENTER, 16, { animate: false });
     }
 }
 
 function fitAlertAndResponders(alertObj) {
     if (!map || !alertObj) return;
+    map.invalidateSize();
     focusedAlertId = alertObj.id;
     const points = [[alertObj.latitude, alertObj.longitude]];
 
@@ -265,8 +303,7 @@ function fitAlertAndResponders(alertObj) {
         paddingTopLeft: [80, 100],
         paddingBottomRight: [drawerCollapsed ? 70 : 435, 85],
         maxZoom: 17,
-        animate: true,
-        duration: 0.95
+        animate: false
     });
 }
 

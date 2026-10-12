@@ -59,6 +59,14 @@
             <option value="Campus Gate 1 (Main Entrance)">Campus Gate 1 (Main Entrance)</option>
             <option value="South Campus Walkway / Parking Area">South Campus Walkway / Parking Area</option>
         </select>
+
+        <!-- Live Tactical Dark-Mode GPS Radar Preview -->
+        <style>
+            #studentGpsMap .leaflet-tile-pane {
+                filter: invert(100%) hue-rotate(185deg) brightness(92%) contrast(94%) saturate(85%);
+            }
+        </style>
+        <div id="studentGpsMap" style="height: 210px; width: 100%; margin-top: 0.85rem; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.2); background: #0b111d; overflow: hidden;"></div>
     </div>
 
     <!-- Central High-Contrast SOS Actuator Terminal -->
@@ -86,7 +94,7 @@
         <div class="countdown-box" style="border: 1px solid rgba(239, 68, 68, 0.5);">
             <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: rgba(239, 68, 68, 0.14); color: #f87171; margin-bottom: 0.75rem; border: 1px solid rgba(239, 68, 68, 0.35);">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+                    <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></path>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
@@ -158,5 +166,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="/static/js/panic.js?v=20261010-realgps2"></script>
+<script src="/static/js/panic.js?v=20261013-fasttiles1"></script>
 {% endblock %}

@@ -64,11 +64,93 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(() => {});
     }
 
+    let studentMap = null;
+    let studentMarker = null;
+    let studentAccuracyCircle = null;
+
+    function initStudentGpsMap() {
+        const mapEl = document.getElementById('studentGpsMap');
+        if (!mapEl || typeof L === 'undefined') return;
+
+        studentMap = L.map('studentGpsMap', {
+            center: [-26.2041, 28.0473],
+            zoom: 15,
+            minZoom: 4,
+            maxZoom: 18,
+            zoomControl: true,
+            attributionControl: false
+        });
+
+        const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            minZoom: 4,
+            maxZoom: 18,
+            crossOrigin: true
+        });
+
+        tileLayer.on('tileerror', (errEvt) => {
+            const tile = errEvt.tile;
+            const coords = errEvt.coords;
+            if (tile && !tile.dataset.fallback) {
+                tile.dataset.fallback = '1';
+                tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${coords.z}/${coords.x}/${coords.y}.png`;
+            }
+        });
+
+        tileLayer.addTo(studentMap);
+
+        [100, 400, 900].forEach(ms => setTimeout(() => {
+            if (studentMap) studentMap.invalidateSize();
+        }, ms));
+
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => {
+                if (studentMap) studentMap.invalidateSize();
+            }).observe(mapEl);
+        }
+    }
+
+    function updateStudentMapPin(lat, lng, acc) {
+        if (!studentMap) initStudentGpsMap();
+        if (!studentMap) return;
+
+        studentMap.invalidateSize();
+        const latLng = [lat, lng];
+        if (!studentMarker) {
+            studentAccuracyCircle = L.circle(latLng, {
+                radius: Math.max(acc || 15, 12),
+                color: '#ef4444',
+                weight: 1.5,
+                fillColor: '#ef4444',
+                fillOpacity: 0.14
+            }).addTo(studentMap);
+
+            studentMarker = L.circleMarker(latLng, {
+                radius: 8,
+                color: '#ffffff',
+                weight: 2.5,
+                fillColor: '#ef4444',
+                fillOpacity: 1.0
+            }).addTo(studentMap).bindPopup('<strong>Your Live SOS Location</strong>');
+            studentMap.setView(latLng, 16, { animate: false });
+        } else {
+            studentMarker.setLatLng(latLng);
+            if (studentAccuracyCircle) {
+                studentAccuracyCircle.setLatLng(latLng);
+                studentAccuracyCircle.setRadius(Math.max(acc || 15, 12));
+            }
+            studentMap.setView(latLng, studentMap.getZoom() || 16, { animate: false });
+        }
+    }
+
+    initStudentGpsMap();
+
     function applyRealCoordinates(lat, lng, acc, labelText, preResolvedAddress) {
         userCoords.latitude = Number(lat);
         userCoords.longitude = Number(lng);
         userCoords.accuracy = Number(acc || 10.0);
         hasRealGpsFix = true;
+
+        updateStudentMapPin(userCoords.latitude, userCoords.longitude, userCoords.accuracy);
 
         if (preResolvedAddress) {
             setLiveAddressOption(preResolvedAddress);
