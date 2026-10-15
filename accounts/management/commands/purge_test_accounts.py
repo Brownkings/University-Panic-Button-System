@@ -15,16 +15,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Starting test account purge...")
 
-        # Identify all non-admin test users
-        # Exclude superusers, admin role users, and master admin email/username
-        test_users = User.objects.exclude(
+        # Explicit legacy demo usernames only — never delete newly registered members
+        DEMO_USERNAMES = ['student1', 'student2', 'student_dummy', 'officer1', 'officer2', 'officer3', 'staff1']
+        test_users = User.objects.filter(
+            username__in=DEMO_USERNAMES
+        ).exclude(
             username__iexact='admin'
         ).exclude(
             email__iexact='mnnhlnkosi@gmail.com'
         ).exclude(
             is_superuser=True
-        ).filter(
-            role__role_name__in=[Role.STUDENT, Role.SECURITY, Role.STAFF]
         )
 
         count = test_users.count()

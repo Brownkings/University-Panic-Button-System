@@ -224,6 +224,31 @@ class AccountsEmailFlowTests(TestCase):
         self.assertRedirects(response, reverse('user_management'))
         mock_send_email.assert_called_once_with(self.user, request=mock_send_email.call_args[1]['request'])
 
+    def test_admin_verify_user_view(self):
+        role_admin = Role.objects.create(role_name=Role.ADMIN, description="Admin Role 3")
+        admin = User.objects.create_user(
+            username="admin_test3",
+            full_name="Campus Administrator 3",
+            institutional_id="ADM997",
+            email="admin3@campus.ac.za",
+            contact_number="+27820000997",
+            role=role_admin,
+            password="adminpassword123",
+            is_staff=True,
+            is_verified=True
+        )
+        self.client.login(username="admin_test3", password="adminpassword123")
+
+        self.assertFalse(self.user.is_verified)
+        response = self.client.post(reverse('admin_verify_user', kwargs={'user_id': self.user.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('user_management'))
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_verified)
+        self.assertTrue(self.user.is_active)
+        self.assertIsNone(self.user.otp_code)
+
     @patch('accounts.management.commands.setup_master_admin.send_account_setup_email')
     def test_setup_master_admin_command(self, mock_send_email):
         from django.core.management import call_command

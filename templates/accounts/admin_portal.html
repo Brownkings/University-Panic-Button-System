@@ -1093,17 +1093,38 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                                <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+                                    {% if not u.is_verified and u.activation_url %}
+                                        <button type="button" class="copy-link-btn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);" onclick="copyUserActivationLink('{{ u.activation_url|escapejs }}', '{{ u.full_name|escapejs }}')" title="Copy direct account activation URL">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                            <span>Copy Link</span>
+                                        </button>
+
+                                        <form method="POST" action="{% url 'admin_verify_user' u.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="admin_portal">
+                                            <button type="submit" class="copy-link-btn" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4);" title="Instantly verify & activate account" onclick="return confirm('Immediately activate and verify account for {{ u.full_name }}?')">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                                <span>Verify Now</span>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
                                     {% if u.email %}
                                         <form method="POST" action="{% url 'admin_send_reset_email' u.id %}" style="display: inline;">
                                             {% csrf_token %}
                                             <input type="hidden" name="return_url" value="admin_portal">
-                                            <button type="submit" class="copy-link-btn" title="Send Password Reset via Resend" onclick="return confirm('Dispatch password reset link to {{ u.email }}?')">
+                                            <button type="submit" class="copy-link-btn" title="Send Setup / Password Reset via Resend" onclick="return confirm('Dispatch {% if not u.is_verified %}setup & activation{% else %}password reset{% endif %} link to {{ u.email }}?')">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <line x1="22" y1="2" x2="11" y2="13"></line>
                                                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                                                 </svg>
-                                                <span>Reset Email</span>
+                                                <span>{% if not u.is_verified %}Setup Email{% else %}Reset Email{% endif %}</span>
                                             </button>
                                         </form>
                                     {% endif %}
@@ -1167,6 +1188,22 @@ function copyPortalLink() {
     }).catch(function(err) {
         prompt('Copy Admin Portal URL:', fullUrl);
     });
+}
+
+function copyUserActivationLink(url, name) {
+    if (!url) {
+        alert('No activation link available for ' + name);
+        return;
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(function() {
+            alert('Activation link for ' + name + ' copied to clipboard!\n\nDirect link:\n' + url + '\n\nShare this with the user so they can set up their password and activate their account.');
+        }).catch(function() {
+            prompt('Copy activation link for ' + name + ':', url);
+        });
+    } else {
+        prompt('Copy activation link for ' + name + ':', url);
+    }
 }
 
 function triggerKeepaliveProbe() {

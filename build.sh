@@ -14,8 +14,5 @@ python manage.py migrate
 echo "==> Initializing UPBS institutional roles..."
 python manage.py seed_upbs
 
-echo "==> Purging test accounts (leaving exclusively master administrator)..."
-python manage.py purge_test_accounts
-
 echo "==> Build complete successfully!"
 

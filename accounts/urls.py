@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/users/<int:user_id>/update-role/', views.update_user_role_view, name='update_user_role'),
     path('admin/users/<int:user_id>/toggle-status/', views.toggle_user_status_view, name='toggle_user_status'),
     path('admin/users/<int:user_id>/send-reset/', views.admin_send_reset_email_view, name='admin_send_reset_email'),
+    path('admin/users/<int:user_id>/verify/', views.admin_verify_user_view, name='admin_verify_user'),
 ]

@@ -111,6 +111,16 @@ def send_password_reset_email(user, request=None):
         return False
 
 
+def get_user_activation_url(user, request=None, base_url=None):
+    """
+    Generates the cryptographically secure 24-hour activation and password setup URL for a user.
+    """
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    setup_path = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+    return build_absolute_url(request, setup_path, base_url=base_url)
+
+
 def send_account_setup_email(user, request=None, base_url=None):
     """
     Sends an account activation and initial password setup email to a newly provisioned student,
@@ -120,10 +130,7 @@ def send_account_setup_email(user, request=None, base_url=None):
         logger.warning("User %s has no email address. Skipping account setup email.", user.institutional_id)
         return False
 
-    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-    setup_path = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
-    setup_url = build_absolute_url(request, setup_path, base_url=base_url)
+    setup_url = get_user_activation_url(user, request=request, base_url=base_url)
 
     subject = "UPBS Campus Safety — Set Up Your Account & Password"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'UPBS Campus Safety <onboarding@resend.dev>')
@@ -146,9 +153,10 @@ def send_account_setup_email(user, request=None, base_url=None):
             to=[user.email],
         )
         msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=False)
-        logger.info("Account setup email dispatched to %s for user %s", user.email, user.institutional_id)
-        return True
+        sent_count = msg.send(fail_silently=False)
+        delivered = bool(sent_count is None or (isinstance(sent_count, int) and sent_count > 0))
+        logger.info("Account setup email dispatched to %s for user %s (delivered: %s)", user.email, user.institutional_id, delivered)
+        return delivered
     except Exception as exc:
         logger.exception("Failed to send account setup email to %s: %s", user.email, exc)
         return False

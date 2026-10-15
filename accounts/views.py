@@ -12,7 +12,12 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import connection
 from django.db.models import Count, Avg, Q
 from .models import User, Role
-from .email_service import send_account_verification_email, send_password_reset_email, send_account_setup_email
+from .email_service import (
+    send_account_verification_email,
+    send_password_reset_email,
+    send_account_setup_email,
+    get_user_activation_url,
+)
 from alerts.models import EmergencyAlert
 from incidents.models import IncidentReport
 from feedback.models import Feedback, UsabilityMetric
@@ -312,7 +317,10 @@ def admin_portal_view(request):
     if role_filter:
         users_qs = users_qs.filter(role__role_name=role_filter)
 
-    users = users_qs.order_by('-date_joined', 'institutional_id')
+    users = list(users_qs.order_by('-date_joined', 'institutional_id'))
+    for u in users:
+        if not u.is_verified:
+            u.activation_url = get_user_activation_url(u, request=request)
 
     context = {
         'db_status': db_status,
@@ -362,7 +370,10 @@ def user_management_view(request):
         messages.error(request, "Access restricted to administrators.")
         return redirect('home')
 
-    users = User.objects.all().select_related('role').order_by('institutional_id')
+    users = list(User.objects.all().select_related('role').order_by('institutional_id'))
+    for u in users:
+        if not u.is_verified:
+            u.activation_url = get_user_activation_url(u, request=request)
     roles = Role.objects.all()
     return render(request, 'accounts/user_management.html', {
         'users': users,
@@ -466,17 +477,23 @@ def admin_create_user_view(request):
         new_user.set_password(initial_password)
         new_user.save()
 
+        # Generate direct activation link
+        activation_url = get_user_activation_url(new_user, request=request)
+
         # Any new student/user added by admin to the database must receive an email to set up passwords and activate their account
+        sent = False
         if new_user.email:
-            send_account_setup_email(new_user, request=request)
+            sent = send_account_setup_email(new_user, request=request)
+
+        if sent:
             messages.success(
                 request,
-                f"User {new_user.full_name} ({institutional_id}) provisioned successfully! An email has been dispatched to {new_user.email} via Resend to set up their password and activate their account."
+                f"User {new_user.full_name} ({institutional_id}) provisioned successfully! An activation email was dispatched to {new_user.email} via Resend."
             )
         else:
-            messages.success(
+            messages.warning(
                 request,
-                f"User {new_user.full_name} ({institutional_id}) provisioned with temporary password: {initial_password}"
+                f"User {new_user.full_name} ({institutional_id}) provisioned! Resend delivery to {new_user.email} could not be confirmed. Manual activation link: {activation_url}"
             )
 
         return redirect(target_dest)
@@ -487,7 +504,8 @@ def admin_create_user_view(request):
 @login_required
 def admin_send_reset_email_view(request, user_id):
     """
-    Enables administrators to send an activation / password setup link to any registered user via Resend.
+    Enables administrators to send an activation / password setup link to any registered user via Resend,
+    with direct activation link fallback if delivery is restricted.
     """
     if not request.user.is_admin_user:
         messages.error(request, "Access restricted to administrators.")
@@ -496,17 +514,60 @@ def admin_send_reset_email_view(request, user_id):
     return_url = request.POST.get('return_url') or request.GET.get('return_url')
     target_dest = return_url if return_url in ('admin_portal', 'user_management') else 'user_management'
 
-    target_user = get_object_or_404(User, id=user_id)
+    target_user = User.objects.filter(id=user_id).first()
+    if not target_user:
+        messages.error(request, f"User #{user_id} was not found in the directory. The account may have been removed or re-indexed.")
+        return redirect(target_dest)
+
+    activation_url = get_user_activation_url(target_user, request=request)
+
     if target_user.email:
         if not target_user.is_verified:
-            send_account_setup_email(target_user, request=request)
-            messages.success(request, f"Account setup & activation email dispatched to {target_user.email} via Resend.")
+            sent = send_account_setup_email(target_user, request=request)
+            if sent:
+                messages.success(request, f"Account setup & activation email dispatched to {target_user.email} via Resend.")
+            else:
+                messages.warning(
+                    request,
+                    f"Email dispatched to {target_user.email}, but Resend delivery could not be confirmed. Manual activation link: {activation_url}"
+                )
         else:
-            send_password_reset_email(target_user, request=request)
-            messages.success(request, f"Password reset email dispatched to {target_user.email} via Resend.")
+            sent = send_password_reset_email(target_user, request=request)
+            if sent:
+                messages.success(request, f"Password reset email dispatched to {target_user.email} via Resend.")
+            else:
+                messages.warning(
+                    request,
+                    f"Password reset dispatched to {target_user.email}, but Resend delivery could not be confirmed. Manual reset link: {activation_url}"
+                )
     else:
-        messages.error(request, f"User {target_user.full_name} has no institutional email address on file.")
+        messages.error(request, f"User {target_user.full_name} has no institutional email address on file. Direct activation link: {activation_url}")
 
+    return redirect(target_dest)
+
+
+@login_required
+def admin_verify_user_view(request, user_id):
+    """
+    Enables administrators to immediately verify and activate an account on the spot.
+    """
+    if not request.user.is_admin_user:
+        messages.error(request, "Access restricted to administrators.")
+        return redirect('home')
+
+    return_url = request.POST.get('return_url') or request.GET.get('return_url')
+    target_dest = return_url if return_url in ('admin_portal', 'user_management') else 'user_management'
+
+    target_user = User.objects.filter(id=user_id).first()
+    if not target_user:
+        messages.error(request, f"User #{user_id} was not found.")
+        return redirect(target_dest)
+
+    target_user.is_verified = True
+    target_user.is_active = True
+    target_user.otp_code = None
+    target_user.save()
+    messages.success(request, f"Account for {target_user.full_name} ({target_user.institutional_id}) has been immediately verified and activated!")
     return redirect(target_dest)
 
 
