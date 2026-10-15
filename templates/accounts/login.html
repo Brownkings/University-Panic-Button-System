@@ -233,7 +233,7 @@
             <div class="form-group">
                 <div class="auth-field-header">
                     <label class="form-label" for="password" style="margin-bottom: 0;">Security Password</label>
-                    <span class="auth-field-hint">Required</span>
+                    <a href="{% url 'password_reset' %}" class="auth-link" style="font-size: 0.78rem;">Forgot password?</a>
                 </div>
                 <input type="password" id="password" name="password" class="form-control" placeholder="Enter institutional password" required>
             </div>
@@ -248,15 +248,10 @@
             </button>
         </form>
 
-        <div class="auth-footer-bar">
-            <span>New campus member?</span>
-            <a href="{% url 'register' %}" class="auth-link">
-                <span>Enroll Institutional Identity</span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-            </a>
+        <div class="auth-footer-bar" style="justify-content: center; text-align: center;">
+            <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                Student &amp; staff accounts are provisioned by Campus Administration. Contact campus safety command if you require access.
+            </span>
         </div>
     </div>
 

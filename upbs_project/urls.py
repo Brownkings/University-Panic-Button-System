@@ -8,7 +8,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
 
+from .health import health_check_view
+
 urlpatterns = [
+    path('healthz/', health_check_view, name='health_check'),
+    path('health/', health_check_view, name='health_check_alt'),
+    path('api/ping/', health_check_view, name='api_ping'),
     path('', lambda req: redirect('home'), name='root_redirect'),
     path('', include('accounts.urls')),
     path('', include('alerts.urls')),

@@ -17,6 +17,19 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load local environment variables from .env file if present
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    with open(_env_path, 'r', encoding='utf-8') as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _k, _v = _line.split('=', 1)
+                _k = _k.strip()
+                _v = _v.strip().strip("'\"")
+                if _k and _k not in os.environ:
+                    os.environ[_k] = _v
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -31,6 +44,7 @@ ALLOWED_HOSTS = [
     '.onrender.com',
     'localhost',
     '127.0.0.1',
+    '192.168.240.1',
     'testserver',
     '0.0.0.0',
     '10.0.2.2',
@@ -196,5 +210,23 @@ if not DEBUG and os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('tru
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Resend Transactional Email Configuration
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', '')
+if RESEND_FROM_EMAIL:
+    DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
+else:
+    DEFAULT_FROM_EMAIL = 'UPBS Campus Safety <onboarding@resend.dev>'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# Use ResendEmailBackend if RESEND_API_KEY is present; fallback to console in local dev when key is absent
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'accounts.email_backend.ResendEmailBackend' if RESEND_API_KEY else 'django.core.mail.backends.console.EmailBackend'
+)
+
+# Password reset token expiry (24 hours in seconds)
+PASSWORD_RESET_TIMEOUT = 86400
 
 

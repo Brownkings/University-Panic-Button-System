@@ -25,8 +25,8 @@ echo "==> 2. Linking manifest and resources with aapt2..."
     --java "$OUT_DIR/gen" \
     --min-sdk-version 24 \
     --target-sdk-version 34 \
-    --version-code 1 \
-    --version-name "1.0.0" \
+    --version-code 2 \
+    --version-name "1.0.1" \
     "$OUT_DIR/res/resources.zip"
 
 echo "==> 3. Compiling Java source files with javac..."

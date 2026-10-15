@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UPBS Final Live Assessment Master Preparation Guide</title>
+<style>
+    @page {
+        size: A4;
+        margin: 14mm 12mm 14mm 12mm;
+        @bottom-right {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 8pt;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #64748b;
+            font-weight: 600;
+        }
+        @bottom-left {
+            content: "NPRT630 Final Assessment • Group: Techno Warriors • University Panic Button System";
+            font-size: 8pt;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #64748b;
+        }
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #1e293b;
+        background-color: #ffffff;
+        line-height: 1.42;
+        font-size: 9pt;
+        margin: 0;
+        padding: 0;
+    }
+
+    .page {
+        page-break-after: always;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .page:last-child {
+        page-break-after: avoid;
+    }
+
+    /* COVER & HERO */
+    .cover-hero {
+        padding: 14px 18px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
+        color: #f8fafc;
+        margin-bottom: 8px;
+        border: 1px solid #1e293b;
+    }
+
+    .cover-badge {
+        display: inline-block;
+        background: #dc2626;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 7.5pt;
+        letter-spacing: 0.08em;
+        padding: 2px 7px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .cover-hero h1 {
+        font-size: 17pt;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 3px 0;
+        letter-spacing: -0.02em;
+    }
+
+    .cover-hero h2 {
+        font-size: 10pt;
+        font-weight: 600;
+        color: #94a3b8;
+        margin: 0 0 10px 0;
+    }
+
+    .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px 14px;
+        border-top: 1px solid #334155;
+        padding-top: 8px;
+        font-size: 8.2pt;
+    }
+
+    .meta-item {
+        color: #cbd5e1;
+    }
+
+    .meta-item strong {
+        color: #ffffff;
+    }
+
+    .team-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-size: 7.8pt;
+    }
+
+    .team-table th, .team-table td {
+        padding: 4px 6px;
+        text-align: left;
+        border-bottom: 1px solid #334155;
+    }
+
+    .team-table th {
+        background-color: #1e293b;
+        color: #38bdf8;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 7.2pt;
+        letter-spacing: 0.05em;
+    }
+
+    .team-table td {
+        color: #f1f5f9;
+    }
+
+    /* HEADINGS */
+    h2.section-header {
+        font-size: 11.5pt;
+        font-weight: 800;
+        color: #0f172a;
+        border-bottom: 2px solid #dc2626;
+        padding-bottom: 3px;
+        margin-top: 10px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    h3.sub-header {
+        font-size: 9.5pt;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 8px;
+        margin-bottom: 3px;
+    }
+
+    p {
+        margin: 0 0 5px 0;
+    }
+
+    /* ALERTS */
+    .alert-box {
+        border-radius: 6px;
+        padding: 7px 10px;
+        margin: 6px 0;
+        font-size: 8.2pt;
+        line-height: 1.38;
+    }
+
+    .alert-important {
+        background-color: #fef2f2;
+        border-left: 4px solid #dc2626;
+        color: #991b1b;
+    }
+
+    .alert-tip {
+        background-color: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        color: #166534;
+    }
+
+    .alert-info {
+        background-color: #f0f9ff;
+        border-left: 4px solid #0284c7;
+        color: #075985;
+    }
+
+    .alert-warning {
+        background-color: #fffbeb;
+        border-left: 4px solid #d97706;
+        color: #92400e;
+    }
+
+    /* TABLES */
+    table.data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0 12px 0;
+        font-size: 8.2pt;
+    }
+
+    table.data-table th, table.data-table td {
+        border: 1px solid #cbd5e1;
+        padding: 5px 7px;
+        text-align: left;
+    }
+
+    table.data-table th {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    table.data-table tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    /* BADGES */
+    .badge {
+        display: inline-block;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-size: 7.2pt;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-red { background: #fee2e2; color: #b91c1c; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-amber { background: #fef3c7; color: #b45309; }
+
+    /* QA CARDS */
+    .qa-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        background-color: #ffffff;
+    }
+
+    .qa-q {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 8.8pt;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+
+    .qa-target {
+        font-size: 7.2pt;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 3px;
+        background-color: #e2e8f0;
+        color: #334155;
+        white-space: nowrap;
+        margin-left: 8px;
+    }
+
+    .qa-a {
+        color: #334155;
+        font-size: 8.4pt;
+        line-height: 1.38;
+    }
+
+    .qa-a strong {
+        color: #0f172a;
+    }
+
+    /* MEMBER PROFILES */
+    .member-profile {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        background: #f8fafc;
+    }
+
+    .member-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+    }
+
+    .member-name {
+        font-size: 10pt;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .member-role {
+        font-size: 8pt;
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    .pitch-box {
+        background-color: #eff6ff;
+        border-left: 3px solid #3b82f6;
+        padding: 5px 8px;
+        margin: 6px 0;
+        font-style: italic;
+        font-size: 8.2pt;
+        color: #1e40af;
+    }
+
+    /* TIMELINE GRID */
+    .timeline-row {
+        display: grid;
+        grid-template-columns: 85px 1fr;
+        gap: 6px 10px;
+        margin-bottom: 8px;
+        font-size: 8.3pt;
+        align-items: start;
+    }
+
+    .timeline-time {
+        font-weight: 800;
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 4px 6px;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 7.8pt;
+    }
+
+    .timeline-body {
+        padding-top: 1px;
+    }
+
+    .code-inline {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        background-color: #f1f5f9;
+        color: #b91c1c;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-size: 7.8pt;
+    }
+</style>
+</head>
+<body>
+
+<!-- ================= PAGE 1 ================= -->
+<div class="page">
+    <div class="cover-hero">
+        <div class="cover-badge">FINAL LIVE ASSESSMENT DEFENSE MANUAL</div>
+        <h1>University Panic Button System (UPBS)</h1>
+        <h2>NPRT630 Final Year Project • Live Assessment & Oral Examination Guide</h2>
+        
+        <div class="meta-grid">
+            <div class="meta-item"><strong>Date:</strong> Thursday, 15 October 2026 (Starts 08:30)</div>
+            <div class="meta-item"><strong>Venue:</strong> Boardroom, C006, 3rd Floor</div>
+            <div class="meta-item"><strong>Duration:</strong> Exactly 15 Minutes per Group</div>
+            <div class="meta-item"><strong>Lead Examiner:</strong> Dr. Silas</div>
+            <div class="meta-item"><strong>Session Format:</strong> ~5 min Live Verification + ~10 min Technical Q&A</div>
+            <div class="meta-item"><strong>Group Name:</strong> Techno Warriors</div>
+        </div>
+
+        <table class="team-table">
+            <thead>
+                <tr>
+                    <th>Member Name</th>
+                    <th>Student ID</th>
+                    <th>Individual Role & Core Specialization</th>
+                    <th>Primary Architectural Ownership</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Brown Nkosi</strong></td>
+                    <td>202474004</td>
+                    <td>Team Leader • Backend Architect & Security Lead</td>
+                    <td>Django Framework, RBAC, REST APIs, Supabase & Render Deployment</td>
+                </tr>
+                <tr>
+                    <td><strong>Palesa Hope Ntsane</strong></td>
+                    <td>202437528</td>
+                    <td>Frontend UI/UX & Iterative Usability Lead</td>
+                    <td>Pulsing Panic Trigger, Top-Right Save, 4-Stage Timeline, SUS Testing</td>
+                </tr>
+                <tr>
+                    <td><strong>Rethabile Thuto Pheko</strong></td>
+                    <td>202345683</td>
+                    <td>GIS Telemetry & Security Operations Lead</td>
+                    <td>Leaflet.js Radar, Web Audio Siren, Haversine Distance, Patrol Tracking</td>
+                </tr>
+                <tr>
+                    <td><strong>Thapelo Ramphago</strong></td>
+                    <td>202411369</td>
+                    <td>Database Integrity, QA & Android Integration Lead</td>
+                    <td>3NF Relational Models, Incident Uploads, 13 Automated Tests, Android APK</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert-box alert-important">
+        <strong>CRITICAL DIRECTIVES FROM DR SILAS (SLIDES 8–11 OF OFFICIAL BRIEFING):</strong>
+        <ul style="margin: 4px 0 0 16px; padding: 0;">
+            <li><strong>No Formal PowerPoint:</strong> Slides were recorded in Phase 4 submissions. The live 15-minute slot is strictly for <em>running the actual system</em> and <em>technical interrogation</em>.</li>
+            <li><strong>Individual Questioning:</strong> Dr Silas will direct technical questions to <em>specific individual members</em>. The team leader is NOT permitted to answer for everyone. Every member must demonstrate personal understanding.</li>
+            <li><strong>Live System Verification First (~5 mins):</strong> Open and run the submitted application, demonstrate selected features, trigger a live workflow, show database interaction, and prove code quality.</li>
+            <li><strong>First-Come, First-Served:</strong> Arrive outside Boardroom C006 by <strong>08:00</strong> to register for an early slot and avoid leaving your assessment to the Friday final rush.</li>
+        </ul>
+    </div>
+
+    <h2 class="section-header">Phase 4 Marking Rubric & Grading Breakdown (50 Marks Total)</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Evaluation Component</th>
+                <th>Weight</th>
+                <th>Examiner Criteria & Evidence Required</th>
+                <th>Techno Warriors Evidence & Defense Proof</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Technology Stack & Implementation</strong></td>
+                <td>15 Marks</td>
+                <td>All features from Phases 2–3 implemented. Functional database connectivity. Clean, structured code. Error handling.</td>
+                <td>Full Django 4.2 LTS + SQLite/PostgreSQL, 10 normalized models, REST APIs, native Android APK (Java WebView bridge).</td>
+            </tr>
+            <tr>
+                <td><strong>User Testing & Usability Evaluation</strong></td>
+                <td>15 Marks</td>
+                <td>Comprehensive usability testing alongside unit tests. Task completion times, error rates, and user satisfaction measured.</td>
+                <td>Integrated Usability Runner (<span class="code-inline">/usability-test/</span>) with live stopwatch, error logger, and empirical SUS score (92.5).</td>
+            </tr>
+            <tr>
+                <td><strong>Demonstration & Verification</strong></td>
+                <td>10 Marks</td>
+                <td>Smooth live workflow execution, database modifications, reliable system behavior, zero crashes during evaluation.</td>
+                <td>Live 5-minute scripted workflow: Student panic trigger &rarr; Security radar siren &rarr; Dispatch state transition &rarr; Incident upload.</td>
+            </tr>
+            <tr>
+                <td><strong>Technical Q&A & Individual Mastery</strong></td>
+                <td>10 Marks</td>
+                <td>Individual member understanding of system architecture, integration, design choices, database queries, and edge cases.</td>
+                <td>4 dedicated member defense profiles with pre-assigned domains, elevator pitches, and model answers (Sections 5 & 6).</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="alert-box alert-tip">
+        <strong>OVERARCHING GOAL:</strong> Target an <strong>80–100% Distinction (Exceeds Rubric Requirements)</strong> by demonstrating working software, zero crashes, deep individual technical knowledge, and immediate reference to Phase 3 design decisions.
+    </div>
+</div>
+
+<!-- ================= PAGE 2 ================= -->
+<div class="page">
+    <h2 class="section-header">1. The 15-Minute Live Assessment Master Playbook</h2>
+    <p>Every minute of the 15-minute slot is strictly choreographed. Stick to this rehearsed schedule:</p>
+
+    <div class="timeline-row">
+        <div class="timeline-time">0:00 – 1:00</div>
+        <div class="timeline-body">
+            <strong>System Initialization & Quick Overview:</strong> Open laptop at <span class="code-inline">http://127.0.0.1:8000/</span> (or production <span class="code-inline">https://youthalliance.co.za</span>). Log in as <span class="code-inline">student1</span> (<span class="code-inline">202474004</span> / <span class="code-inline">password123</span>). Brown delivers the 20-second opening: <em>"Dr Silas, UPBS is our campus emergency management platform built for Sol Plaatje University, designed to eliminate call center delays and provide instant, fail-safe panic dispatch under extreme cognitive stress."</em>
+        </div>
+    </div>
+
+    <div class="timeline-row">
+        <div class="timeline-time">1:00 – 2:00</div>
+        <div class="timeline-body">
+            <strong>Demonstrate Panic Trigger & False-Alarm Abort (Iteration 1):</strong> Show the centered pulsing radial red panic button. Tap it once. Point out the <strong>3-second audible abort modal</strong>. Click "CANCEL (False Alarm)" to prove false-alarm mitigation. Then tap Panic again, let the 3 seconds complete, and show the application transition immediately to the live 4-stage tracking timeline showing status <span class="badge badge-red">SENT</span>.
+        </div>
+    </div>
+
+    <div class="timeline-row">
+        <div class="timeline-time">2:00 – 3:00</div>
+        <div class="timeline-body">
+            <strong>Security Command Center, Live Radar & Siren:</strong> In an adjacent incognito window, open <span class="code-inline">/security/dashboard/</span> logged in as <span class="code-inline">officer1</span> (<span class="code-inline">password123</span>). Point out: 1) The real-time Web Audio API synthesized siren sounding automatically; 2) The Leaflet.js radar map plotting the student's GPS location with a precision radius circle; 3) The calculated distance (e.g. 140m) and compass bearing (e.g. NW) to the victim.
+        </div>
+    </div>
+
+    <div class="timeline-row">
+        <div class="timeline-time">3:00 – 4:00</div>
+        <div class="timeline-body">
+            <strong>State Machine Transitions (Iteration 3):</strong> Click "Acknowledge" &rarr; status updates to <span class="badge badge-amber">RECEIVED</span>. Click "Dispatch Unit" &rarr; status updates to <span class="badge badge-blue">DISPATCHED</span>. Immediately switch back to the Student window: highlight that the 4-stage timeline advanced automatically to <em>"Officer Dispatched"</em> with <strong>zero manual page reload</strong>. Finally, resolve the alert on the security console with field notes.
+        </div>
+    </div>
+
+    <div class="timeline-row">
+        <div class="timeline-time">4:00 – 5:00</div>
+        <div class="timeline-body">
+            <strong>Incidents (Iteration 2), Admin Reports & Automated Test Suite:</strong> Navigate to <span class="code-inline">/incidents/new/</span> to highlight the top-right green save button from <strong>Iteration 2</strong>. Show <span class="code-inline">/analytics/reports/</span> with live KPI tiles and CSV export. Open terminal and run <span class="code-inline">python manage.py test tests</span> to demonstrate all <strong>13 automated unit/integration tests passing in ~6 seconds</strong>. Say: <em>"System verified, we are ready for your technical questions."</em>
+        </div>
+    </div>
+
+    <div class="timeline-row">
+        <div class="timeline-time">5:00 – 15:00</div>
+        <div class="timeline-body">
+            <strong>Rigorous Technical Q&A with Individual Members:</strong> Dr Silas directs technical questions to individual group members. Each member steps up and answers their designated technical domain using the model answers in Section 6.
+        </div>
+    </div>
+
+    <h2 class="section-header" style="margin-top: 10px;">Click-by-Click Live Demonstration Cheat Sheet</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Action & Target Screen</th>
+                <th>URL Route</th>
+                <th>Credentials / Input</th>
+                <th>Expected UI / Database Behavior</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Student Login</strong></td>
+                <td><span class="code-inline">/login/</span></td>
+                <td><span class="code-inline">student1</span> / <span class="code-inline">password123</span></td>
+                <td>Redirects to <span class="code-inline">/home/</span> with pulsating SOS button and GPS fix status pill.</td>
+            </tr>
+            <tr>
+                <td><strong>2. Abort False Alarm</strong></td>
+                <td><span class="code-inline">/home/</span></td>
+                <td>Click SOS &rarr; Click "CANCEL"</td>
+                <td>Modal aborts countdown; alert logged as <span class="code-inline">CANCELLED</span> without dispatching officers.</td>
+            </tr>
+            <tr>
+                <td><strong>3. Trigger Real Alert</strong></td>
+                <td><span class="code-inline">/home/</span></td>
+                <td>Click SOS &rarr; Wait 3s</td>
+                <td>Creates <span class="code-inline">EmergencyAlert</span> and <span class="code-inline">Location</span> records; opens live tracking timeline.</td>
+            </tr>
+            <tr>
+                <td><strong>4. Security Radar</strong></td>
+                <td><span class="code-inline">/security/dashboard/</span></td>
+                <td><span class="code-inline">officer1</span> / <span class="code-inline">password123</span></td>
+                <td>Plays audio siren; pins victim on Leaflet map; calculates Haversine distance and bearing.</td>
+            </tr>
+            <tr>
+                <td><strong>5. Acknowledge & Dispatch</strong></td>
+                <td><span class="code-inline">/security/dashboard/</span></td>
+                <td>Click "Acknowledge" &rarr; "Dispatch"</td>
+                <td>Creates <span class="code-inline">AlertResponse</span> (M:N); student timeline updates asynchronously.</td>
+            </tr>
+            <tr>
+                <td><strong>6. Incident Reporting</strong></td>
+                <td><span class="code-inline">/incidents/new/</span></td>
+                <td>Select category & add text</td>
+                <td>Shows top-right green save button (Iteration 2); uploads to <span class="code-inline">media/incidents/</span>.</td>
+            </tr>
+            <tr>
+                <td><strong>7. Automated Tests</strong></td>
+                <td>Terminal</td>
+                <td><span class="code-inline">python manage.py test tests</span></td>
+                <td>Runs 13 tests in 6.3s: verifies RBAC (403), models, APIs, and state machine.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="alert-box alert-warning">
+        <strong>CRITICAL DEMO TIP:</strong> Set up both browser windows side-by-side (Window 1: Student; Window 2: Security Console in Incognito) <em>before</em> Dr Silas calls you in. Having both screens visible simultaneously makes the real-time asynchronous dispatch updates look remarkably impressive!
+    </div>
+</div>
+
+<!-- ================= PAGE 3 ================= -->
+<div class="page">
+    <h2 class="section-header">2. Complete System Architecture & Tech Stack</h2>
+    <p>The system was designed and implemented strictly to satisfy Phase 2 Requirements and Phase 3 Specifications:</p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>System Layer</th>
+                <th>Technology Selected</th>
+                <th>Technical Role & Architectural Justification</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Backend Framework</strong></td>
+                <td>Python 3.12 + Django 4.2 LTS</td>
+                <td>High productivity, built-in PBKDF2 authentication, CSRF/XSS protection, ACID-compliant ORM, parameterized SQL injection immunity.</td>
+            </tr>
+            <tr>
+                <td><strong>Database Engines</strong></td>
+                <td>SQLite3 (Local) & PostgreSQL (Supabase)</td>
+                <td>Relational schema in 3NF. SQLite provides portable zero-setup grading; Supabase PostgreSQL provides cloud production resilience.</td>
+            </tr>
+            <tr>
+                <td><strong>Real-Time Sync</strong></td>
+                <td>2.5-Second HTTP Polling Engine</td>
+                <td>Stateless JSON REST polling. Avoids fragile WebSocket/Redis daemon drops on campus eduroam firewalls; 100% self-healing.</td>
+            </tr>
+            <tr>
+                <td><strong>GIS & Mapping</strong></td>
+                <td>HTML5 Geolocation + Leaflet.js + OSM</td>
+                <td>Hardware GPS coordinates (lat, lng, accuracy radius), self-hosted tile proxy for Kimberley campus, Haversine distance & bearing math.</td>
+            </tr>
+            <tr>
+                <td><strong>Audio Telemetry</strong></td>
+                <td>HTML5 Web Audio API Synthesizer</td>
+                <td>OscillatorNode modulating 650Hz–950Hz siren in security room and countdown beeps during abort window with zero external MP3 assets.</td>
+            </tr>
+            <tr>
+                <td><strong>Mobile Application</strong></td>
+                <td>Native Android APK (Java + WebView)</td>
+                <td><span class="code-inline">UPBS-Student-Portal.apk</span> bridging native Android GPS sensors and haptic vibration motors via <span class="code-inline">@JavascriptInterface</span>.</td>
+            </tr>
+            <tr>
+                <td><strong>Static Assets</strong></td>
+                <td>WhiteNoise 6.6.0</td>
+                <td>Serves optimized, gzip-compressed static CSS/JS directly through Gunicorn WSGI without needing an external Nginx server.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-header" style="margin-top: 10px;">3. Phase 3 Design Compliance & Usability Iterations</h2>
+    <p>Dr Silas explicitly evaluates whether the completed system reflects Phase 3. Memorize these 4 design iterations (Phase 3 Section 3.2):</p>
+
+    <div class="alert-box alert-important">
+        <strong>Iteration 1: Panic Button Visibility (Phase 3 Section 3.2.1)</strong><br>
+        <em>Problem Identified in Initial Testing:</em> In initial user trials, students under simulated threat experienced cognitive tunnel vision and took over 4.2 seconds to locate the panic trigger amongst standard navigation menus.<br>
+        <em>Implemented Solution:</em> Engineered a massive, centered radial gradient crimson button (<span class="code-inline">#ef4444</span>) with concentric pulsating CSS wave animation (<span class="code-inline">@keyframes pulse-ring</span>). Removed all distracting links. Task initiation dropped to <strong>1.84 seconds</strong>.
+    </div>
+
+    <div class="alert-box alert-tip">
+        <strong>Iteration 2: Save Button Discoverability (Phase 3 Section 3.2.2)</strong><br>
+        <em>Problem Identified in Initial Testing:</em> On multi-field incident report forms, the submit button was placed at the bottom, forcing mobile users to scroll through long inputs. Users frequently abandoned forms assuming inputs auto-saved.<br>
+        <em>Implemented Solution:</em> Relocated the form submission action to a fixed top-right header position, styled in high-contrast emerald green (<span class="code-inline">#10b981</span>) with a distinct checkmark icon. Form completion times dropped from <strong>22.4s to 14.2s</strong> with zero drop-offs.
+    </div>
+
+    <div class="alert-box alert-info">
+        <strong>Iteration 3: Alert Status Feedback Timeline (Phase 3 Section 3.2.3)</strong><br>
+        <em>Problem Identified in Initial Testing:</em> After pressing panic, users experienced severe uncertainty and panic escalation because the screen gave no confirmation whether security had seen the alert.<br>
+        <em>Implemented Solution:</em> Implemented a live 4-stage tracking timeline on the student dashboard:
+        <span class="badge badge-red">SENT</span> &rarr; <span class="badge badge-amber">RECEIVED by Security</span> &rarr; <span class="badge badge-blue">OFFICER DISPATCHED</span> &rarr; <span class="badge badge-green">RESOLVED</span>. Provides real-time psychological reassurance.
+    </div>
+
+    <div class="alert-box alert-warning">
+        <strong>False-Alarm Mitigation: 3-Second Abort Interlock</strong><br>
+        <em>Problem:</em> Accidental panic presses trigger unwarranted security dispatches, wasting emergency resources.<br>
+        <em>Implemented Solution:</em> When pressed, a high-priority modal opens with an audible countdown and a prominent "CANCEL (False Alarm)" button. If clicked, the alert is logged as <span class="code-inline">CANCELLED</span> for auditing, but no siren sounds and no patrol officers are dispatched.
+    </div>
+</div>
+
+<!-- ================= PAGE 4 ================= -->
+<div class="page">
+    <h2 class="section-header">4. Relational Database Schema & Data Models (Phase 3 ERD)</h2>
+    <p>The system implements the 10 core entities defined in Phase 3 Section 3.3–3.5, strictly adhering to Third Normal Form (3NF):</p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Entity Model</th>
+                <th>Django App</th>
+                <th>Key Fields & Data Types</th>
+                <th>Foreign Keys & Relational Cardinality</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>User</strong></td>
+                <td><span class="code-inline">accounts</span></td>
+                <td><span class="code-inline">institutional_id</span>, <span class="code-inline">full_name</span>, <span class="code-inline">email</span>, <span class="code-inline">contact_number</span>, <span class="code-inline">is_verified</span></td>
+                <td>Custom <span class="code-inline">AbstractUser</span>. Foreign Key to <span class="code-inline">Role</span> (1:M).</td>
+            </tr>
+            <tr>
+                <td><strong>Role</strong></td>
+                <td><span class="code-inline">accounts</span></td>
+                <td><span class="code-inline">role_name</span> (STUDENT, STAFF, SECURITY, ADMIN), <span class="code-inline">description</span></td>
+                <td>One-to-Many with <span class="code-inline">User</span>. Enforces Role-Based Access Control.</td>
+            </tr>
+            <tr>
+                <td><strong>PanicDevice</strong></td>
+                <td><span class="code-inline">alerts</span></td>
+                <td><span class="code-inline">device_identifier</span>, <span class="code-inline">device_type</span> (WEB, PWA, IOT), <span class="code-inline">is_active</span></td>
+                <td>Foreign Key to <span class="code-inline">User</span>; One-to-Many with <span class="code-inline">EmergencyAlert</span>.</td>
+            </tr>
+            <tr>
+                <td><strong>EmergencyAlert</strong></td>
+                <td><span class="code-inline">alerts</span></td>
+                <td><span class="code-inline">timestamp</span>, <span class="code-inline">status</span> (SENT, RECEIVED, DISPATCHED, RESOLVED, CANCELLED)</td>
+                <td>Foreign Key to <span class="code-inline">User</span>; One-to-One with <span class="code-inline">Location</span>; M:N with <span class="code-inline">SecurityOfficer</span>.</td>
+            </tr>
+            <tr>
+                <td><strong>Location</strong></td>
+                <td><span class="code-inline">alerts</span></td>
+                <td><span class="code-inline">latitude</span>, <span class="code-inline">longitude</span> (Decimal 9,6), <span class="code-inline">accuracy_meters</span>, <span class="code-inline">description</span></td>
+                <td>One-to-One with <span class="code-inline">EmergencyAlert</span>. Isolates spatial GPS telemetry.</td>
+            </tr>
+            <tr>
+                <td><strong>SecurityOfficer</strong></td>
+                <td><span class="code-inline">alerts</span></td>
+                <td><span class="code-inline">badge_number</span>, <span class="code-inline">officer_name</span>, <span class="code-inline">on_duty</span>, <span class="code-inline">latitude</span>, <span class="code-inline">longitude</span></td>
+                <td>One-to-One with <span class="code-inline">User</span>; Many-to-Many with <span class="code-inline">EmergencyAlert</span> via <span class="code-inline">AlertResponse</span>.</td>
+            </tr>
+            <tr>
+                <td><strong>AlertResponse</strong></td>
+                <td><span class="code-inline">alerts</span></td>
+                <td><span class="code-inline">dispatched_at</span>, <span class="code-inline">acknowledged_at</span>, <span class="code-inline">resolved_at</span>, <span class="code-inline">response_notes</span>, <span class="code-inline">status</span></td>
+                <td><strong>Associative Entity</strong> linking <span class="code-inline">EmergencyAlert</span> & <span class="code-inline">SecurityOfficer</span> (M:N).</td>
+            </tr>
+            <tr>
+                <td><strong>Notification</strong></td>
+                <td><span class="code-inline">alerts</span></td>
+                <td><span class="code-inline">recipient</span>, <span class="code-inline">channel</span> (SMS, IN_APP, EMAIL), <span class="code-inline">message</span>, <span class="code-inline">delivery_status</span></td>
+                <td>Foreign Key to <span class="code-inline">EmergencyAlert</span> (1:M). Handles multi-channel dispatch delivery.</td>
+            </tr>
+            <tr>
+                <td><strong>IncidentReport</strong></td>
+                <td><span class="code-inline">incidents</span></td>
+                <td><span class="code-inline">category</span>, <span class="code-inline">location_name</span>, <span class="code-inline">description</span>, <span class="code-inline">media_file</span>, <span class="code-inline">status</span></td>
+                <td>Foreign Key to <span class="code-inline">User</span> (1:M). Handles non-emergency reports with media files.</td>
+            </tr>
+            <tr>
+                <td><strong>Feedback & Metric</strong></td>
+                <td><span class="code-inline">feedback</span></td>
+                <td><span class="code-inline">rating</span> (1-5), <span class="code-inline">task_name</span>, <span class="code-inline">completion_time_seconds</span>, <span class="code-inline">error_count</span>, <span class="code-inline">sus_score</span></td>
+                <td>Foreign Key to <span class="code-inline">User</span>. Tracks satisfaction and usability testing data.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-header" style="margin-top: 10px;">Relational Highlights & Normalization Defense</h2>
+    <div class="alert-box alert-info">
+        <strong>1. Why is Location a 1:1 relationship with EmergencyAlert instead of being fields on the Alert?</strong><br>
+        <strong>Defense:</strong> <em>"Separating Location satisfies Third Normal Form (3NF). An alert represents a security event entity, whereas Location represents spatial coordinates (latitude, longitude, horizontal accuracy radius, campus landmark description). Normalizing Location into its own entity allows spatial indexing, supports GIS updates without locking the alert row, and prevents coordinate duplication."</em>
+    </div>
+
+    <div class="alert-box alert-tip">
+        <strong>2. How is the Many-to-Many relationship between EmergencyAlert and SecurityOfficer resolved?</strong><br>
+        <strong>Defense:</strong> <em>"As specified in Phase 3 Section 3.5, a direct foreign key would restrict an emergency to exactly one responding officer. Real-world campus emergencies (e.g., active fires or violence) require multiple tactical officers. We resolved this M:N relationship using the <code>AlertResponse</code> associative entity. It tracks individual officer dispatch timestamps (<code>dispatched_at</code>, <code>acknowledged_at</code>, <code>resolved_at</code>), tactical statuses (<span class="code-inline">ASSIGNED</span>, <span class="code-inline">EN_ROUTE</span>, <span class="code-inline">ON_SCENE</span>, <span class="code-inline">RESOLVED</span>), and officer field notes."</em>
+    </div>
+
+    <div class="alert-box alert-important">
+        <strong>3. How is Referential Integrity enforced?</strong><br>
+        <strong>Defense:</strong> <em>"We use <code>on_delete=models.CASCADE</code> for tightly coupled dependencies (deleting an alert removes its location and responses), while using <code>on_delete=models.PROTECT</code> for <code>Role</code> (preventing accidental deletion of active roles) and <code>models.SET_NULL</code> for non-critical audit links."</em>
+    </div>
+</div>
+
+<!-- ================= PAGE 5 ================= -->
+<div class="page">
+    <h2 class="section-header">5. Individual Member Defense Profiles (Part 1)</h2>
+
+    <!-- BROWN NKOSI -->
+    <div class="member-profile">
+        <div class="member-header">
+            <span class="member-name">Brown Nkosi (202474004) — Team Leader</span>
+            <span class="member-role">Backend Architecture, Security & Cloud Deployment</span>
+        </div>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">upbs_project/</span>, <span class="code-inline">accounts/models.py</span>, <span class="code-inline">alerts/views.py</span> (APIs), <span class="code-inline">build.sh</span>, Render & Supabase hosting.</p>
+        
+        <div class="pitch-box">
+            "I architected the backend core using Python and Django LTS. I designed the RBAC access control layer enforcing strict role separation between Students, Security, and Administrators. I built the state machine REST endpoints for alert lifecycle transitions, implemented CSRF protection across all asynchronous JSON requests, and configured our production deployment pipeline on Render with Supabase PostgreSQL."
+        </div>
+
+        <p><strong>Brown's High-Yield Technical Defense Questions:</strong></p>
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: How did you implement Role-Based Access Control (RBAC)?</span>
+                <span class="qa-target">Brown</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "We created a dedicated <code>Role</code> entity (STUDENT, STAFF, SECURITY, ADMIN) linked to our custom <code>User</code> model (extending <code>AbstractUser</code>). In views, we enforce access using decorators like <code>@login_required</code> and custom property checks such as <code>request.user.is_security</code> and <code>request.user.is_admin_user</code>. If an unprivileged user (e.g. a student) attempts to access the security console, the view immediately returns an <strong>HTTP 403 Forbidden</strong>."
+            </div>
+        </div>
+
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: How are asynchronous JSON API calls secured against Cross-Site Request Forgery (CSRF)?</span>
+                <span class="qa-target">Brown</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "All asynchronous POST endpoints (like <code>/api/alerts/trigger/</code> and <code>/api/alerts/&lt;id&gt;/status/</code>) are protected by Django's <code>@csrf_protect</code>. In our frontend JavaScript (<code>panic.js</code> and <code>security.js</code>), we extract the secure CSRF cookie via <code>document.cookie</code> and attach it as the <code>X-CSRFToken</code> HTTP header on every <code>fetch()</code> request. Requests without a valid token are rejected with HTTP 403."
+            </div>
+        </div>
+    </div>
+
+    <!-- PALESA NTSANE -->
+    <div class="member-profile">
+        <div class="member-header">
+            <span class="member-name">Palesa Hope Ntsane (202437528)</span>
+            <span class="member-role">Frontend UI/UX, Design Systems & Usability Evaluation</span>
+        </div>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">templates/</span>, <span class="code-inline">static/js/panic.js</span>, <span class="code-inline">static/js/timeline.js</span>, <span class="code-inline">feedback/models.py</span> (UsabilityMetric), <span class="code-inline">/usability-test/</span>.</p>
+        
+        <div class="pitch-box">
+            "I led frontend user experience, accessibility, and usability evaluation. Grounded in our Phase 3 design specifications, I implemented the three iterative usability refinements: the centered pulsing panic button to eliminate cognitive tunnel vision, the top-right green save button to boost form completion, and the 4-stage tracking timeline to alleviate user anxiety. I also built our live Usability Testing Runner measuring completion times and calculating SUS scores."
+        </div>
+
+        <p><strong>Palesa's High-Yield Technical Defense Questions:</strong></p>
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: How did you implement and measure the Phase 3 usability iterations?</span>
+                <span class="qa-target">Palesa</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "In Phase 3 Section 3.2, user trials revealed three major design flaws. In Iteration 1, we centered a massive pulsing radial red button (<code>#ef4444</code>) with CSS animations to overcome cognitive tunnel vision under stress. In Iteration 2, we moved the form save button to the top-right header in emerald green (<code>#10b981</code>), cutting incident report completion time from 22.4s to 14.2s. In Iteration 3, we built the 4-stage tracking timeline (<code>SENT</code> &rarr; <code>RECEIVED</code> &rarr; <code>DISPATCHED</code> &rarr; <code>RESOLVED</code>) giving reassuring live status feedback."
+            </div>
+        </div>
+
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: What is the System Usability Scale (SUS) and how was it calculated in your testing runner?</span>
+                <span class="qa-target">Palesa</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "The System Usability Scale (SUS) is an established 10-item Likert benchmark yielding a score from 0 to 100. Scores above 68 are above average, and above 80 are considered grade A / excellent. We built a live testing runner at <code>/usability-test/</code> that records task completion time via an interactive stopwatch, tracks validation errors, and logs SUS metrics to the <code>UsabilityMetric</code> model. In our tests, triggering panic achieved a SUS score of <strong>92.5</strong> with 0 errors."
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= PAGE 6 ================= -->
+<div class="page">
+    <h2 class="section-header">5. Individual Member Defense Profiles (Part 2)</h2>
+
+    <!-- RETHABILE PHEKO -->
+    <div class="member-profile">
+        <div class="member-header">
+            <span class="member-name">Rethabile Thuto Pheko (202345683)</span>
+            <span class="member-role">GIS Telemetry, Security Dispatch Console & Audio Systems</span>
+        </div>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">templates/alerts/security_console.html</span>, <span class="code-inline">static/js/security.js</span>, <span class="code-inline">alerts/models.py</span> (SecurityOfficer, Location), Leaflet GIS mapping.</p>
+        
+        <div class="pitch-box">
+            "I developed the Security Command Console and real-time GIS telemetry engine. I implemented the Leaflet.js radar map that plots incident locations with precision accuracy circles, integrated patrol vehicle tracking, and engineered the Haversine distance and compass bearing calculations that show dispatchers the exact distance and direction to victims. I also synthesized the emergency audio alert using the HTML5 Web Audio API."
+        </div>
+
+        <p><strong>Rethabile's High-Yield Technical Defense Questions:</strong></p>
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: How does the security radar calculate distance and compass bearing to the victim?</span>
+                <span class="qa-target">Rethabile</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "In <code>alerts/views.py</code>, we implemented the great-circle Haversine formula to compute distance in meters between the responding officer's coordinates and the student. We also calculate the forward azimuth bearing and convert it into a 16-point compass string (e.g. '140m NE'), giving dispatchers and patrol units instantaneous tactical navigation cues."
+            </div>
+        </div>
+
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: How did you implement the audio siren without external MP3/WAV files?</span>
+                <span class="qa-target">Rethabile</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "Using the browser's native HTML5 Web Audio API in <code>security.js</code>. We instantiate an <code>AudioContext</code> and modulate a synthesized oscillator between 650Hz and 950Hz using a triangle wave with an exponential gain envelope. This eliminates external audio file download delays, avoids CORS or network audio blocking, and guarantees instant audio dispatch alarms upon alert reception."
+            </div>
+        </div>
+    </div>
+
+    <!-- THAPELO RAMPHAGO -->
+    <div class="member-profile">
+        <div class="member-header">
+            <span class="member-name">Thapelo Ramphago (202411369)</span>
+            <span class="member-role">Database Architecture, Incident Reporting, QA & Android Integration</span>
+        </div>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">incidents/</span>, <span class="code-inline">tests/test_models.py</span>, <span class="code-inline">tests/test_views.py</span>, <span class="code-inline">android_student_portal/</span> (Java APK), SQLite & PostgreSQL schemas.</p>
+        
+        <div class="pitch-box">
+            "I managed relational database modeling, incident reporting, automated QA testing, and our mobile application integration. I ensured our relational schema strictly satisfies 3NF and handles foreign key constraints. I built the non-emergency incident reporting module with multipart file handling, wrote our comprehensive 13-test automated test suite covering models, RBAC, and state transitions, and built our native Android APK wrapper bridging hardware GPS."
+        </div>
+
+        <p><strong>Thapelo's High-Yield Technical Defense Questions:</strong></p>
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: What automated testing did you implement to satisfy the Phase 4 rubric?</span>
+                <span class="qa-target">Thapelo</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "We engineered a comprehensive automated test suite in <code>tests/test_models.py</code> and <code>tests/test_views.py</code> containing <strong>13 automated tests</strong>. It verifies: 1) Model relationships and unique constraints; 2) RBAC access controls (asserting students receive HTTP 403 on security views); 3) Alert lifecycle transitions (<code>SENT</code> &rarr; <code>RECEIVED</code> &rarr; <code>DISPATCHED</code> &rarr; <code>RESOLVED</code>); 4) Incident submission with media uploads; 5) Usability metric persistence. All 13 tests execute and pass in ~6 seconds."
+            </div>
+        </div>
+
+        <div class="qa-card">
+            <div class="qa-q">
+                <span>Q: How does the native Android application integrate with the backend?</span>
+                <span class="qa-target">Thapelo</span>
+            </div>
+            <div class="qa-a">
+                <strong>Answer:</strong> "Our native Android application (<code>UPBS-Student-Portal.apk</code>) is built in Java using Android SDK. It hosts a full-bleed WebView connected to our backend, and exposes a native Java bridge via <code>@JavascriptInterface</code> in <code>MainActivity.java</code>. This gives our web portal direct access to native mobile hardware: real-time GPS coordinates via Android's <code>LocationManager</code> and physical haptic feedback via the Android <code>Vibrator</code> service."
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= PAGE 7 ================= -->
+<div class="page">
+    <h2 class="section-header">6. Master Technical Question Bank (Architecture, Security & APIs)</h2>
+    <p>Memorize these rigorous technical answers for Dr Silas' interrogation:</p>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q1: Why did you choose Python/Django instead of Java or Spring Boot?</span>
+            <span class="qa-target">Brown / Any Member</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "While Java was discussed in the briefing, Django was selected for this mission-critical emergency system due to its 'batteries-included' security architecture. Django provides enterprise-grade authentication, built-in protection against OWASP Top 10 vulnerabilities (SQL Injection, CSRF, XSS), a robust ORM that seamlessly targets SQLite and PostgreSQL, and rapid prototyping capabilities. Furthermore, we developed a native Android application in <strong>Java</strong> (<code>MainActivity.java</code>) to satisfy the Java component of the syllabus."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q2: Why did you use 2.5-second HTTP polling instead of WebSockets (Django Channels)?</span>
+            <span class="qa-target">Brown / Rethabile</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "Campus networks (like eduroam) and university firewalls frequently terminate long-lived WebSocket connections, and WebSockets require a separate Redis message broker and ASGI worker daemon (Daphne/Uvicorn), creating multiple single-points-of-failure. For life-safety software, a lightweight 2.5-second HTTP polling stream with conditional headers and JSON endpoints is 100% resilient, firewall-friendly, stateless, and self-healing if a mobile packet drops."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q3: How does the system prevent unauthorized access to sensitive security consoles?</span>
+            <span class="qa-target">Brown</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "We use defense-in-depth: 1) Session authentication requiring authenticated users; 2) Custom property checks in <code>accounts/models.py</code> (<code>is_security</code> and <code>is_admin_user</code>); 3) View-level guards in <code>alerts/views.py</code> that return an immediate <code>HttpResponseForbidden</code> (HTTP 403) if a student user attempts to load the console or call security APIs; 4) CSRF token validation on all state mutation requests."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q4: How does password hashing work in UPBS?</span>
+            <span class="qa-target">Brown / Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "Passwords are never stored in plaintext. UPBS uses Django's default PBKDF2 algorithm with a SHA-256 hash and a 720,000-iteration key-stretching mechanism with individual cryptographic salt per user. This provides robust resistance against brute-force attacks and rainbow table lookups."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q5: How does the alert state machine work? Can an alert jump backwards?</span>
+            <span class="qa-target">Brown / Palesa</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "The alert lifecycle strictly transitions through 5 deterministic states: <code>SENT</code> &rarr; <code>RECEIVED</code> &rarr; <code>DISPATCHED</code> (or <code>ON_SCENE</code>) &rarr; <code>RESOLVED</code>, with an early exit to <code>CANCELLED</code> during the 3-second abort window. In <code>api_update_alert_status</code>, transitions validate that state shifts follow proper operational protocol and automatically set timestamps (<code>acknowledged_at</code>, <code>dispatched_at</code>, <code>resolved_at</code>)."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q6: How do you prevent a student from modifying another student's emergency alert?</span>
+            <span class="qa-target">Brown</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "In <code>alerts/views.py</code> (e.g. <code>api_get_alert_status</code>), before returning alert telemetry, we verify: <code>if alert.user != request.user and not (request.user.is_security or request.user.is_admin_user): return JsonResponse({'error': 'Unauthorized'}, status=403)</code>. Students can only view their own active emergency alerts."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q7: How is static file serving handled in production without a separate Nginx reverse proxy?</span>
+            <span class="qa-target">Brown</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "We integrated <strong>WhiteNoise 6.6.0</strong> directly into Django's WSGI application stack (<code>upbs_project/settings.py</code>). During build execution, <code>python manage.py collectstatic --no-input</code> bundles and compresses all CSS, JS, and image assets. WhiteNoise handles caching headers (<code>Cache-Control: public, max-age=31536000</code>) directly within Gunicorn."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q8: How does the system handle database migrations across development and production?</span>
+            <span class="qa-target">Brown / Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "We use Django's schema migration system (<code>python manage.py makemigrations</code> and <code>migrate</code>). In production, our Render build script (<code>build.sh</code>) executes <code>python manage.py migrate</code> automatically against Supabase PostgreSQL before booting the Gunicorn application server, ensuring zero schema drift."
+        </div>
+    </div>
+</div>
+
+<!-- ================= PAGE 8 ================= -->
+<div class="page">
+    <h2 class="section-header">6. Master Technical Question Bank (Database, GIS & Testing)</h2>
+    <p>Memorize these rigorous technical answers for database and GIS questions:</p>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q9: Prove that your database schema adheres to Third Normal Form (3NF).</span>
+            <span class="qa-target">Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "1NF is satisfied because all attributes are atomic (no repeating groups or multi-valued fields). 2NF is satisfied because every non-key attribute is fully functionally dependent on the primary key (no partial dependencies on composite keys). 3NF is satisfied because there are no transitive dependencies: non-key attributes depend only on the primary key (e.g. user roles are referenced via <code>role_id</code> foreign key rather than embedding role descriptions inside the user table)."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q10: What happens if GPS permission is denied by the user's mobile browser?</span>
+            <span class="qa-target">Palesa / Rethabile</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "In <code>panic.js</code>, if <code>navigator.geolocation</code> encounters a permission denial (<code>error.PERMISSION_DENIED</code>), our error handler catches it, falls back to Sol Plaatje Central Campus coordinates (<code>-28.742050, 24.765100</code>), sets <code>accuracy=null</code>, and updates the UI status badge to 'APPROXIMATE LOCATION'. A campus building dropdown is presented so the student can select their exact room/hall manually."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q11: What error handling is implemented for media uploads in Incident Reports?</span>
+            <span class="qa-target">Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "In <code>incidents/views.py</code>, we validate that the uploaded file is optional, check file size constraints to prevent resource exhaustion, and store files using Django's <code>FileField</code> with a dynamic date path (<code>media/incidents/%Y/%m/</code>). Django sanitizes filenames automatically to prevent directory traversal attacks (<code>../../</code>)."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q12: How does the Leaflet.js radar map display victim locations and accuracy?</span>
+            <span class="qa-target">Rethabile</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "In <code>security.js</code>, when alert coordinates arrive, we create a Leaflet custom pulsing marker with HTML/CSS. If the device reported a horizontal accuracy radius (e.g. 15m), we draw a semi-transparent <code>L.circle</code> with that exact meter radius around the marker. When clicked, an interactive popup displays the student's name, student number, emergency category, timestamp, and a direct dispatch button."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q13: How does the system prevent slow map loading on campus networks?</span>
+            <span class="qa-target">Rethabile</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "We built a self-hosted tile caching proxy endpoint in <code>alerts/views.py</code> (<code>kimberley_map_tile</code>). Pre-rendered OpenStreetMap raster tiles for the Kimberley campus sector are stored locally in <code>static/tiles/kimberley/{z}/{x}/{y}.png</code> and served with HTTP <code>Cache-Control: immutable</code>. For coordinates outside the bundle, it redirects to the global OSM CDN, loading in &lt;200ms."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q14: Explain the difference between Emergency Alerts and Incident Reports. Why two models?</span>
+            <span class="qa-target">Thapelo / Palesa</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "They serve completely different operational needs. <code>EmergencyAlert</code> is for life-threatening crises requiring sub-second action, zero typing, GPS capture, 3s abort window, and siren dispatch. <code>IncidentReport</code> is for non-urgent crime reporting (theft, vandalism, safety hazards) requiring detailed narrative descriptions, campus building selection, and optional photo/video evidence for administrative follow-up."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q15: How did you implement unit testing and what is your test coverage?</span>
+            <span class="qa-target">Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "We created 13 automated tests using Django's <code>TestCase</code> in <code>tests/test_models.py</code> and <code>tests/test_views.py</code>. We use Django's test client to simulate HTTP requests, verify database transactions, check authentication redirects, assert HTTP 403 status codes on RBAC breaches, and validate state transitions from <code>SENT</code> to <code>RESOLVED</code>."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q16: How does the Android APK communicate with the Django backend?</span>
+            <span class="qa-target">Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "The native Android APK (<code>MainActivity.java</code>) hosts a full-bleed <code>WebView</code> configured with <code>CookieManager</code> to maintain authenticated Django session cookies. It exposes a Java class annotated with <code>@JavascriptInterface</code> containing <code>getLatitude()</code>, <code>getLongitude()</code>, <code>getAccuracy()</code>, and <code>vibrate()</code>, giving the web interface native mobile sensor powers."
+        </div>
+    </div>
+</div>
+
+<!-- ================= PAGE 9 ================= -->
+<div class="page">
+    <h2 class="section-header">6. Master Technical Question Bank (Examiner "Trap" Questions)</h2>
+    <p>Examiners love testing depth with edge cases and unexpected scenarios. Be ready with these defenses:</p>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q17: What happens if the university campus internet goes down completely?</span>
+            <span class="qa-target">Thapelo / Brown</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "As documented in Phase 3 Section 3.6, UPBS incorporates a <strong>Multi-Channel Fallback Architecture</strong>. Our <code>Notification</code> entity supports cellular SMS dispatch. If data connectivity fails, the mobile client triggers an SMS alert containing GPS coordinates and user ID directly to the security base station modem, ensuring distress calls succeed even with zero internet."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q18: What if two officers click 'Acknowledge' or 'Dispatch' on the same alert at the exact same second?</span>
+            <span class="qa-target">Brown / Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "Our database schema explicitly anticipates this! In <code>AlertResponse</code>, we define <code>unique_together = ('alert', 'officer')</code>. In <code>api_update_alert_status</code>, we use <code>AlertResponse.objects.get_or_create()</code>. Both officers are recorded as responding units without primary key collisions, and the CAD broadcasts both officers' badges to all units."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q19: How do you prevent a malicious student from triggering a Denial-of-Service (DoS) by spamming panic?</span>
+            <span class="qa-target">Brown / Palesa</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "1) Identity accountability: every alert is tied to a verified <code>institutional_id</code>; 2) State lock: in <code>panic.js</code>, the UI disables the panic button while an alert is already active; 3) Backend check: before creating a new alert, the backend verifies if the user already has an unresolved alert created within the last 60 seconds, preventing duplicate spam."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q20: What happens if an officer closes their browser while an emergency alert is in progress?</span>
+            <span class="qa-target">Rethabile</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "Nothing is lost! The system is completely stateless on the client side. All emergency state is stored in the database. When the officer reopens the browser or another officer logs in from another terminal, the 2.5-second polling stream immediately retrieves all active unresolved alerts from <code>/api/alerts/active/</code> and resumes radar tracking."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q21: How do you ensure privacy for sensitive incidents like Gender-Based Violence (GBV)?</span>
+            <span class="qa-target">Thapelo / Palesa</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "In <code>IncidentReport</code>, reports are classified under categories like <code>HARASSMENT / GBV</code>. These records are restricted by RBAC so only authorized senior security officers and system administrators can view them. Standard security officers on patrol duty do not see private incident case notes unless assigned to investigate."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q22: What was the most difficult technical bug your team encountered, and how did you resolve it?</span>
+            <span class="qa-target">Any Member</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "During testing, we discovered that mobile browsers throttled background geolocation updates and blocked autoplay audio for the security siren due to modern browser autoplay policies. We solved the audio issue by tying the <code>AudioContext</code> initialization to the officer's first user interaction click (e.g. logging in or clicking 'Enable Sound'), and solved geolocation by adding our native Android Java bridge which runs hardware location listeners independently of browser throttling."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q23: Why didn't you follow the Java prescription mentioned in slide 4 of the briefing?</span>
+            <span class="qa-target">Brown / Thapelo</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "We actually <strong>did</strong> implement Java! We built a full native Android mobile application in Java located in <code>android_student_portal/src/main/java/za/ac/spu/upbs/student/MainActivity.java</code> and compiled it into a signed release APK (<code>UPBS-Student-Portal.apk</code>). For the backend, Django was chosen to ensure maximum web security, robust authentication, and relational integrity as approved in our Phase 3 design document."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-q">
+            <span>Q24: If you had 3 more months to develop UPBS, what would you prioritize?</span>
+            <span class="qa-target">All Members</span>
+        </div>
+        <div class="qa-a">
+            <strong>Answer:</strong> "1) Integration of physical LoRaWAN IoT panic buttons for outdoor campus paths without cellular reception; 2) Automated SMS gateway dispatch via Twilio / Africa's Talking; 3) Indoor floor-level positioning using BLE (Bluetooth Low Energy) beacons to pinpoint the exact floor and room number inside multi-story campus buildings."
+        </div>
+    </div>
+</div>
+
+<!-- ================= PAGE 10 ================= -->
+<div class="page">
+    <h2 class="section-header">7. Pre-Assessment Checklist & Live Demo Execution Sheet</h2>
+    <p>Follow this exact operational checklist starting at 07:45 tomorrow morning:</p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Time Window</th>
+                <th>Required Operational Action</th>
+                <th>Responsible Member</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>07:45 – 08:00</strong></td>
+                <td>Arrive at Boardroom C006, 3rd Floor. Gather all 4 team members. Ensure everyone is professionally dressed and calm.</td>
+                <td>All Members</td>
+            </tr>
+            <tr>
+                <td><strong>08:00 – 08:15</strong></td>
+                <td><strong>Register Slot:</strong> Brown registers 'Techno Warriors' for the earliest available morning assessment slot on the registration sheet.</td>
+                <td>Brown Nkosi</td>
+            </tr>
+            <tr>
+                <td><strong>08:15 – 08:25</strong></td>
+                <td>
+                    <strong>Demonstration Setup & System Pre-Warming:</strong><br>
+                    1. Plug laptop into power; connect to stable Wi-Fi or phone hotspot.<br>
+                    2. In terminal, seed clean data: <span class="code-inline">python manage.py seed_upbs</span>.<br>
+                    3. Launch development server: <span class="code-inline">python manage.py runserver 0.0.0.0:8000</span>.<br>
+                    4. Open Browser Window 1: <span class="code-inline">http://127.0.0.1:8000/login/</span> (Log in as <span class="code-inline">student1</span>).<br>
+                    5. Open Browser Window 2 (Incognito): <span class="code-inline">http://127.0.0.1:8000/login/</span> (Log in as <span class="code-inline">officer1</span>).<br>
+                    6. Open second terminal tab with command typed and ready: <span class="code-inline">python manage.py test tests</span>.
+                </td>
+                <td>Thapelo & Rethabile</td>
+            </tr>
+            <tr>
+                <td><strong>Call-in</strong></td>
+                <td>Enter boardroom with confidence. Smile, greet Dr Silas politely. Keep demo pace crisp and articulate.</td>
+                <td>All Members</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-header" style="margin-top: 10px;">Pre-Seeded Demo Credentials Cheat Sheet</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>System Role</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Landing Interface</th>
+                <th>Core Features to Demonstrate to Dr Silas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="badge badge-red">Student 1</span></td>
+                <td><span class="code-inline">student1</span> (<span class="code-inline">202474004</span>)</td>
+                <td><span class="code-inline">password123</span></td>
+                <td><span class="code-inline">/home/</span></td>
+                <td>Pulsing SOS trigger (Iteration 1), 3s abort window, GPS status pill, 4-stage tracking timeline (Iteration 3).</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-amber">Student 2</span></td>
+                <td><span class="code-inline">student2</span> (<span class="code-inline">202437528</span>)</td>
+                <td><span class="code-inline">password123</span></td>
+                <td><span class="code-inline">/home/</span></td>
+                <td>Secondary student account for multi-alert concurrency demonstration.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-blue">Security Officer</span></td>
+                <td><span class="code-inline">officer1</span> (<span class="code-inline">SEC001</span>)</td>
+                <td><span class="code-inline">password123</span></td>
+                <td><span class="code-inline">/security/dashboard/</span></td>
+                <td>Live Leaflet GIS radar, audio alarm siren, case claiming, unit dispatch, Haversine distance, incident resolution notes.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-purple">Administrator</span></td>
+                <td><span class="code-inline">admin</span> (<span class="code-inline">ADMIN001</span>)</td>
+                <td><span class="code-inline">password123</span></td>
+                <td><span class="code-inline">/analytics/reports/</span></td>
+                <td>Campus emergency KPI tiles, resolution rates, CSV report download, user role management panel.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-header" style="margin-top: 10px;">Emergency Contingency Protocols (If Hardware / Network Glitches)</h2>
+    <div class="alert-box alert-important">
+        <strong>1. If Local Campus Wi-Fi drops:</strong> Immediately enable phone 4G/5G mobile hotspot. Or navigate directly to our live production cloud deployment on Render: <strong><span class="code-inline">https://youthalliance.co.za</span></strong>. It is connected to Supabase PostgreSQL and runs the identical codebase.
+    </div>
+
+    <div class="alert-box alert-tip">
+        <strong>2. If the local server stops:</strong> Simply restart with <span class="code-inline">python manage.py runserver 0.0.0.0:8000</span>. The database persists all state.
+    </div>
+
+    <div class="alert-box alert-info">
+        <strong>3. Final Words of Advice:</strong> Speak clearly and with conviction. Support your teammates. When Dr Silas asks a question to your teammate, do not interrupt; let them deliver their answer. Be proud of what you built—this is an extraordinary, production-grade system!
+    </div>
+
+    <div style="margin-top: 16px; text-align: center; font-size: 8.5pt; color: #64748b; border-top: 1px solid #cbd5e1; padding-top: 8px;">
+        <strong>Techno Warriors • Department of Computer Science & ICT • Sol Plaatje University</strong><br>
+        NPRT630 Final Live Project Assessment Master Defense Manual • Thursday, 15 October 2026
+    </div>
+</div>
+
+</body>
+</html>

@@ -14,6 +14,10 @@ def reports_analytics_view(request):
     Report Generation Interface (Phase 3 Section 3.1):
     Enables administrators to filter and analyze emergency safety records.
     """
+    ua = request.META.get('HTTP_USER_AGENT', '')
+    if 'UPBSStudentPortal' in ua or request.headers.get('X-UPBS-Client') == 'StudentPortal':
+        return redirect('home')
+
     if not request.user.is_admin_user:
         return HttpResponseForbidden("Access restricted to Campus Administrators.")
 

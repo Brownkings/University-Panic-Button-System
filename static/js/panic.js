@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success && data.address) {
                     setLiveAddressOption(data.address);
                     updateGeoStatusBanner(`Real Location Locked: ${data.address}`, '#34d399');
+                    if (typeof window.syncHeroLocationDisplay === 'function') {
+                        window.syncHeroLocationDisplay(lat, lng, acc, data.address);
+                    }
                 }
             })
             .catch(() => {});
@@ -73,12 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!mapEl || typeof L === 'undefined') return;
 
         studentMap = L.map('studentGpsMap', {
-            center: [-26.2041, 28.0473],
-            zoom: 15,
+            center: [-28.742050, 24.765100],
+            zoom: 16,
             minZoom: 4,
             maxZoom: 18,
             zoomControl: true,
             attributionControl: false
+        });
+
+        studentMap.on('click', (e) => {
+            const { lat, lng } = e.latlng;
+            applyRealCoordinates(lat, lng, 5.0, 'Manual Map Pin Lock', null);
+            reverseGeocodeRealCoords(lat, lng, 5.0);
         });
 
         const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -152,6 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateStudentMapPin(userCoords.latitude, userCoords.longitude, userCoords.accuracy);
 
+        if (typeof window.syncHeroLocationDisplay === 'function') {
+            window.syncHeroLocationDisplay(userCoords.latitude, userCoords.longitude, userCoords.accuracy, preResolvedAddress || userCoords.address);
+        }
+
         if (preResolvedAddress) {
             setLiveAddressOption(preResolvedAddress);
             updateGeoStatusBanner(`Real Location Locked: ${preResolvedAddress}`, '#34d399');
@@ -161,34 +174,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const CAMPUS_BUILDINGS = {
+        'Main Library - 2nd Floor Study Area': [-28.74160, 24.76470],
+        'Science Block B - Computer Labs': [-28.74150, 24.76600],
+        'East Student Residence - Block C': [-28.73880, 24.76540],
+        'Central Administration Building': [-28.74205, 24.76510],
+        'University Sports Grounds & Pavilion': [-28.74340, 24.76630],
+        'Campus Gate 1 (Main Entrance)': [-28.74260, 24.76360],
+        'South Campus Walkway / Parking Area': [-28.74520, 24.76500]
+    };
+
+    if (locationInput) {
+        locationInput.addEventListener('change', () => {
+            const val = locationInput.value;
+            if (CAMPUS_BUILDINGS[val]) {
+                const [bLat, bLng] = CAMPUS_BUILDINGS[val];
+                applyRealCoordinates(bLat, bLng, 4.0, `Campus Landmark: ${val}`, val);
+            }
+        });
+    }
+
     function resolveViaNetworkGeoFallback() {
         if (hasRealGpsFix) return;
-        // Fallback when Linux/desktop browser OS GeoClue returns POSITION_UNAVAILABLE despite permission granted
-        fetch('https://ipwho.is/')
+        fetch('/alerts/api/resolve-location/')
             .then(res => res.json())
             .then(data => {
-                if (!hasRealGpsFix && data && data.latitude && data.longitude) {
-                    const addrParts = [data.city, data.region].filter(Boolean).join(', ');
-                    applyRealCoordinates(data.latitude, data.longitude, 25.0, 'Live Network Geolocation Locked', addrParts || null);
-                    reverseGeocodeRealCoords(Number(data.latitude), Number(data.longitude), 25.0);
-                } else if (!hasRealGpsFix) {
-                    throw new Error('Primary GeoIP incomplete');
+                if (!hasRealGpsFix && data && data.success && data.latitude && data.longitude) {
+                    const lat = Number(data.latitude);
+                    const lng = Number(data.longitude);
+                    if (lat >= -29.2 && lat <= -28.2 && lng >= 24.2 && lng <= 25.2) {
+                        applyRealCoordinates(lat, lng, data.accuracy || 20.0, 'Live Campus Geolocation Locked', data.address);
+                        return;
+                    }
                 }
+                throw new Error('Non-campus coordinates');
             })
             .catch(() => {
-                fetch('/alerts/api/resolve-location/')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!hasRealGpsFix && data && data.success) {
-                            applyRealCoordinates(data.latitude, data.longitude, data.accuracy || 25.0, 'Live Network Geolocation Locked', data.address);
-                        }
-                    })
-                    .catch(err => {
-                        console.warn("All geolocation providers failed:", err);
-                        if (!hasRealGpsFix) {
-                            updateGeoStatusBanner('Unable to lock GPS — check browser Location settings', '#fbbf24');
-                        }
-                    });
+                if (!hasRealGpsFix) {
+                    // Default to Sol Plaatje Central Campus benchmark
+                    applyRealCoordinates(-28.742050, 24.765100, 5.0, 'SPU Central Campus (Benchmark Lock)', 'Sol Plaatje University Central Campus');
+                }
             });
     }
 

@@ -62,6 +62,12 @@ public class MainActivity extends Activity implements LocationListener {
     private static final String PREFS_NAME = "upbs_student_prefs";
     private static final String KEY_BASE_URL = "base_url";
     private static final String DEFAULT_BASE_URL = "https://youthalliance.co.za";
+    private static final String LOCAL_BASE_URL = "http://192.168.240.1:8000";
+    private static final String KEY_CALIBRATED_LAT = "calibrated_lat";
+    private static final String KEY_CALIBRATED_LNG = "calibrated_lng";
+    private static final String KEY_CALIBRATED_LABEL = "calibrated_label";
+    public static final double SPU_CENTRAL_LAT = -28.742050;
+    public static final double SPU_CENTRAL_LNG = 24.765100;
 
     WebView webView;
     ProgressBar progressBar;
@@ -75,10 +81,10 @@ public class MainActivity extends Activity implements LocationListener {
     private LocationManager locationManager;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    volatile double currentLat = Double.NaN;
-    volatile double currentLng = Double.NaN;
-    volatile float currentAcc = 25.0f;
-    volatile String currentSource = "INITIALIZING";
+    volatile double currentLat = SPU_CENTRAL_LAT;
+    volatile double currentLng = SPU_CENTRAL_LNG;
+    volatile float currentAcc = 4.0f;
+    volatile String currentSource = "SPU CAMPUS";
     String baseUrl = DEFAULT_BASE_URL;
 
     @Override
@@ -95,6 +101,12 @@ public class MainActivity extends Activity implements LocationListener {
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         baseUrl = prefs.getString(KEY_BASE_URL, DEFAULT_BASE_URL);
+
+        // Load saved campus calibration or default to Sol Plaatje Central Campus
+        currentLat = Double.longBitsToDouble(prefs.getLong(KEY_CALIBRATED_LAT, Double.doubleToRawLongBits(SPU_CENTRAL_LAT)));
+        currentLng = Double.longBitsToDouble(prefs.getLong(KEY_CALIBRATED_LNG, Double.doubleToRawLongBits(SPU_CENTRAL_LNG)));
+        currentSource = prefs.getString(KEY_CALIBRATED_LABEL, "SPU CAMPUS");
+        currentAcc = 4.0f;
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -360,10 +372,6 @@ public class MainActivity extends Activity implements LocationListener {
                 + "      body { background: #070b12 !important; }"
                 + "      .main-content { padding: 0.7rem 0.75rem 1.25rem 0.75rem !important; max-width: 100% !important; margin: 0 !important; }"
                 + "      .card { padding: 0.85rem 0.95rem !important; margin-bottom: 0.75rem !important; border-radius: 12px !important; background: #0d131f !important; border: 1px solid rgba(148,163,184,0.16) !important; }"
-                + "      .panic-container { padding: 0.5rem 0.25rem 0.75rem 0.25rem !important; }"
-                + "      .panic-pulse-wrapper { width: 196px !important; height: 196px !important; margin: 0.4rem auto !important; }"
-                + "      .btn-panic { width: 156px !important; height: 156px !important; font-size: 1.18rem !important; }"
-                + "      .btn-panic span.subtext { font-size: 0.62rem !important; padding: 0.12rem 0.42rem !important; }"
                 + "      .grid-2 { grid-template-columns: 1fr !important; gap: 0.55rem !important; }"
                 + "      .auth-shell { margin: 0.35rem auto !important; }"
                 + "      .auth-card { padding: 1.2rem 1.1rem !important; }"
@@ -379,7 +387,7 @@ public class MainActivity extends Activity implements LocationListener {
                 + "    roleBtns.forEach(function(btn) {"
                 + "      var oc = btn.getAttribute('onclick') || '';"
                 + "      if (oc.indexOf('officer1') !== -1 || oc.indexOf('admin') !== -1) {"
-                + "        btn.style.display = 'none';"
+                + "        btn.remove();"
                 + "      }"
                 + "    });"
                 + "    var authH = document.querySelector('.auth-heading');"
@@ -387,13 +395,12 @@ public class MainActivity extends Activity implements LocationListener {
                 + "    var swTitle = document.querySelector('.role-switcher-title span:last-child');"
                 + "    if (swTitle) swTitle.textContent = 'Quick Student Identity Demo';"
                 + "  }"
-                + "  var pCont = document.querySelector('.panic-container');"
-                + "  var locSel = document.getElementById('locationDescription');"
-                + "  if (pCont && locSel) {"
-                + "    var locCard = locSel.closest('.card');"
-                + "    if (locCard && pCont.compareDocumentPosition(locCard) & Node.DOCUMENT_POSITION_PRECEDING) {"
-                + "      locCard.parentNode.insertBefore(pCont, locCard);"
-                + "    }"
+                + "  document.querySelectorAll('.nav-link-security, .nav-link-analytics, a[href*=\"/security\"], a[href*=\"/analytics\"], a[href*=\"/admin\"]').forEach(function(el) {"
+                + "    if (el.closest('.role-option-btn')) return;"
+                + "    el.remove();"
+                + "  });"
+                + "  if (document.getElementById('cadRadarMap') || document.querySelector('.reports-grid') || document.querySelector('.user-table')) {"
+                + "    window.location.replace('/home/');"
                 + "  }"
                 + "  if (!window.AndroidBridge) return;"
                 + "  function makePos(lat, lng, acc) {"
@@ -571,18 +578,60 @@ public class MainActivity extends Activity implements LocationListener {
 
     void showServerConfigDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("UPBS Student Portal Endpoint");
-        builder.setMessage("Default cloud server is https://youthalliance.co.za. Enter custom server URL if needed:");
+        builder.setTitle("UPBS Server Endpoint");
+        final String[] options = new String[] {
+            "Cloud Production (https://youthalliance.co.za)",
+            "Local Host Dev (http://192.168.240.1:8000)",
+            "Custom URL..."
+        };
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    setServerEndpoint(DEFAULT_BASE_URL);
+                } else if (which == 1) {
+                    setServerEndpoint(LOCAL_BASE_URL);
+                } else {
+                    showCustomUrlDialog();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
 
+    void setServerEndpoint(String url) {
+        if (url == null) return;
+        String trimmed = url.trim();
+        if (trimmed.endsWith("/")) trimmed = trimmed.substring(0, trimmed.length() - 1);
+        if (!trimmed.isEmpty()) {
+            baseUrl = trimmed;
+            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_BASE_URL, baseUrl)
+                    .apply();
+            if (webView != null) {
+                webView.loadUrl(baseUrl + "/home/");
+            }
+            Toast.makeText(this, "Connected: " + baseUrl, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    void showCustomUrlDialog() {
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle("Enter Custom Server URL");
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         input.setText(baseUrl);
-        builder.setView(input);
-
-        builder.setPositiveButton("Save & Connect", new ServerSaveListener(input));
-        builder.setNeutralButton("Reset Default", new ServerResetListener());
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+        b.setView(input);
+        b.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                setServerEndpoint(input.getText().toString());
+            }
+        });
+        b.setNegativeButton("Cancel", null);
+        b.show();
     }
 
     @Override
@@ -630,15 +679,128 @@ public class MainActivity extends Activity implements LocationListener {
         );
     }
 
+    void showLocationCalibrationDialog() {
+        final String[] options = {
+                "🛰️ Live Hardware GNSS (Auto-Detect)",
+                "🏫 SPU Central Campus (-28.7421, 24.7651)",
+                "📚 SPU Main Library (-28.7416, 24.7647)",
+                "💻 Science Block B - Labs (-28.7415, 24.7660)",
+                "🏢 Student Centre (-28.7426, 24.7636)",
+                "🏠 North Student Residence (-28.7388, 24.7654)",
+                "🚪 Campus South Gate (-28.7452, 24.7650)",
+                "🎯 Enter Custom Coordinates..."
+        };
+
+        final double[][] coords = {
+                {Double.NaN, Double.NaN},
+                {-28.742050, 24.765100},
+                {-28.741600, 24.764700},
+                {-28.741500, 24.766000},
+                {-28.742600, 24.763600},
+                {-28.738800, 24.765400},
+                {-28.745200, 24.765000},
+        };
+
+        final String[] labels = {
+                "LIVE GPS",
+                "SPU CAMPUS",
+                "MAIN LIBRARY",
+                "SCIENCE BLOCK",
+                "STUDENT CTR",
+                "NORTH RES",
+                "SOUTH GATE"
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Calibrate SOS Telemetry");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    Toast.makeText(MainActivity.this, "Connecting to Hardware GNSS...", Toast.LENGTH_SHORT).show();
+                    startLocationTracking();
+                    fetchNetworkLocationFallback();
+                } else if (which == options.length - 1) {
+                    showCustomCoordinatesDialog();
+                } else {
+                    double lat = coords[which][0];
+                    double lng = coords[which][1];
+                    String lbl = labels[which];
+                    setCalibratedLocation(lat, lng, 4.0f, lbl);
+                    Toast.makeText(MainActivity.this, "Calibrated: " + options[which], Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    void setCalibratedLocation(double lat, double lng, float acc, String label) {
+        this.currentLat = lat;
+        this.currentLng = lng;
+        this.currentAcc = acc;
+        this.currentSource = label;
+
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putLong(KEY_CALIBRATED_LAT, Double.doubleToRawLongBits(lat))
+                .putLong(KEY_CALIBRATED_LNG, Double.doubleToRawLongBits(lng))
+                .putString(KEY_CALIBRATED_LABEL, label)
+                .apply();
+
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (gpsBadgeView != null) {
+                    gpsBadgeView.setText(String.format(Locale.US, "● %.4f, %.4f", lat, lng));
+                    gpsBadgeView.setTextColor(Color.parseColor("#34D399"));
+                }
+                injectGeolocationBridge();
+            }
+        });
+    }
+
+    void showCustomCoordinatesDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter Benchmark Coordinates");
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(dp(20), dp(10), dp(20), dp(10));
+
+        final EditText latInput = new EditText(this);
+        latInput.setHint("Latitude (e.g. -28.742050)");
+        latInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
+        latInput.setText(String.format(Locale.US, "%.6f", currentLat));
+        layout.addView(latInput);
+
+        final EditText lngInput = new EditText(this);
+        lngInput.setHint("Longitude (e.g. 24.765100)");
+        lngInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
+        lngInput.setText(String.format(Locale.US, "%.6f", currentLng));
+        layout.addView(lngInput);
+
+        builder.setView(layout);
+        builder.setPositiveButton("Apply Calibration", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    double lat = Double.parseDouble(latInput.getText().toString().trim());
+                    double lng = Double.parseDouble(lngInput.getText().toString().trim());
+                    setCalibratedLocation(lat, lng, 4.0f, "CUSTOM_BENCHMARK");
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Invalid coordinate format", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
     private class GpsRefreshClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            Toast.makeText(MainActivity.this, "Syncing Live GPS Telemetry...", Toast.LENGTH_SHORT).show();
-            startLocationTracking();
-            fetchNetworkLocationFallback();
-            if (webView != null) {
-                webView.reload();
-            }
+            showLocationCalibrationDialog();
         }
     }
 
@@ -727,41 +889,12 @@ public class MainActivity extends Activity implements LocationListener {
         @Override
         public void run() {
             try {
-                URL url = new URL("https://ipwho.is/");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("User-Agent", "UPBS-Student-Waydroid/2.0");
-                if (conn.getResponseCode() == 200) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    reader.close();
-                    JSONObject json = new JSONObject(sb.toString());
-                    if (json.optBoolean("success", true) && json.has("latitude") && json.has("longitude")) {
-                        double lat = json.getDouble("latitude");
-                        double lng = json.getDouble("longitude");
-                        if (!Double.isNaN(lat) && !Double.isNaN(lng)) {
-                            if (Double.isNaN(currentLat) || !"ANDROID_GPS".equals(currentSource)) {
-                                updateNativeCoordinates(lat, lng, 35.0f, "NET_GEO");
-                            }
-                            return;
-                        }
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-
-            try {
                 URL url = new URL(baseUrl + "/alerts/api/resolve-location/");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
                 conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13; Mobile) UPBSStudentPortal/2.0");
                 if (conn.getResponseCode() == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuilder sb = new StringBuilder();
@@ -771,11 +904,14 @@ public class MainActivity extends Activity implements LocationListener {
                     }
                     reader.close();
                     JSONObject json = new JSONObject(sb.toString());
-                    if (json.has("latitude") && json.has("longitude") && !json.isNull("latitude")) {
+                    if (json.optBoolean("success", false) && json.has("latitude") && json.has("longitude")) {
                         double lat = json.getDouble("latitude");
                         double lng = json.getDouble("longitude");
-                        if (Double.isNaN(currentLat) || !"ANDROID_GPS".equals(currentSource)) {
-                            updateNativeCoordinates(lat, lng, 45.0f, "UPBS_GEO");
+                        // Guard against ISP IP hops defaulting to Johannesburg; accept Kimberley coordinates
+                        if (lat >= -29.2 && lat <= -28.2 && lng >= 24.2 && lng <= 25.2) {
+                            if (!"ANDROID_GPS".equals(currentSource)) {
+                                updateNativeCoordinates(lat, lng, 15.0f, "CAMPUS_NET");
+                            }
                         }
                     }
                 }
@@ -785,6 +921,23 @@ public class MainActivity extends Activity implements LocationListener {
     }
 
     private class PortalWebViewClient extends WebViewClient {
+        private boolean isRestrictedPath(String urlString) {
+            if (urlString == null) return false;
+            try {
+                Uri uri = Uri.parse(urlString);
+                String path = uri.getPath();
+                if (path == null) return false;
+                String lower = path.toLowerCase(Locale.US);
+                return lower.startsWith("/security") ||
+                       lower.startsWith("/analytics") ||
+                       lower.startsWith("/admin") ||
+                       lower.startsWith("/users") ||
+                       lower.startsWith("/user_management");
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             Uri uri = request.getUrl();
@@ -810,12 +963,15 @@ public class MainActivity extends Activity implements LocationListener {
                 return true;
             }
 
-            String path = uri.getPath() != null ? uri.getPath().toLowerCase(Locale.US) : "";
-            // Strictly restrict the mobile phone app to the Student Portal
-            if (path.startsWith("/security") || path.startsWith("/analytics") || path.startsWith("/users") || path.startsWith("/admin")) {
-                Toast.makeText(MainActivity.this, "Mobile App is restricted to the Student Safety Portal.", Toast.LENGTH_SHORT).show();
+            if (isRestrictedPath(uri.toString())) {
+                Toast.makeText(MainActivity.this, "Access Denied: Mobile App is restricted to the Student Safety Portal.", Toast.LENGTH_SHORT).show();
                 if (webView != null) {
-                    webView.loadUrl(baseUrl + "/home/");
+                    webView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            webView.loadUrl(baseUrl + "/home/");
+                        }
+                    });
                 }
                 return true;
             }
@@ -825,6 +981,16 @@ public class MainActivity extends Activity implements LocationListener {
         @Override
         public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            if (isRestrictedPath(url)) {
+                view.stopLoading();
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.loadUrl(baseUrl + "/home/");
+                    }
+                });
+                return;
+            }
             progressBar.setVisibility(View.VISIBLE);
             syncTabFromUrl(url);
             injectGeolocationBridge();
@@ -839,6 +1005,12 @@ public class MainActivity extends Activity implements LocationListener {
             }
             syncTabFromUrl(url);
             injectGeolocationBridge();
+        }
+
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            progressBar.setVisibility(View.GONE);
         }
 
         @Override

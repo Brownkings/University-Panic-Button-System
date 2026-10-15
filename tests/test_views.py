@@ -211,3 +211,28 @@ class UPBSViewTests(TestCase):
         data = response.json()
         self.assertTrue(data['success'])
         self.assertTrue(UsabilityMetric.objects.filter(id=data['metric_id']).exists())
+
+    def test_mobile_app_dashboard_restrictions(self):
+        """Verifies that requests from the UPBSStudentPortal mobile client are strictly locked to the student portal."""
+        # 1. Security Officer login via mobile app redirects to student home instead of security dashboard
+        self.client.login(username='security_user', password='password123')
+        resp = self.client.get(reverse('role_redirect'), HTTP_USER_AGENT='Mozilla/5.0 UPBSStudentPortal/2.0')
+        self.assertRedirects(resp, reverse('home'))
+
+        # 2. Attempting to access security dashboard via mobile app redirects to student home
+        resp_sec = self.client.get(reverse('security_dashboard'), HTTP_USER_AGENT='Mozilla/5.0 UPBSStudentPortal/2.0')
+        self.assertRedirects(resp_sec, reverse('home'))
+
+        # 3. Administrator login via mobile app redirects to student home instead of analytics
+        self.client.login(username='admin_user', password='password123')
+        resp_adm = self.client.get(reverse('role_redirect'), HTTP_USER_AGENT='Mozilla/5.0 UPBSStudentPortal/2.0')
+        self.assertRedirects(resp_adm, reverse('home'))
+
+        # 4. Attempting to access analytics reports via mobile app redirects to student home
+        resp_ana = self.client.get(reverse('reports_analytics'), HTTP_USER_AGENT='Mozilla/5.0 UPBSStudentPortal/2.0')
+        self.assertRedirects(resp_ana, reverse('home'))
+
+        # 5. Attempting to access user management via mobile app redirects to student home
+        resp_usr = self.client.get(reverse('user_management'), HTTP_USER_AGENT='Mozilla/5.0 UPBSStudentPortal/2.0')
+        self.assertRedirects(resp_usr, reverse('home'))
+

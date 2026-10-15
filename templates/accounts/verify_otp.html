@@ -160,14 +160,25 @@
             <span class="mfa-step-badge">STEP 02 / 02 &mdash; MFA CHALLENGE</span>
             <h1 class="mfa-title">Two-Factor Identity Verification</h1>
             <p class="mfa-desc">
-                Enter the 6-digit one-time security token dispatched via SMS to your registered mobile endpoint:
+                Enter the 6-digit one-time security token dispatched via Resend to your registered email and SMS mobile endpoint:
             </p>
-            <div class="mfa-phone-pill">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                </svg>
-                <span>{{ user_phone }}</span>
+            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.65rem;">
+                {% if user_email %}
+                    <div class="mfa-phone-pill" style="margin-top: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <span>{{ user_email }}</span>
+                    </div>
+                {% endif %}
+                <div class="mfa-phone-pill" style="margin-top: 0;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                    </svg>
+                    <span>{{ user_phone }}</span>
+                </div>
             </div>
         </div>
 

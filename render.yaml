@@ -5,7 +5,7 @@ services:
     buildCommand: ./build.sh
     startCommand: gunicorn upbs_project.wsgi:application
     plan: free
-    healthCheckPath: /login/
+    healthCheckPath: /healthz/
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.3

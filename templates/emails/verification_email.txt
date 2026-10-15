@@ -1,0 +1,16 @@
+UPBS Campus Safety — Account Verification
+
+Hello {{ user.full_name }},
+
+Thank you for enrolling your institutional profile ({{ user.institutional_id }}) into the University Panic Button & Emergency Dispatch System.
+
+Your one-time security verification code is:
+{{ otp_code }}
+
+Or verify your account directly with this link:
+{{ verify_url }}
+
+Emergency Dispatch Notice:
+This code is personal to your student/staff profile. Never share it with anyone. If you did not create this account, please immediately contact campus security at {{ support_email }}.
+
+— UPBS Campus Safety Command

@@ -402,6 +402,10 @@ def security_dashboard_view(request):
     Admin / Security Dashboard (Phase 3 Section 3.1):
     Live radar map, real-time alert polling queue, and officer dispatch controls.
     """
+    ua = request.META.get('HTTP_USER_AGENT', '')
+    if 'UPBSStudentPortal' in ua or request.headers.get('X-UPBS-Client') == 'StudentPortal':
+        return redirect('home')
+
     if not (request.user.is_security or request.user.is_admin_user):
         return HttpResponseForbidden("Access restricted to Campus Security personnel.")
 
