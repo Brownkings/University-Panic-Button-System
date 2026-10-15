@@ -211,17 +211,27 @@ if not DEBUG and os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('tru
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Resend Transactional Email Configuration
+# Transactional Email Configuration (Resend + SMTP Support)
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', '') or 'UPBS Campus Safety <onboarding@resend.dev>'
-DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', '') or RESEND_FROM_EMAIL
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
-# Use ResendEmailBackend if RESEND_API_KEY is present; fallback to console in local dev when key is absent
-EMAIL_BACKEND = os.environ.get(
-    'EMAIL_BACKEND',
-    'accounts.email_backend.ResendEmailBackend' if RESEND_API_KEY else 'django.core.mail.backends.console.EmailBackend'
-)
+# SMTP Configuration (supports Gmail SMTP, Brevo, SendGrid, or institutional SMTP relays)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+default_backend = 'django.core.mail.backends.console.EmailBackend'
+if os.environ.get('EMAIL_HOST_USER'):
+    default_backend = 'django.core.mail.backends.smtp.EmailBackend'
+elif RESEND_API_KEY:
+    default_backend = 'accounts.email_backend.ResendEmailBackend'
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', default_backend)
 
 # Password reset token expiry (24 hours in seconds)
 PASSWORD_RESET_TIMEOUT = 86400
