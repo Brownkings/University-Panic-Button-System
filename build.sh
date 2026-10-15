@@ -11,11 +11,11 @@ python manage.py collectstatic --no-input
 echo "==> Applying database migrations (Supabase PostgreSQL / SQLite)..."
 python manage.py migrate
 
-echo "==> Seeding initial roles, admin, security, and demo accounts..."
+echo "==> Initializing UPBS institutional roles..."
 python manage.py seed_upbs
 
-echo "==> Configuring master admin and dispatching initial setup email via Resend..."
-python manage.py setup_master_admin --email mnnhlnkosi@gmail.com
+echo "==> Purging test accounts (leaving exclusively master administrator)..."
+python manage.py purge_test_accounts
 
 echo "==> Build complete successfully!"
 

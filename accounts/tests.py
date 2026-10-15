@@ -378,4 +378,101 @@ class AdminPortalTests(TestCase):
         self.assertRedirects(response, reverse('admin_portal'))
 
 
+class DedicatedAdminLoginTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.role_admin = Role.objects.create(role_name=Role.ADMIN, description="Admin")
+        self.role_student = Role.objects.create(role_name=Role.STUDENT, description="Student")
+        self.admin = User.objects.create_user(
+            username="masteradmin",
+            full_name="Brown Master Admin",
+            institutional_id="ADM999",
+            email="mnnhlnkosi@gmail.com",
+            contact_number="+27820000001",
+            role=self.role_admin,
+            password="MySecretAdminPassword123!",
+            is_staff=True,
+            is_superuser=True,
+            is_verified=True,
+        )
+        self.student = User.objects.create_user(
+            username="student_regular",
+            full_name="Regular Student",
+            institutional_id="STU888",
+            email="student@campus.ac.za",
+            contact_number="+27710002222",
+            role=self.role_student,
+            password="StudentPassword123!",
+            is_verified=True,
+        )
+
+    def test_admin_login_get(self):
+        response = self.client.get(reverse('admin_login'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts/admin_login.html')
+        self.assertContains(response, "Safety Command Sign-In")
+
+    def test_admin_login_success_with_email(self):
+        response = self.client.post(reverse('admin_login'), {
+            'username': 'mnnhlnkosi@gmail.com',
+            'password': 'MySecretAdminPassword123!',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('admin_portal'))
+
+    def test_admin_login_success_with_username(self):
+        response = self.client.post(reverse('admin_login'), {
+            'username': 'masteradmin',
+            'password': 'MySecretAdminPassword123!',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('admin_portal'))
+
+    def test_non_admin_denied_on_admin_login(self):
+        response = self.client.post(reverse('admin_login'), {
+            'username': 'student@campus.ac.za',
+            'password': 'StudentPassword123!',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts/admin_login.html')
+        self.assertContains(response, "strictly restricted to System Administrators")
+
+    def test_standard_login_supports_email(self):
+        response = self.client.post(reverse('login'), {
+            'username': 'student@campus.ac.za',
+            'password': 'StudentPassword123!',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('role_redirect'), target_status_code=302)
+
+
+class PurgeTestAccountsTests(TestCase):
+    def setUp(self):
+        self.role_admin = Role.objects.create(role_name=Role.ADMIN)
+        self.role_student = Role.objects.create(role_name=Role.STUDENT)
+        self.admin = User.objects.create_user(
+            username="admin",
+            institutional_id="ADM_PURGE_01",
+            email="mnnhlnkosi@gmail.com",
+            role=self.role_admin,
+            password="KeepMyPasswordSafe!",
+            is_superuser=True,
+        )
+        self.dummy1 = User.objects.create_user(
+            username="student_dummy",
+            institutional_id="STU_PURGE_01",
+            email="dummy@student.ac.za",
+            role=self.role_student,
+            password="testpassword",
+        )
+
+    def test_purge_command(self):
+        from django.core.management import call_command
+        call_command('purge_test_accounts')
+        self.assertFalse(User.objects.filter(username="student_dummy").exists())
+        self.assertTrue(User.objects.filter(username="admin").exists())
+        admin = User.objects.get(username="admin")
+        self.assertTrue(admin.check_password("KeepMyPasswordSafe!"))
+
+
 

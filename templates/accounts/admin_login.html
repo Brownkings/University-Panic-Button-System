@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Command Sign-In | UPBS Safety Command{% endblock %}
+
+{% block extra_head %}
+<style>
+    .admin-auth-shell {
+        min-height: calc(100vh - 170px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1rem;
+        background: radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.08) 0%, rgba(15, 23, 42, 0) 70%);
+    }
+    .admin-auth-card {
+        width: 100%;
+        max-width: 480px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(220, 38, 38, 0.35);
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.65), 0 0 35px rgba(220, 38, 38, 0.12);
+        padding: 2.25rem 2rem;
+        backdrop-filter: blur(12px);
+        position: relative;
+        overflow: hidden;
+    }
+    .admin-auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #dc2626, #f59e0b, #ef4444);
+    }
+    .admin-brand-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .admin-emblem {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: rgba(220, 38, 38, 0.15);
+        border: 1px solid rgba(220, 38, 38, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ef4444;
+        margin-bottom: 1rem;
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.25);
+    }
+    .admin-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #f87171;
+        margin-bottom: 0.35rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .admin-heading {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #f8fafc;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+    .admin-subtext {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+        line-height: 1.4;
+    }
+    .admin-field-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.45rem;
+    }
+    .admin-field-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #e2e8f0;
+    }
+    .admin-field-hint {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .admin-form-control {
+        width: 100%;
+        background: #020617;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        color: #f8fafc;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .admin-form-control:focus {
+        border-color: #ef4444;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+    }
+    .admin-submit-btn {
+        width: 100%;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #ffffff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .admin-submit-btn:hover {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 0 25px rgba(220, 38, 38, 0.4);
+        transform: translateY(-1px);
+    }
+    .admin-warning-box {
+        margin-top: 1.5rem;
+        padding: 0.85rem 1rem;
+        background: rgba(220, 38, 38, 0.08);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        color: #fca5a5;
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+    .admin-footer-bar {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+    }
+    .admin-portal-link {
+        color: #94a3b8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        transition: color 0.15s ease;
+    }
+    .admin-portal-link:hover {
+        color: #f8fafc;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-auth-shell">
+    <div class="admin-auth-card">
+        <div class="admin-brand-header">
+            <div class="admin-emblem" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <span class="admin-eyebrow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+                Restricted System Administration
+            </span>
+            <h1 class="admin-heading">Safety Command Sign-In</h1>
+            <p class="admin-subtext">Unified Executive Command &amp; Emergency Incident Oversight Gateway</p>
+        </div>
+
+        <form method="POST" action="{% url 'admin_login' %}">
+            {% csrf_token %}
+            {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <div class="admin-field-header">
+                    <label class="admin-field-label" for="username">Administrator Identifier</label>
+                    <span class="admin-field-hint">Username, Email, or Admin ID</span>
+                </div>
+                <input type="text" id="username" name="username" class="admin-form-control" placeholder="e.g. admin or mnnhlnkosi@gmail.com" required autofocus>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <div class="admin-field-header">
+                    <label class="admin-field-label" for="password">Administrator Password</label>
+                    <a href="{% url 'password_reset' %}" class="admin-portal-link" style="color: #f87171; font-size: 0.78rem;">Forgot password?</a>
+                </div>
+                <input type="password" id="password" name="password" class="admin-form-control" placeholder="Enter administrator password" required>
+            </div>
+
+            <button type="submit" class="admin-submit-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                <span>Authenticate to Command Center &rarr;</span>
+            </button>
+        </form>
+
+        <div class="admin-warning-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div>
+                <strong>Restricted Gateway:</strong> All authentication sessions and administrative actions are logged with IP and telemetry audits under institutional security policy.
+            </div>
+        </div>
+
+        <div class="admin-footer-bar">
+            <a href="{% url 'login' %}" class="admin-portal-link">
+                &larr; Return to Student &amp; Staff Sign-In
+            </a>
+            <span style="color: #64748b; font-size: 0.75rem;">UPBS Command Node</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

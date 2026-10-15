@@ -1,6 +1,7 @@
 import time
 import random
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -25,15 +26,14 @@ def login_view(request):
         identifier = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
 
-        # Allow login via username or institutional_id
+        # Allow login via username, institutional_id, or email
         user = authenticate(request, username=identifier, password=password)
         if user is None:
-            # Try finding user by institutional_id
-            try:
-                matched_user = User.objects.get(institutional_id__iexact=identifier)
+            matched_user = User.objects.filter(
+                Q(institutional_id__iexact=identifier) | Q(email__iexact=identifier)
+            ).first()
+            if matched_user:
                 user = authenticate(request, username=matched_user.username, password=password)
-            except User.DoesNotExist:
-                pass
 
         if user is not None:
             if not user.is_active:
@@ -44,9 +44,62 @@ def login_view(request):
             messages.success(request, f"Welcome back, {user.full_name}!")
             return redirect('role_redirect')
         else:
-            messages.error(request, "Invalid institutional ID/username or password.")
+            messages.error(request, "Invalid institutional ID, username, email, or password.")
 
     return render(request, 'accounts/login.html')
+
+
+def admin_login_view(request):
+    """
+    Dedicated Executive Authentication Gateway for Campus Safety Administrators.
+    Restricted to system administrators, staff administrators, and superusers.
+    """
+    if request.user.is_authenticated:
+        if getattr(request.user, 'is_admin_user', False) or request.user.is_staff or request.user.is_superuser:
+            return redirect('admin_portal')
+        messages.error(request, "Access restricted to system administrators.")
+        return redirect('home')
+
+    next_url = request.GET.get('next') or request.POST.get('next') or reverse('admin_portal')
+
+    if request.method == 'POST':
+        identifier = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        user = authenticate(request, username=identifier, password=password)
+        if user is None:
+            matched_user = User.objects.filter(
+                Q(institutional_id__iexact=identifier) | Q(email__iexact=identifier)
+            ).first()
+            if matched_user:
+                user = authenticate(request, username=matched_user.username, password=password)
+
+        if user is not None:
+            # Enforce administrator role check
+            is_admin = bool(
+                user.is_superuser or 
+                user.is_staff or 
+                getattr(user, 'is_admin_user', False) or 
+                (user.role and user.role.role_name == Role.ADMIN)
+            )
+            if not is_admin:
+                messages.error(
+                    request,
+                    "Access Denied: This command gateway is strictly restricted to System Administrators. Students and security officers must sign in via the standard portal."
+                )
+                return render(request, 'accounts/admin_login.html', {'next': next_url})
+
+            if not user.is_active:
+                messages.error(request, "Administrator account has been deactivated. Contact campus safety command.")
+                return render(request, 'accounts/admin_login.html', {'next': next_url})
+
+            login(request, user)
+            messages.success(request, f"Welcome to Safety Command, {user.full_name}!")
+            return redirect(next_url)
+        else:
+            messages.error(request, "Invalid administrator institutional ID, username, email, or password.")
+
+    return render(request, 'accounts/admin_login.html', {'next': next_url})
 
 
 def register_view(request):
@@ -169,7 +222,6 @@ def role_redirect_view(request):
         return redirect('home')
 
 
-@login_required
 def admin_portal_view(request):
     """
     Unified Executive Command Portal for Campus Safety Administrators.
@@ -180,6 +232,9 @@ def admin_portal_view(request):
     - Integrated User Management & RBAC Directory
     - Empirical Usability & Satisfaction telemetry
     """
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('admin_login')}?next={request.path}")
+
     ua = request.META.get('HTTP_USER_AGENT', '')
     if 'UPBSStudentPortal' in ua or request.headers.get('X-UPBS-Client') == 'StudentPortal':
         return redirect('home')
