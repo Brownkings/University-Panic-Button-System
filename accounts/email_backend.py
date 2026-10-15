@@ -45,6 +45,8 @@ class ResendEmailBackend(BaseEmailBackend):
         for message in email_messages:
             try:
                 from_email = message.from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', 'security@youthalliance.co.za')
+                if not from_email or 'onboarding@resend.dev' in from_email:
+                    from_email = 'UPBS Campus Safety <security@youthalliance.co.za>'
                 recipients = list(message.to)
                 if not recipients:
                     continue

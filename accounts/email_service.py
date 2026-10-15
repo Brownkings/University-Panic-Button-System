@@ -42,6 +42,8 @@ def send_account_verification_email(user, otp_code=None, request=None):
 
     subject = f"UPBS Account Verification Code: {code}"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'UPBS Campus Safety <security@youthalliance.co.za>')
+    if not from_email or 'onboarding@resend.dev' in from_email:
+        from_email = 'UPBS Campus Safety <security@youthalliance.co.za>'
 
     context = {
         'user': user,
@@ -84,6 +86,8 @@ def send_password_reset_email(user, request=None):
 
     subject = "UPBS Campus Safety — Password Reset Request"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'UPBS Campus Safety <security@youthalliance.co.za>')
+    if not from_email or 'onboarding@resend.dev' in from_email:
+        from_email = 'UPBS Campus Safety <security@youthalliance.co.za>'
 
     context = {
         'user': user,
@@ -134,6 +138,8 @@ def send_account_setup_email(user, request=None, base_url=None):
 
     subject = "UPBS Campus Safety — Set Up Your Account & Password"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'UPBS Campus Safety <security@youthalliance.co.za>')
+    if not from_email or 'onboarding@resend.dev' in from_email:
+        from_email = 'UPBS Campus Safety <security@youthalliance.co.za>'
 
     context = {
         'user': user,

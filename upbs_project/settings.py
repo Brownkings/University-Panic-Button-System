@@ -213,8 +213,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Transactional Email Configuration (Resend + SMTP Support)
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
-RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', '') or 'UPBS Campus Safety <security@youthalliance.co.za>'
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', '') or RESEND_FROM_EMAIL
+_raw_resend_from = os.environ.get('RESEND_FROM_EMAIL', '').strip()
+if not _raw_resend_from or 'onboarding@resend.dev' in _raw_resend_from:
+    RESEND_FROM_EMAIL = 'UPBS Campus Safety <security@youthalliance.co.za>'
+else:
+    RESEND_FROM_EMAIL = _raw_resend_from
+
+_raw_default_from = os.environ.get('DEFAULT_FROM_EMAIL', '').strip()
+if not _raw_default_from or 'onboarding@resend.dev' in _raw_default_from:
+    DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
+else:
+    DEFAULT_FROM_EMAIL = _raw_default_from
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # SMTP Configuration (supports Gmail SMTP, Brevo, SendGrid, or institutional SMTP relays)
