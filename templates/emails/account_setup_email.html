@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Your UPBS Account &amp; Set Password</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #f8fafc;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #0b0f19;
+            padding: 32px 16px;
+        }
+        .container {
+            max-width: 540px;
+            margin: 0 auto;
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            padding: 24px 28px;
+            border-bottom: 1px solid #334155;
+            text-align: center;
+        }
+        .brand-badge {
+            display: inline-block;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            margin-bottom: 8px;
+        }
+        .title {
+            color: #f8fafc;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+        .content {
+            padding: 28px;
+        }
+        .greeting {
+            font-size: 15px;
+            color: #cbd5e1;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        .text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background-color: #0b1120;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .info-card strong {
+            color: #f8fafc;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin: 28px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 13px 32px;
+            border-radius: 8px;
+            letter-spacing: 0.02em;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .link-alt {
+            background-color: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 12px;
+            word-break: break-all;
+            font-size: 12px;
+            color: #60a5fa;
+            font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+            margin-bottom: 20px;
+        }
+        .security-notice {
+            background-color: rgba(59, 130, 246, 0.08);
+            border-left: 3px solid #3b82f6;
+            padding: 12px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #93c5fd;
+            line-height: 1.5;
+            margin-top: 24px;
+        }
+        .footer {
+            padding: 20px 28px;
+            border-top: 1px solid #1e293b;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="brand-badge">UPBS Enrollment &bull; Access Protocol</div>
+                <h1 class="title">Activate Your Account &amp; Set Password</h1>
+            </div>
+            <div class="content">
+                <p class="greeting">Hello {{ user.full_name }},</p>
+                <p class="text">
+                    Your institutional profile has been enrolled on the <strong>University Panic Button &amp; Emergency Dispatch System (UPBS)</strong>.
+                </p>
+
+                <div class="info-card">
+                    <div><strong>Institutional ID:</strong> {{ user.institutional_id }}</div>
+                    <div><strong>Username:</strong> {{ user.username }}</div>
+                    <div><strong>Assigned System Role:</strong> {{ user.role.get_role_name_display|default:"Campus Member" }}</div>
+                </div>
+
+                <p class="text">
+                    To activate your account and choose your secure password, click the button below. This activation link is valid for {{ timeout_hours }} hours:
+                </p>
+
+                <div class="btn-wrapper">
+                    <a href="{{ setup_url }}" class="btn" target="_blank">Activate Account &amp; Set Password &rarr;</a>
+                </div>
+
+                <p class="text" style="font-size: 12px; margin-bottom: 8px;">
+                    If the button above does not work, copy and paste the following link into your web browser:
+                </p>
+                <div class="link-alt">{{ setup_url }}</div>
+
+                <div class="security-notice">
+                    <strong>Campus Safety Notice:</strong> Once your password is set, your account is immediately verified and active. You can log into the student portal, security radar, or admin command center using your username or institutional ID. If you did not expect this invitation, please notify dispatch at <a href="mailto:{{ support_email }}" style="color: #60a5fa;">{{ support_email }}</a>.
+                </div>
+            </div>
+            <div class="footer">
+                &copy; University Panic Button System (UPBS) &bull; Campus Safety Command<br>
+                Identity telemetry protected under campus safety protocols.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

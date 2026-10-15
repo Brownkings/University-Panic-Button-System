@@ -14,13 +14,16 @@ from django.urls import reverse
 logger = logging.getLogger(__name__)
 
 
-def build_absolute_url(request, path):
-    """Safely builds an absolute URL using request or settings fallback."""
+def build_absolute_url(request, path, base_url=None):
+    """Safely builds an absolute URL using base_url, request, or settings fallback."""
+    if base_url:
+        return f"{base_url.rstrip('/')}{path}"
     if request:
         return request.build_absolute_uri(path)
     base_domain = getattr(settings, 'RENDER_EXTERNAL_HOSTNAME', None) or 'youthalliance.co.za'
-    protocol = 'https' if not getattr(settings, 'DEBUG', False) else 'http'
+    protocol = 'https' if ('youthalliance.co.za' in base_domain or not getattr(settings, 'DEBUG', False)) else 'http'
     return f"{protocol}://{base_domain}{path}"
+
 
 
 def send_account_verification_email(user, otp_code=None, request=None):
@@ -106,3 +109,47 @@ def send_password_reset_email(user, request=None):
     except Exception as exc:
         logger.exception("Failed to send password reset email to %s: %s", user.email, exc)
         return False
+
+
+def send_account_setup_email(user, request=None, base_url=None):
+    """
+    Sends an account activation and initial password setup email to a newly provisioned student,
+    staff member, officer, or administrator via Resend.
+    """
+    if not user.email:
+        logger.warning("User %s has no email address. Skipping account setup email.", user.institutional_id)
+        return False
+
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    setup_path = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+    setup_url = build_absolute_url(request, setup_path, base_url=base_url)
+
+    subject = "UPBS Campus Safety — Set Up Your Account & Password"
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'UPBS Campus Safety <onboarding@resend.dev>')
+
+    context = {
+        'user': user,
+        'setup_url': setup_url,
+        'timeout_hours': 24,
+        'support_email': 'security@campus.ac.za',
+    }
+
+    try:
+        text_content = render_to_string('emails/account_setup_email.txt', context)
+        html_content = render_to_string('emails/account_setup_email.html', context)
+
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=from_email,
+            to=[user.email],
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+        logger.info("Account setup email dispatched to %s for user %s", user.email, user.institutional_id)
+        return True
+    except Exception as exc:
+        logger.exception("Failed to send account setup email to %s: %s", user.email, exc)
+        return False
+

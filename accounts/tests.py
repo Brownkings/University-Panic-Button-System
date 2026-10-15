@@ -7,7 +7,7 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from accounts.models import User, Role
 from accounts.email_backend import ResendEmailBackend
-from accounts.email_service import send_account_verification_email, send_password_reset_email
+from accounts.email_service import send_account_verification_email, send_password_reset_email, send_account_setup_email
 
 
 class ResendEmailBackendTests(TestCase):
@@ -168,8 +168,8 @@ class AccountsEmailFlowTests(TestCase):
         login_success = self.client.login(username='student1', password='BrandNewPassword123!')
         self.assertTrue(login_success)
 
-    @patch('accounts.views.send_password_reset_email')
-    def test_admin_create_user_with_reset_email(self, mock_send_email):
+    @patch('accounts.views.send_account_setup_email')
+    def test_admin_create_user_with_setup_email(self, mock_send_email):
         mock_send_email.return_value = True
         role_admin = Role.objects.create(role_name=Role.ADMIN, description="Admin Role")
         admin = User.objects.create_user(
@@ -192,18 +192,17 @@ class AccountsEmailFlowTests(TestCase):
             'contact_number': '+27720001122',
             'role': 'STUDENT',
             'password': '',
-            'send_reset': '1',
         })
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('user_management'))
 
         created = User.objects.get(institutional_id='202477889')
-        self.assertTrue(created.is_verified)
+        self.assertFalse(created.is_verified)
         self.assertTrue(created.is_active)
         self.assertEqual(created.role.role_name, Role.STUDENT)
         mock_send_email.assert_called_once_with(created, request=mock_send_email.call_args[1]['request'])
 
-    @patch('accounts.views.send_password_reset_email')
+    @patch('accounts.views.send_account_setup_email')
     def test_admin_send_reset_email_view(self, mock_send_email):
         mock_send_email.return_value = True
         role_admin = Role.objects.create(role_name=Role.ADMIN, description="Admin Role 2")
@@ -224,6 +223,18 @@ class AccountsEmailFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('user_management'))
         mock_send_email.assert_called_once_with(self.user, request=mock_send_email.call_args[1]['request'])
+
+    @patch('accounts.management.commands.setup_master_admin.send_account_setup_email')
+    def test_setup_master_admin_command(self, mock_send_email):
+        from django.core.management import call_command
+        mock_send_email.return_value = True
+        call_command('setup_master_admin', email='mnnhlnkosi@gmail.com')
+        admin = User.objects.get(email='mnnhlnkosi@gmail.com')
+        self.assertTrue(admin.is_superuser)
+        self.assertTrue(admin.is_staff)
+        self.assertEqual(admin.role.role_name, Role.ADMIN)
+        mock_send_email.assert_called_once()
+
 
 
 class HealthCheckAndKeepaliveTests(TestCase):

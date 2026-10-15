@@ -949,10 +949,12 @@
                 </div>
 
                 <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                    <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: #cbd5e1; cursor: pointer;">
-                        <input type="checkbox" name="send_reset" value="1" checked style="accent-color: #3b82f6;">
-                        <span>Dispatch password setup email to user via Resend transactional email</span>
-                    </label>
+                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: #93c5fd;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Account activation &amp; password setup email will automatically be dispatched to the user via Resend</span>
+                    </div>
 
                     <div style="display: flex; gap: 0.6rem;">
                         <button type="button" onclick="toggleEnrollModal()" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(148, 163, 184, 0.2); color: #cbd5e1; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">Cancel</button>

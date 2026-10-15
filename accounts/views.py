@@ -11,7 +11,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import connection
 from django.db.models import Count, Avg, Q
 from .models import User, Role
-from .email_service import send_account_verification_email, send_password_reset_email
+from .email_service import send_account_verification_email, send_password_reset_email, send_account_setup_email
 from alerts.models import EmergencyAlert
 from incidents.models import IncidentReport
 from feedback.models import Feedback, UsabilityMetric
@@ -405,17 +405,24 @@ def admin_create_user_view(request):
             email=email,
             contact_number=contact_number,
             role=role,
-            is_verified=True,
+            is_verified=False,
             is_active=True
         )
         new_user.set_password(initial_password)
         new_user.save()
 
-        if send_reset:
-            send_password_reset_email(new_user, request=request)
-            messages.success(request, f"Student/Staff {new_user.full_name} ({institutional_id}) provisioned successfully! Password setup email dispatched via Resend.")
+        # Any new student/user added by admin to the database must receive an email to set up passwords and activate their account
+        if new_user.email:
+            send_account_setup_email(new_user, request=request)
+            messages.success(
+                request,
+                f"User {new_user.full_name} ({institutional_id}) provisioned successfully! An email has been dispatched to {new_user.email} via Resend to set up their password and activate their account."
+            )
         else:
-            messages.success(request, f"Student/Staff {new_user.full_name} ({institutional_id}) provisioned with temporary password: {initial_password}")
+            messages.success(
+                request,
+                f"User {new_user.full_name} ({institutional_id}) provisioned with temporary password: {initial_password}"
+            )
 
         return redirect(target_dest)
 
@@ -425,7 +432,7 @@ def admin_create_user_view(request):
 @login_required
 def admin_send_reset_email_view(request, user_id):
     """
-    Enables administrators to send a password reset link to any registered student or staff member via Resend.
+    Enables administrators to send an activation / password setup link to any registered user via Resend.
     """
     if not request.user.is_admin_user:
         messages.error(request, "Access restricted to administrators.")
@@ -436,8 +443,12 @@ def admin_send_reset_email_view(request, user_id):
 
     target_user = get_object_or_404(User, id=user_id)
     if target_user.email:
-        send_password_reset_email(target_user, request=request)
-        messages.success(request, f"Password reset email dispatched to {target_user.email} via Resend.")
+        if not target_user.is_verified:
+            send_account_setup_email(target_user, request=request)
+            messages.success(request, f"Account setup & activation email dispatched to {target_user.email} via Resend.")
+        else:
+            send_password_reset_email(target_user, request=request)
+            messages.success(request, f"Password reset email dispatched to {target_user.email} via Resend.")
     else:
         messages.error(request, f"User {target_user.full_name} has no institutional email address on file.")
 
@@ -533,8 +544,9 @@ def password_reset_confirm_view(request, uidb64, token):
 
         user.set_password(new_password)
         user.is_active = True
+        user.is_verified = True
         user.save()
-        messages.success(request, "Your password has been successfully reset. Please log in with your new credentials.")
+        messages.success(request, "Your password has been successfully set and your account is now fully activated. Please log in with your credentials.")
         return redirect('password_reset_complete')
 
     return render(request, 'accounts/password_reset_confirm.html', {'validlink': True, 'user': user})

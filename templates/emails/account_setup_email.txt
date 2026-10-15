@@ -1,0 +1,18 @@
+UPBS Campus Safety — Activate Your Account & Set Password
+
+Hello {{ user.full_name }},
+
+Your institutional profile has been enrolled on the University Panic Button & Emergency Dispatch System (UPBS).
+
+Account Details:
+- Institutional ID: {{ user.institutional_id }}
+- Username: {{ user.username }}
+- Assigned System Role: {{ user.role.get_role_name_display|default:"Campus Member" }}
+
+To activate your account and choose your secure password, visit the following secure link (valid for {{ timeout_hours }} hours):
+{{ setup_url }}
+
+Campus Safety Notice:
+Once your password is set, your account is immediately verified and active. You can log into the student portal, security radar, or admin command center using your username or institutional ID. If you did not expect this invitation, please notify dispatch at {{ support_email }}.
+
+— UPBS Campus Safety Command
