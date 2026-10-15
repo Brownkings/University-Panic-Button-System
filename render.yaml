@@ -22,5 +22,5 @@ services:
       - key: RESEND_API_KEY
         sync: false # Set in Render Dashboard with your Resend API key
       - key: RESEND_FROM_EMAIL
-        value: "UPBS Campus Safety <onboarding@resend.dev>"
+        value: "UPBS Campus Safety <security@youthalliance.co.za>"
 
