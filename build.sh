@@ -14,5 +14,8 @@ python manage.py migrate
 echo "==> Seeding initial roles, admin, security, and demo accounts..."
 python manage.py seed_upbs
 
+echo "==> Configuring master admin and dispatching initial setup email via Resend..."
+python manage.py setup_master_admin --email mnnhlnkosi@gmail.com
+
 echo "==> Build complete successfully!"
 

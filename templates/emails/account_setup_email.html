@@ -142,10 +142,19 @@
                     Your institutional profile has been enrolled on the <strong>University Panic Button &amp; Emergency Dispatch System (UPBS)</strong>.
                 </p>
 
-                <div class="info-card">
-                    <div><strong>Institutional ID:</strong> {{ user.institutional_id }}</div>
-                    <div><strong>Username:</strong> {{ user.username }}</div>
-                    <div><strong>Assigned System Role:</strong> {{ user.role.get_role_name_display|default:"Campus Member" }}</div>
+                <div class="info-card" style="background-color: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px 20px; margin-bottom: 22px; color: #f8fafc;">
+                    <div style="margin-bottom: 9px; font-size: 14px; color: #f8fafc;">
+                        <span style="color: #cbd5e1; font-weight: 600;">Institutional ID:</span>
+                        <span style="color: #ffffff; font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 14px; font-weight: 700; background: rgba(59, 130, 246, 0.25); border: 1px solid rgba(96, 165, 250, 0.4); padding: 2px 8px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.04em;">{{ user.institutional_id }}</span>
+                    </div>
+                    <div style="margin-bottom: 9px; font-size: 14px; color: #f8fafc;">
+                        <span style="color: #cbd5e1; font-weight: 600;">Username:</span>
+                        <span style="color: #38bdf8; font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 14px; font-weight: 700; margin-left: 6px;">{{ user.username }}</span>
+                    </div>
+                    <div style="font-size: 14px; color: #f8fafc;">
+                        <span style="color: #cbd5e1; font-weight: 600;">Assigned System Role:</span>
+                        <span style="color: #34d399; font-size: 14px; font-weight: 700; margin-left: 6px;">{{ user.role.get_role_name_display|default:"Campus Member" }}</span>
+                    </div>
                 </div>
 
                 <p class="text">

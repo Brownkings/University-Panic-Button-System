@@ -86,12 +86,17 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"✓ Created new master admin account: {user.username} ({user.email})"))
 
         # Dispatch account setup email via Resend
-        sent = send_account_setup_email(user, base_url=base_url)
-        if sent:
-            self.stdout.write(self.style.SUCCESS(
-                f"✓ Initial account setup and password configuration email successfully dispatched via Resend to {user.email}!"
-            ))
-        else:
+        try:
+            sent = send_account_setup_email(user, base_url=base_url)
+            if sent:
+                self.stdout.write(self.style.SUCCESS(
+                    f"✓ Initial account setup and password configuration email successfully dispatched via Resend to {user.email}!"
+                ))
+            else:
+                self.stdout.write(self.style.WARNING(
+                    f"⚠ Resend dispatch returned False. Check RESEND_API_KEY."
+                ))
+        except Exception as exc:
             self.stdout.write(self.style.WARNING(
-                f"⚠ Resend dispatch returned False. Check RESEND_API_KEY."
+                f"⚠ Error sending account setup email: {exc}"
             ))

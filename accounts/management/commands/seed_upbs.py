@@ -31,9 +31,9 @@ class Command(BaseCommand):
         admin_user, created = User.objects.get_or_create(
             username="admin",
             defaults={
-                'full_name': "Administrator System",
+                'full_name': "Brown Nkosi (Master Administrator)",
                 'institutional_id': "ADMIN001",
-                'email': "admin@campus.ac.za",
+                'email': "mnnhlnkosi@gmail.com",
                 'contact_number': "+27820000001",
                 'role': roles[Role.ADMIN],
                 'is_staff': True,
@@ -44,7 +44,12 @@ class Command(BaseCommand):
         if created:
             admin_user.set_password("password123")
             admin_user.save()
-        self.stdout.write(self.style.SUCCESS(f"✓ Admin account ready: {admin_user.username} (password123)"))
+        else:
+            if admin_user.email != "mnnhlnkosi@gmail.com" or admin_user.full_name != "Brown Nkosi (Master Administrator)":
+                admin_user.email = "mnnhlnkosi@gmail.com"
+                admin_user.full_name = "Brown Nkosi (Master Administrator)"
+                admin_user.save()
+        self.stdout.write(self.style.SUCCESS(f"✓ Admin account ready: {admin_user.username} ({admin_user.email})"))
 
         # 3. Create Security Officers (Multi-Unit Kimberley Campus Patrol Fleet)
         sec_user, created = User.objects.get_or_create(
