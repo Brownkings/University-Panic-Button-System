@@ -26,18 +26,18 @@
     <!-- Enterprise Command Navigation Header -->
     <nav class="navbar" aria-label="Primary Command Navigation">
         <div class="nav-brand-group">
-            <a href="{% url 'home' %}" class="nav-brand">
-                <span class="brand-mark" aria-hidden="true">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <a href="{% url 'home' %}" class="nav-brand" aria-label="UPBS Campus Safety Home">
+                <span class="brand-shield-pill">
+                    <svg class="brand-shield-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <path d="M12 8v4"></path>
-                        <path d="M12 16h.01"></path>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
+                    <span class="brand-shield-text">UPBS</span>
                 </span>
-                <span class="brand-badge">UPBS</span>
                 <span class="brand-title">
-                    <span>Campus Safety Command</span>
-                    <span class="brand-subtitle">Critical Event Dispatch</span>
+                    <span class="brand-name">Campus Safety</span>
+                    <span class="brand-subtitle">Emergency Dispatch</span>
                 </span>
             </a>
 
@@ -47,7 +47,19 @@
             </div>
         </div>
 
-        <ul class="nav-links">
+        <!-- Mobile Header Controls -->
+        <div class="nav-mobile-actions">
+            <div class="mobile-status-dot" title="Telemetry Active"></div>
+            <button class="nav-mobile-toggle" id="navMobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg class="hamburger-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12" class="line-mid"></line>
+                    <line x1="3" y1="6" x2="21" y2="6" class="line-top"></line>
+                    <line x1="3" y1="18" x2="21" y2="18" class="line-bot"></line>
+                </svg>
+            </button>
+        </div>
+
+        <ul class="nav-links" id="navLinksMenu">
             {% if user.is_authenticated %}
                 <li>
                     <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
@@ -181,6 +193,7 @@
             {% endif %}
         </ul>
     </nav>
+    <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
 
     <!-- Main Content Container -->
     <main class="main-content">
@@ -231,6 +244,54 @@
             </div>
         </div>
     </footer>
+
+    <script>
+    (function() {
+        var toggleBtn = document.getElementById('navMobileToggle');
+        var backdrop = document.getElementById('navBackdrop');
+        var navbar = document.querySelector('.navbar');
+
+        if (!toggleBtn || !navbar) return;
+
+        function toggleMenu(forceOpen) {
+            var isOpen = (typeof forceOpen === 'boolean') ? forceOpen : !navbar.classList.contains('mobile-menu-open');
+            if (isOpen) {
+                navbar.classList.add('mobile-menu-open');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                if (backdrop) backdrop.classList.add('is-active');
+                document.body.classList.add('nav-locked');
+            } else {
+                navbar.classList.remove('mobile-menu-open');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                if (backdrop) backdrop.classList.remove('is-active');
+                document.body.classList.remove('nav-locked');
+            }
+        }
+
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        if (backdrop) {
+            backdrop.addEventListener('click', function() {
+                toggleMenu(false);
+            });
+        }
+
+        document.querySelectorAll('.nav-links a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                toggleMenu(false);
+            });
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                toggleMenu(false);
+            }
+        });
+    })();
+    </script>
 
     {% block extra_scripts %}{% endblock %}
 </body>
