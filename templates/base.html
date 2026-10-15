@@ -95,6 +95,17 @@
 
                 {% if user.is_admin_user %}
                     <li>
+                        <a href="{% url 'admin_portal' %}" class="nav-link nav-link-admin {% if request.resolver_match.url_name == 'admin_portal' %}active{% endif %}">
+                            <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Admin Portal</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{% url 'reports_analytics' %}" class="nav-link nav-link-analytics {% if request.resolver_match.url_name == 'reports_analytics' %}active{% endif %}">
                             <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>

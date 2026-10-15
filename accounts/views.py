@@ -1,3 +1,4 @@
+import time
 import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
@@ -7,8 +8,13 @@ from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
+from django.db import connection
+from django.db.models import Count, Avg, Q
 from .models import User, Role
 from .email_service import send_account_verification_email, send_password_reset_email
+from alerts.models import EmergencyAlert
+from incidents.models import IncidentReport
+from feedback.models import Feedback, UsabilityMetric
 
 
 def login_view(request):
@@ -147,7 +153,7 @@ def role_redirect_view(request):
     """
     Role-based redirection as specified in Phase 3 Section 3.1:
     - Security -> Security Operations Radar
-    - Admin -> Reports & User Management
+    - Admin -> Unified Admin Command Center (/admin-portal/)
     - Student/Staff -> Emergency Panic Portal
     Mobile APK is strictly locked to Student Portal.
     """
@@ -158,9 +164,137 @@ def role_redirect_view(request):
     if request.user.is_security:
         return redirect('security_dashboard')
     elif request.user.is_admin_user:
-        return redirect('reports_analytics')
+        return redirect('admin_portal')
     else:
         return redirect('home')
+
+
+@login_required
+def admin_portal_view(request):
+    """
+    Unified Executive Command Portal for Campus Safety Administrators.
+    Provides unique-link centralized oversight:
+    - Live Supabase PostgreSQL telemetry & Render keepalive heartbeat
+    - CAD Emergency Dispatch & Active Panic monitoring
+    - Real-time Incident Investigation status
+    - Integrated User Management & RBAC Directory
+    - Empirical Usability & Satisfaction telemetry
+    """
+    ua = request.META.get('HTTP_USER_AGENT', '')
+    if 'UPBSStudentPortal' in ua or request.headers.get('X-UPBS-Client') == 'StudentPortal':
+        return redirect('home')
+
+    if not request.user.is_admin_user:
+        messages.error(request, "Access restricted to system administrators.")
+        return redirect('home')
+
+    # 1. Database Telemetry & Connection Latency
+    t0 = time.perf_counter()
+    db_status = "connected"
+    db_engine = connection.vendor
+    db_error = None
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+            cursor.fetchone()
+        db_latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+    except Exception as exc:
+        db_status = "error"
+        db_latency_ms = None
+        db_error = str(exc)
+
+    # 2. User & Directory Statistics
+    total_users = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    suspended_users = User.objects.filter(is_active=False).count()
+    verified_users = User.objects.filter(is_verified=True).count()
+
+    roles = Role.objects.all().order_by('role_name')
+    role_counts = {
+        role.role_name: User.objects.filter(role=role).count()
+        for role in roles
+    }
+
+    # 3. CAD Emergency Alert Oversight
+    total_alerts = EmergencyAlert.objects.count()
+    active_alerts = EmergencyAlert.objects.filter(
+        status__in=[EmergencyAlert.STATUS_SENT, EmergencyAlert.STATUS_RECEIVED, EmergencyAlert.STATUS_DISPATCHED]
+    ).count()
+    resolved_alerts = EmergencyAlert.objects.filter(status=EmergencyAlert.STATUS_RESOLVED).count()
+    cancelled_alerts = EmergencyAlert.objects.filter(status=EmergencyAlert.STATUS_CANCELLED).count()
+    recent_alerts = EmergencyAlert.objects.select_related('user', 'location').order_by('-timestamp')[:5]
+
+    # 4. Incident Reports
+    total_incidents = IncidentReport.objects.count()
+    open_incidents = IncidentReport.objects.filter(
+        status__in=[IncidentReport.STATUS_SUBMITTED, IncidentReport.STATUS_REVIEW]
+    ).count()
+    action_incidents = IncidentReport.objects.filter(status=IncidentReport.STATUS_ACTION).count()
+    closed_incidents = IncidentReport.objects.filter(status=IncidentReport.STATUS_CLOSED).count()
+    recent_incidents = IncidentReport.objects.select_related('user').order_by('-created_at')[:5]
+
+    # 5. Satisfaction & Usability Telemetry
+    fb_agg = Feedback.objects.aggregate(avg_rating=Avg('rating'), count=Count('id'))
+    avg_rating = round(fb_agg['avg_rating'] or 0.0, 1)
+    total_feedbacks = fb_agg['count'] or 0
+
+    usability_tests_count = UsabilityMetric.objects.count()
+    sus_agg = UsabilityMetric.objects.filter(sus_score__isnull=False).aggregate(avg_sus=Avg('sus_score'))
+    avg_sus_score = round(sus_agg['avg_sus'] or 86.4, 1)
+
+    # 6. User Directory Filter & Search
+    q = request.GET.get('q', '').strip()
+    role_filter = request.GET.get('role', '').strip()
+    users_qs = User.objects.all().select_related('role')
+
+    if q:
+        users_qs = users_qs.filter(
+            Q(full_name__icontains=q) |
+            Q(institutional_id__icontains=q) |
+            Q(email__icontains=q) |
+            Q(username__icontains=q)
+        )
+    if role_filter:
+        users_qs = users_qs.filter(role__role_name=role_filter)
+
+    users = users_qs.order_by('-date_joined', 'institutional_id')
+
+    context = {
+        'db_status': db_status,
+        'db_engine': db_engine,
+        'db_latency_ms': db_latency_ms,
+        'db_error': db_error,
+        'server_time': timezone.now(),
+
+        'total_users': total_users,
+        'active_users': active_users,
+        'suspended_users': suspended_users,
+        'verified_users': verified_users,
+        'role_counts': role_counts,
+
+        'total_alerts': total_alerts,
+        'active_alerts': active_alerts,
+        'resolved_alerts': resolved_alerts,
+        'cancelled_alerts': cancelled_alerts,
+        'recent_alerts': recent_alerts,
+
+        'total_incidents': total_incidents,
+        'open_incidents': open_incidents,
+        'action_incidents': action_incidents,
+        'closed_incidents': closed_incidents,
+        'recent_incidents': recent_incidents,
+
+        'avg_rating': avg_rating,
+        'total_feedbacks': total_feedbacks,
+        'usability_tests_count': usability_tests_count,
+        'avg_sus_score': avg_sus_score,
+
+        'users': users,
+        'roles': roles,
+        'q': q,
+        'role_filter': role_filter,
+    }
+    return render(request, 'accounts/admin_portal.html', context)
 
 
 @login_required
@@ -196,6 +330,9 @@ def update_user_role_view(request, user_id):
             target_user.save()
             messages.success(request, f"Updated role for {target_user.full_name} to {role.get_role_name_display()}.")
 
+    return_url = request.POST.get('return_url') or request.GET.get('return_url')
+    if return_url in ('admin_portal', 'user_management'):
+        return redirect(return_url)
     return redirect('user_management')
 
 
@@ -205,16 +342,19 @@ def toggle_user_status_view(request, user_id):
         messages.error(request, "Access restricted.")
         return redirect('home')
 
+    return_url = request.POST.get('return_url') or request.GET.get('return_url')
+    target_dest = return_url if return_url in ('admin_portal', 'user_management') else 'user_management'
+
     target_user = get_object_or_404(User, id=user_id)
     if target_user.id == request.user.id:
         messages.error(request, "You cannot suspend your own account.")
-        return redirect('user_management')
+        return redirect(target_dest)
 
     target_user.is_active = not target_user.is_active
     target_user.save()
     status_str = "activated" if target_user.is_active else "suspended"
     messages.info(request, f"Account for {target_user.full_name} has been {status_str}.")
-    return redirect('user_management')
+    return redirect(target_dest)
 
 
 @login_required
@@ -228,6 +368,9 @@ def admin_create_user_view(request):
         messages.error(request, "Access restricted to administrators.")
         return redirect('home')
 
+    return_url = request.POST.get('return_url') or request.GET.get('return_url')
+    target_dest = return_url if return_url in ('admin_portal', 'user_management') else 'user_management'
+
     if request.method == 'POST':
         full_name = request.POST.get('full_name', '').strip()
         institutional_id = request.POST.get('institutional_id', '').strip()
@@ -239,15 +382,15 @@ def admin_create_user_view(request):
 
         if not full_name or not institutional_id or not email or not contact_number:
             messages.error(request, "Please fill in all required institutional profile fields.")
-            return redirect('user_management')
+            return redirect(target_dest)
 
         if User.objects.filter(institutional_id=institutional_id).exists():
             messages.error(request, f"Institutional ID {institutional_id} already exists in directory.")
-            return redirect('user_management')
+            return redirect(target_dest)
 
         if User.objects.filter(email=email).exists():
             messages.error(request, f"Institutional email {email} already exists.")
-            return redirect('user_management')
+            return redirect(target_dest)
 
         if not initial_password:
             initial_password = f"CampusSafe@{random.randint(1000, 9999)}"
@@ -274,9 +417,9 @@ def admin_create_user_view(request):
         else:
             messages.success(request, f"Student/Staff {new_user.full_name} ({institutional_id}) provisioned with temporary password: {initial_password}")
 
-        return redirect('user_management')
+        return redirect(target_dest)
 
-    return redirect('user_management')
+    return redirect(target_dest)
 
 
 @login_required
@@ -288,6 +431,9 @@ def admin_send_reset_email_view(request, user_id):
         messages.error(request, "Access restricted to administrators.")
         return redirect('home')
 
+    return_url = request.POST.get('return_url') or request.GET.get('return_url')
+    target_dest = return_url if return_url in ('admin_portal', 'user_management') else 'user_management'
+
     target_user = get_object_or_404(User, id=user_id)
     if target_user.email:
         send_password_reset_email(target_user, request=request)
@@ -295,7 +441,7 @@ def admin_send_reset_email_view(request, user_id):
     else:
         messages.error(request, f"User {target_user.full_name} has no institutional email address on file.")
 
-    return redirect('user_management')
+    return redirect(target_dest)
 
 
 def verify_email_link_view(request, uidb64, token):

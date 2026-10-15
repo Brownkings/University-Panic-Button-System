@@ -255,3 +255,116 @@ class HealthCheckAndKeepaliveTests(TestCase):
         self.assertEqual(result['http_status'], 200)
 
 
+class AdminPortalTests(TestCase):
+    """Unit and integration tests for the dedicated Admin Command Center (/admin-portal/)."""
+
+    def setUp(self):
+        self.client = Client()
+        self.role_admin, _ = Role.objects.get_or_create(role_name=Role.ADMIN, defaults={'description': 'Admin'})
+        self.role_security, _ = Role.objects.get_or_create(role_name=Role.SECURITY, defaults={'description': 'Officer'})
+        self.role_student, _ = Role.objects.get_or_create(role_name=Role.STUDENT, defaults={'description': 'Student'})
+        self.role_staff, _ = Role.objects.get_or_create(role_name=Role.STAFF, defaults={'description': 'Staff'})
+
+        self.admin = User.objects.create_user(
+            username="portal_admin",
+            full_name="Command Admin",
+            institutional_id="ADM001",
+            email="portal_admin@campus.ac.za",
+            contact_number="+27820000001",
+            role=self.role_admin,
+            password="adminpassword123",
+            is_staff=True,
+            is_verified=True
+        )
+
+        self.student = User.objects.create_user(
+            username="portal_student",
+            full_name="Portal Student",
+            institutional_id="STU001",
+            email="portal_student@campus.ac.za",
+            contact_number="+27820000002",
+            role=self.role_student,
+            password="studentpassword123",
+            is_verified=True
+        )
+
+        self.officer = User.objects.create_user(
+            username="portal_officer",
+            full_name="Portal Officer",
+            institutional_id="SEC001",
+            email="portal_officer@campus.ac.za",
+            contact_number="+27820000003",
+            role=self.role_security,
+            password="officerpassword123",
+            is_verified=True
+        )
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse('admin_portal'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login/', response.url)
+        self.assertIn('next=/admin-portal/', response.url)
+
+    def test_student_forbidden(self):
+        self.client.login(username="portal_student", password="studentpassword123")
+        response = self.client.get(reverse('admin_portal'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('home'))
+
+    def test_security_officer_forbidden(self):
+        self.client.login(username="portal_officer", password="officerpassword123")
+        response = self.client.get(reverse('admin_portal'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('home'))
+
+    def test_admin_access_granted(self):
+        self.client.login(username="portal_admin", password="adminpassword123")
+        response = self.client.get(reverse('admin_portal'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts/admin_portal.html')
+        self.assertContains(response, "Admin Command Center")
+        self.assertContains(response, "/admin-portal/")
+        self.assertContains(response, "Institutional Principals")
+        self.assertEqual(response.context['db_status'], 'connected')
+        self.assertGreaterEqual(response.context['total_users'], 3)
+
+    def test_mobile_client_blocked(self):
+        self.client.login(username="portal_admin", password="adminpassword123")
+        response = self.client.get(reverse('admin_portal'), HTTP_USER_AGENT='UPBSStudentPortal/1.0')
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('home'))
+
+    def test_role_redirect_for_admin(self):
+        self.client.login(username="portal_admin", password="adminpassword123")
+        response = self.client.get(reverse('role_redirect'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('admin_portal'))
+
+    def test_admin_portal_search_filter(self):
+        self.client.login(username="portal_admin", password="adminpassword123")
+        response = self.client.get(reverse('admin_portal') + '?q=STU001')
+        self.assertEqual(response.status_code, 200)
+        users = list(response.context['users'])
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0].institutional_id, "STU001")
+
+    def test_actions_return_url_support(self):
+        self.client.login(username="portal_admin", password="adminpassword123")
+        # Toggle status with return_url=admin_portal
+        response = self.client.post(
+            reverse('toggle_user_status', kwargs={'user_id': self.student.id}),
+            {'return_url': 'admin_portal'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('admin_portal'))
+
+        # Update role with return_url=admin_portal
+        response = self.client.post(
+            reverse('update_user_role', kwargs={'user_id': self.student.id}),
+            {'role_name': Role.STAFF, 'return_url': 'admin_portal'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('admin_portal'))
+
+
+

@@ -930,6 +930,7 @@ public class MainActivity extends Activity implements LocationListener {
                 String lower = path.toLowerCase(Locale.US);
                 return lower.startsWith("/security") ||
                        lower.startsWith("/analytics") ||
+                       lower.startsWith("/admin-portal") ||
                        lower.startsWith("/admin") ||
                        lower.startsWith("/users") ||
                        lower.startsWith("/user_management");

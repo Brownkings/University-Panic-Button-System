@@ -1,0 +1,1151 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Command Center — UPBS System Administration{% endblock %}
+
+{% block extra_head %}
+<style>
+    .admin-portal-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 3rem 1rem;
+    }
+
+    /* Command Center Header */
+    .admin-hero {
+        background: radial-gradient(120% 120% at 50% 0%, rgba(30, 58, 138, 0.28) 0%, rgba(15, 23, 42, 0.88) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.28);
+        border-radius: 16px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    .admin-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #60a5fa, #10b981, #f59e0b, #ef4444);
+    }
+    .admin-hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+    }
+    .admin-title-box {
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+    }
+    .admin-portal-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(30, 58, 138, 0.65));
+        border: 1px solid rgba(96, 165, 250, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #93c5fd;
+        box-shadow: 0 8px 16px -4px rgba(37, 99, 235, 0.35);
+    }
+    .admin-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #60a5fa;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .admin-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #f8fafc;
+        margin: 0.2rem 0;
+        letter-spacing: -0.02em;
+    }
+    .admin-subtitle {
+        color: #94a3b8;
+        font-size: 0.88rem;
+        margin: 0;
+    }
+
+    /* Route pill & Copy button */
+    .admin-url-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 8px;
+        padding: 0.45rem 0.85rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.8rem;
+        color: #e2e8f0;
+    }
+    .admin-url-badge {
+        background: #2563eb;
+        color: #fff;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.72rem;
+    }
+    .copy-link-btn {
+        background: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        color: #93c5fd;
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: all 0.2s;
+    }
+    .copy-link-btn:hover {
+        background: rgba(59, 130, 246, 0.3);
+        color: #ffffff;
+    }
+
+    /* Telemetry Bar */
+    .telemetry-strip {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .telemetry-pills {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .telemetry-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 20px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.78rem;
+        color: #cbd5e1;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .dot-live {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 10px #10b981;
+        animation: pulse-dot 2s infinite ease-in-out;
+    }
+    .dot-error {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #ef4444;
+        box-shadow: 0 0 10px #ef4444;
+    }
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    /* Metric Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    .metric-card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 14px;
+        padding: 1.35rem 1.5rem;
+        position: relative;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.35);
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(96, 165, 250, 0.35);
+    }
+    .metric-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    .metric-label {
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #94a3b8;
+    }
+    .metric-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+    }
+    .metric-val {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #f8fafc;
+        letter-spacing: -0.03em;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        line-height: 1.1;
+    }
+    .metric-footer {
+        margin-top: 0.85rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        font-size: 0.76rem;
+    }
+    .sub-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: rgba(30, 41, 59, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        color: #cbd5e1;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Fast Action Launchpad */
+    .launchpad-card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+    }
+    .section-title-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0;
+    }
+    .launchpad-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+    .launch-item {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.2rem;
+        border-radius: 10px;
+        background: rgba(30, 41, 59, 0.45);
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .launch-item:hover {
+        background: rgba(30, 41, 59, 0.85);
+        border-color: rgba(96, 165, 250, 0.45);
+        transform: translateY(-2px);
+    }
+    .launch-icon-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    .launch-item-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #f8fafc;
+        margin: 0 0 0.35rem 0;
+    }
+    .launch-item-desc {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        line-height: 1.35;
+        margin: 0;
+    }
+
+    /* Live Feed Split (Alerts & Incidents) */
+    .split-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) {
+        .split-grid { grid-template-columns: 1fr; }
+    }
+    .feed-card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+    }
+    .feed-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.85rem;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .feed-item:last-child {
+        border-bottom: none;
+    }
+    .feed-item-main {
+        flex: 1;
+    }
+    .feed-item-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #f1f5f9;
+        margin: 0 0 0.2rem 0;
+    }
+    .feed-item-sub {
+        font-size: 0.76rem;
+        color: #94a3b8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Status Badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .badge-danger { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .badge-warning { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+    .badge-success { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .badge-info { background: rgba(59, 130, 246, 0.18); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .badge-muted { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.25); }
+
+    /* IAM Directory Table */
+    .iam-section {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+    }
+    .iam-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .iam-search-box {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex: 1;
+        max-width: 500px;
+    }
+    .iam-input {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #f8fafc;
+        border-radius: 8px;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.85rem;
+        width: 100%;
+        outline: none;
+    }
+    .iam-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+    .iam-select {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #f8fafc;
+        border-radius: 8px;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.85rem;
+        outline: none;
+    }
+    .btn-provision {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        border: 1px solid #3b82f6;
+        color: #fff;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        transition: all 0.2s;
+    }
+    .btn-provision:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+    }
+
+    .iam-table-wrap {
+        overflow-x: auto;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 10px;
+    }
+    .iam-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+    }
+    .iam-table th {
+        background: rgba(15, 23, 42, 0.95);
+        padding: 0.8rem 1rem;
+        text-align: left;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #94a3b8;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        white-space: nowrap;
+    }
+    .iam-table td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        vertical-align: middle;
+        color: #e2e8f0;
+    }
+    .iam-table tbody tr:hover {
+        background: rgba(30, 41, 59, 0.45);
+    }
+    .user-tag {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.8rem;
+        color: #93c5fd;
+        background: rgba(30, 58, 138, 0.25);
+        border: 1px solid rgba(59, 130, 246, 0.24);
+        padding: 0.2rem 0.55rem;
+        border-radius: 5px;
+        font-weight: 600;
+    }
+
+    /* Modal Form */
+    .enroll-modal-card {
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        border-radius: 14px;
+        padding: 1.5rem 1.75rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6);
+        display: none;
+        animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .form-group label {
+        display: block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        margin-bottom: 0.35rem;
+    }
+    .form-group input, .form-group select {
+        width: 100%;
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 8px;
+        color: #f8fafc;
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    /* Keepalive Diagnostics Box */
+    .diagnostics-panel {
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 2rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .ping-btn {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        color: #34d399;
+        border-radius: 6px;
+        padding: 0.35rem 0.8rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+    .ping-btn:hover {
+        background: rgba(16, 185, 129, 0.3);
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-portal-wrap">
+
+    <!-- 1. Header & Live Telemetry Strip -->
+    <header class="admin-hero">
+        <div class="admin-hero-top">
+            <div class="admin-title-box">
+                <div class="admin-portal-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </div>
+                <div>
+                    <span class="admin-eyebrow">
+                        <span>CAMPUS SAFETY COMMAND</span>
+                        <span>•</span>
+                        <span>SUPERUSER CLEARANCE</span>
+                    </span>
+                    <h1 class="admin-title">Admin Command Center</h1>
+                    <p class="admin-subtitle">Centralized platform telemetry, emergency CAD oversight, and IAM directory governance.</p>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                <div class="admin-url-tag">
+                    <span class="admin-url-badge">PORTAL ROUTE</span>
+                    <span id="portalUrlText">/admin-portal/</span>
+                    <button type="button" class="copy-link-btn" onclick="copyPortalLink()" title="Copy direct Admin Portal URL">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span id="copyBtnLabel">Copy Link</span>
+                    </button>
+                </div>
+                <div style="font-size: 0.74rem; color: #94a3b8; font-family: ui-monospace, monospace;">
+                    Operator: <strong style="color: #f8fafc;">{{ user.full_name }}</strong> ({{ user.username }})
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry Strip -->
+        <div class="telemetry-strip">
+            <div class="telemetry-pills">
+                <!-- Database Telemetry -->
+                <div class="telemetry-pill" title="Supabase PostgreSQL Keepalive Status">
+                    {% if db_status == 'connected' %}
+                        <span class="dot-live"></span>
+                        <span>DATABASE: <strong>CONNECTED</strong> ({{ db_engine|upper }}{% if db_latency_ms %}, {{ db_latency_ms }}ms{% endif %})</span>
+                    {% else %}
+                        <span class="dot-error"></span>
+                        <span style="color: #f87171;">DATABASE: <strong>DEGRADED</strong></span>
+                    {% endif %}
+                </div>
+
+                <!-- Render Keepalive Status -->
+                <div class="telemetry-pill" title="Render Server Idle Heartbeat">
+                    <span class="dot-live"></span>
+                    <span>RENDER KEEPALIVE: <strong>ACTIVE</strong></span>
+                </div>
+
+                <!-- Server Time -->
+                <div class="telemetry-pill">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>{{ server_time|date:"Y-m-d H:i:s" }} UTC</span>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" class="ping-btn" onclick="triggerKeepaliveProbe()" id="pingProbeBtn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span>Run Health Probe</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Metric Stat Cards -->
+    <section class="metrics-grid">
+        <!-- Card 1: Total Registered Principals -->
+        <div class="metric-card">
+            <div class="metric-header">
+                <span class="metric-label">Institutional Principals</span>
+                <div class="metric-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-val">{{ total_users }}</div>
+            <div class="metric-footer">
+                <span class="sub-pill">{{ active_users }} Active</span>
+                <span class="sub-pill">{{ suspended_users }} Suspended</span>
+                <span class="sub-pill">{{ role_counts.STUDENT|default:0 }} Students</span>
+                <span class="sub-pill">{{ role_counts.SECURITY|default:0 }} Officers</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Emergency CAD Alerts -->
+        <div class="metric-card">
+            <div class="metric-header">
+                <span class="metric-label">Emergency CAD Dispatches</span>
+                <div class="metric-icon" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-val" style="color: {% if active_alerts > 0 %}#f87171{% else %}#f8fafc{% endif %};">
+                {{ total_alerts }}
+            </div>
+            <div class="metric-footer">
+                <span class="sub-pill" style="color: #f87171; border-color: rgba(239, 68, 68, 0.35);">{{ active_alerts }} Active / En Route</span>
+                <span class="sub-pill" style="color: #34d399;">{{ resolved_alerts }} Resolved</span>
+                <span class="sub-pill">{{ cancelled_alerts }} Cancelled</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Incident Reports -->
+        <div class="metric-card">
+            <div class="metric-header">
+                <span class="metric-label">Campus Incidents</span>
+                <div class="metric-icon" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-val">{{ total_incidents }}</div>
+            <div class="metric-footer">
+                <span class="sub-pill" style="color: #fbbf24;">{{ open_incidents }} Under Review</span>
+                <span class="sub-pill" style="color: #60a5fa;">{{ action_incidents }} Action Taken</span>
+                <span class="sub-pill">{{ closed_incidents }} Closed</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Usability & User Satisfaction -->
+        <div class="metric-card">
+            <div class="metric-header">
+                <span class="metric-label">Satisfaction &amp; Usability</span>
+                <div class="metric-icon" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-val" style="display: flex; align-items: baseline; gap: 0.35rem;">
+                <span>{{ avg_rating }}</span>
+                <span style="font-size: 1.1rem; color: #94a3b8;">/ 5.0</span>
+            </div>
+            <div class="metric-footer">
+                <span class="sub-pill" style="color: #34d399;">SUS: {{ avg_sus_score }} (Grade A)</span>
+                <span class="sub-pill">{{ total_feedbacks }} Ratings</span>
+                <span class="sub-pill">{{ usability_tests_count }} Tests Run</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Fast Action Command Launchpad -->
+    <section class="launchpad-card">
+        <div class="section-title-bar">
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Command Operations Launchpad</span>
+            </h2>
+            <span style="font-size: 0.78rem; color: #94a3b8;">Quick Administrative Jump Gates</span>
+        </div>
+
+        <div class="launchpad-grid">
+            <a href="{% url 'security_dashboard' %}" class="launch-item">
+                <div>
+                    <div class="launch-icon-row">
+                        <span class="badge badge-danger">Live CAD</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="launch-item-title">Security Dispatch Radar</h3>
+                    <p class="launch-item-desc">Tactical real-time officer dispatch map, incident escalation queue, and panic feeds.</p>
+                </div>
+                <div style="margin-top: 1rem; color: #60a5fa; font-size: 0.78rem; font-weight: 600;">Open Radar &rarr;</div>
+            </a>
+
+            <a href="{% url 'reports_analytics' %}" class="launch-item">
+                <div>
+                    <div class="launch-icon-row">
+                        <span class="badge badge-info">Executive</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <h3 class="launch-item-title">Reports &amp; Analytics</h3>
+                    <p class="launch-item-desc">Emergency response time heatmaps, spatial distribution charts, and CSV report export.</p>
+                </div>
+                <div style="margin-top: 1rem; color: #60a5fa; font-size: 0.78rem; font-weight: 600;">Open Analytics &rarr;</div>
+            </a>
+
+            <a href="/admin/" target="_blank" class="launch-item">
+                <div>
+                    <div class="launch-icon-row">
+                        <span class="badge badge-warning">Native ORM</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h3 class="launch-item-title">Django Site Admin</h3>
+                    <p class="launch-item-desc">Low-level database administration, model auditing, and schema inspection portal.</p>
+                </div>
+                <div style="margin-top: 1rem; color: #fbbf24; font-size: 0.78rem; font-weight: 600;">Open Django Admin &rarr;</div>
+            </a>
+
+            <a href="{% url 'usability_test' %}" class="launch-item">
+                <div>
+                    <div class="launch-icon-row">
+                        <span class="badge badge-success">Benchmark</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="launch-item-title">Usability Benchmark Suite</h3>
+                    <p class="launch-item-desc">Measure live task completion durations, error rates, and System Usability Scale metrics.</p>
+                </div>
+                <div style="margin-top: 1rem; color: #34d399; font-size: 0.78rem; font-weight: 600;">Open Benchmark &rarr;</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 4. Active Emergency & Incident Ticker -->
+    <div class="split-grid">
+        <!-- Recent Alerts -->
+        <div class="feed-card">
+            <div class="section-title-bar">
+                <h3 class="section-title" style="font-size: 1rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Recent Emergency CAD Alerts</span>
+                </h3>
+                <a href="{% url 'security_dashboard' %}" style="font-size: 0.76rem; color: #60a5fa; text-decoration: none;">View All &rarr;</a>
+            </div>
+
+            <div>
+                {% for a in recent_alerts %}
+                    <div class="feed-item">
+                        <div class="feed-item-main">
+                            <div class="feed-item-title">
+                                Alert #{{ a.id }} — {{ a.user.full_name }}
+                            </div>
+                            <div class="feed-item-sub">
+                                Location: {{ a.location.location_name|default:"SPU Campus Grounds" }} | {{ a.timestamp|date:"M d, H:i" }}
+                            </div>
+                        </div>
+                        <div>
+                            {% if a.status == 'RESOLVED' %}
+                                <span class="badge badge-success">Resolved</span>
+                            {% elif a.status == 'CANCELLED' %}
+                                <span class="badge badge-muted">Cancelled</span>
+                            {% else %}
+                                <span class="badge badge-danger">{{ a.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="padding: 1.5rem 0; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                        No emergency alerts recorded in system log.
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Incidents -->
+        <div class="feed-card">
+            <div class="section-title-bar">
+                <h3 class="section-title" style="font-size: 1rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Recent Campus Incident Reports</span>
+                </h3>
+                <a href="{% url 'incident_create' %}" style="font-size: 0.76rem; color: #fbbf24; text-decoration: none;">Report New &rarr;</a>
+            </div>
+
+            <div>
+                {% for inc in recent_incidents %}
+                    <div class="feed-item">
+                        <div class="feed-item-main">
+                            <div class="feed-item-title">
+                                {{ inc.get_category_display }} — {{ inc.location_name }}
+                            </div>
+                            <div class="feed-item-sub">
+                                Reporter: {{ inc.user.full_name }} | {{ inc.created_at|date:"M d, H:i" }}
+                            </div>
+                        </div>
+                        <div>
+                            {% if inc.status == 'CLOSED' %}
+                                <span class="badge badge-success">Closed</span>
+                            {% elif inc.status == 'ACTION_TAKEN' %}
+                                <span class="badge badge-info">Action Taken</span>
+                            {% else %}
+                                <span class="badge badge-warning">{{ inc.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="padding: 1.5rem 0; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                        No recent incidents submitted.
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Integrated Identity & Access Management (IAM Directory) -->
+    <section class="iam-section">
+        <div class="section-title-bar">
+            <div>
+                <h2 class="section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    <span>User Management &amp; Access Directory</span>
+                </h2>
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.2rem;">
+                    Institutional user directory, role-based authorization, and instant security provisioning.
+                </div>
+            </div>
+
+            <button type="button" class="btn-provision" onclick="toggleEnrollModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span>Provision Principal</span>
+            </button>
+        </div>
+
+        <!-- Provisioning Modal / Drawer Form -->
+        <div id="enrollUserPanel" class="enroll-modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(148, 163, 184, 0.16); padding-bottom: 0.75rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc; font-weight: 700;">Provision New Institutional User</h3>
+                <button type="button" onclick="toggleEnrollModal()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
+            </div>
+
+            <form method="POST" action="{% url 'admin_create_user' %}">
+                {% csrf_token %}
+                <input type="hidden" name="return_url" value="admin_portal">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Legal Name</label>
+                        <input type="text" name="full_name" placeholder="e.g. Sipho Dlamini" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Institutional ID</label>
+                        <input type="text" name="institutional_id" placeholder="e.g. 202474099" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Institutional Email</label>
+                        <input type="email" name="email" placeholder="e.g. sipho@campus.ac.za" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Mobile</label>
+                        <input type="tel" name="contact_number" placeholder="e.g. +27720000000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>System Role</label>
+                        <select name="role" required>
+                            {% for r in roles %}
+                                <option value="{{ r.role_name }}">{{ r.get_role_name_display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Password (Optional)</label>
+                        <input type="text" name="password" placeholder="Leave blank for auto-generated">
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: #cbd5e1; cursor: pointer;">
+                        <input type="checkbox" name="send_reset" value="1" checked style="accent-color: #3b82f6;">
+                        <span>Dispatch password setup email to user via Resend transactional email</span>
+                    </label>
+
+                    <div style="display: flex; gap: 0.6rem;">
+                        <button type="button" onclick="toggleEnrollModal()" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(148, 163, 184, 0.2); color: #cbd5e1; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">Cancel</button>
+                        <button type="submit" class="btn-provision">Enroll &amp; Authorize</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filter Controls -->
+        <form method="GET" action="{% url 'admin_portal' %}" class="iam-controls">
+            <div class="iam-search-box">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search by name, ID, username or email..." class="iam-input">
+                <select name="role" class="iam-select" onchange="this.form.submit()">
+                    <option value="">All Roles</option>
+                    {% for r in roles %}
+                        <option value="{{ r.role_name }}" {% if role_filter == r.role_name %}selected{% endif %}>{{ r.get_role_name_display }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" style="background: #2563eb; border: none; color: #fff; padding: 0.55rem 0.9rem; border-radius: 8px; cursor: pointer; font-weight: 600;">Search</button>
+                {% if q or role_filter %}
+                    <a href="{% url 'admin_portal' %}" style="color: #94a3b8; font-size: 0.8rem; text-decoration: underline; white-space: nowrap;">Clear</a>
+                {% endif %}
+            </div>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+                Displaying <strong>{{ users|length }}</strong> institutional principals
+            </div>
+        </form>
+
+        <!-- Directory Table -->
+        <div class="iam-table-wrap">
+            <table class="iam-table">
+                <thead>
+                    <tr>
+                        <th>Institutional ID</th>
+                        <th>Name</th>
+                        <th>Email &amp; Phone</th>
+                        <th>Role Authorization</th>
+                        <th>Account Status</th>
+                        <th>Clearance Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>
+                                <span class="user-tag">{{ u.institutional_id }}</span>
+                            </td>
+                            <td>
+                                <div style="font-weight: 700; color: #f8fafc;">{{ u.full_name }}</div>
+                                <div style="font-size: 0.74rem; color: #94a3b8; font-family: ui-monospace, monospace;">{{ u.username }}</div>
+                            </td>
+                            <td>
+                                <div>{{ u.email }}</div>
+                                <div style="font-size: 0.76rem; color: #94a3b8; font-family: ui-monospace, monospace;">{{ u.contact_number }}</div>
+                            </td>
+                            <td>
+                                <form method="POST" action="{% url 'update_user_role' u.id %}" style="display: inline-block;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="return_url" value="admin_portal">
+                                    <select name="role_name" onchange="this.form.submit()" class="iam-select" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;">
+                                        {% for r in roles %}
+                                            <option value="{{ r.role_name }}" {% if u.role and u.role.role_name == r.role_name %}selected{% endif %}>
+                                                {{ r.get_role_name_display }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+                                    {% if u.is_verified %}
+                                        <span class="badge badge-success">Verified</span>
+                                    {% else %}
+                                        <span class="badge badge-muted">Unverified</span>
+                                    {% endif %}
+
+                                    {% if u.is_active %}
+                                        <span class="badge badge-info">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Suspended</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                                    {% if u.email %}
+                                        <form method="POST" action="{% url 'admin_send_reset_email' u.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="admin_portal">
+                                            <button type="submit" class="copy-link-btn" title="Send Password Reset via Resend" onclick="return confirm('Dispatch password reset link to {{ u.email }}?')">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                                </svg>
+                                                <span>Reset Email</span>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    <form method="POST" action="{% url 'toggle_user_status' u.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="return_url" value="admin_portal">
+                                        {% if u.is_active %}
+                                            <button type="submit" class="copy-link-btn" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4);" onclick="return confirm('Suspend account for {{ u.full_name }}?')">
+                                                <span>Suspend</span>
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="copy-link-btn" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4);">
+                                                <span>Activate</span>
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No institutional principals match your search filter.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 6. System Diagnostics & Keepalive Console -->
+    <div class="diagnostics-panel" id="diagnosticsConsole">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="color: #60a5fa; font-weight: 700;">SYSTEM DIAGNOSTICS &amp; CLOUD TELEMETRY</span>
+            <span id="probeResultBadge">Ready</span>
+        </div>
+        <div id="probeDetails">
+            • Health Endpoint: <span style="color: #cbd5e1;">/healthz/</span> | Keepalive Target: <span style="color: #cbd5e1;">Supabase PostgreSQL ({{ db_engine }})</span><br>
+            • Free-tier idle prevention active via Render Background Pulse and Keepalive command.<br>
+            • Click <strong>Run Health Probe</strong> above to execute a real-time round-trip latency and SQL connectivity test.
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleEnrollModal() {
+    var p = document.getElementById('enrollUserPanel');
+    if (p) {
+        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+    }
+}
+
+function copyPortalLink() {
+    var fullUrl = window.location.origin + '/admin-portal/';
+    navigator.clipboard.writeText(fullUrl).then(function() {
+        var label = document.getElementById('copyBtnLabel');
+        if (label) {
+            label.textContent = 'Copied!';
+            setTimeout(function() { label.textContent = 'Copy Link'; }, 2000);
+        }
+    }).catch(function(err) {
+        prompt('Copy Admin Portal URL:', fullUrl);
+    });
+}
+
+function triggerKeepaliveProbe() {
+    var btn = document.getElementById('pingProbeBtn');
+    var badge = document.getElementById('probeResultBadge');
+    var details = document.getElementById('probeDetails');
+    if (btn) btn.disabled = true;
+    if (badge) badge.textContent = 'Probing...';
+
+    var startTime = performance.now();
+    fetch('/healthz/')
+        .then(function(res) {
+            var roundTrip = Math.round(performance.now() - startTime);
+            return res.json().then(function(data) {
+                if (btn) btn.disabled = false;
+                if (badge) {
+                    badge.innerHTML = '<span style="color: #34d399; font-weight: bold;">HTTP ' + res.status + ' OK (' + roundTrip + 'ms)</span>';
+                }
+                if (details) {
+                    details.innerHTML = '• Endpoint Response: <span style="color: #34d399;">' + JSON.stringify(data) + '</span><br>' +
+                                        '• Round-Trip Probe Latency: <span style="color: #60a5fa; font-weight: bold;">' + roundTrip + ' ms</span><br>' +
+                                        '• Supabase Keep-Alive Pulse successfully recorded at ' + new Date().toLocaleTimeString();
+                }
+            });
+        })
+        .catch(function(err) {
+            if (btn) btn.disabled = false;
+            if (badge) {
+                badge.innerHTML = '<span style="color: #f87171; font-weight: bold;">Probe Failed</span>';
+            }
+            if (details) {
+                details.innerHTML = '<span style="color: #f87171;">Probe Error: ' + err.message + '</span>';
+            }
+        });
+}
+</script>
+{% endblock %}

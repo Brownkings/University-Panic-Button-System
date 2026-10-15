@@ -13,6 +13,7 @@ urlpatterns = [
     path('password-reset-complete/', views.password_reset_complete_view, name='password_reset_complete'),
     path('logout/', views.logout_view, name='logout'),
     path('role-redirect/', views.role_redirect_view, name='role_redirect'),
+    path('admin-portal/', views.admin_portal_view, name='admin_portal'),
     path('admin/users/', views.user_management_view, name='user_management'),
     path('admin/users/create/', views.admin_create_user_view, name='admin_create_user'),
     path('admin/users/<int:user_id>/update-role/', views.update_user_role_view, name='update_user_role'),
