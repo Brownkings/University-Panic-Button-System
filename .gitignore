@@ -32,3 +32,8 @@ android_student_portal/build/
 .env
 .github/
 
+# Internal Assessment & Defense Preparation Guides
+UPBS_Final_Assessment_Preparation_Guide.pdf
+master_assessment_guide.html
+build_master_pdf.py
+
