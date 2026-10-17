@@ -291,6 +291,13 @@ class EmergencyAlertWorkflowTests(TestCase):
         self.assertEqual(response_rec.status, AlertResponse.STATUS_RESOLVED)
         self.assertEqual(response_rec.response_notes, 'Fire extinguisher deployed, situation contained.')
 
+        # Verify IncidentReport was automatically synchronized with officer resolution notes
+        from incidents.models import IncidentReport
+        incident = IncidentReport.objects.filter(description__startswith=f"CAD Emergency Incident #{alert.id} ").first()
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident.status, IncidentReport.STATUS_CLOSED)
+        self.assertIn('Fire extinguisher deployed, situation contained.', incident.admin_notes)
+
     def test_api_update_officer_location(self):
         """Officer updates hardware tablet telemetry coordinates."""
         self.client.login(username="sec_officer1", password="Password123!")

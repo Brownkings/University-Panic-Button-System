@@ -145,6 +145,87 @@ class Command(BaseCommand):
                 defaults={'device_type': 'MOBILE_PWA', 'is_active': True}
             )
 
+            # Demo Emergency Alerts & Officer Field Resolution Reports
+            if not EmergencyAlert.objects.exists():
+                a1 = EmergencyAlert.objects.create(
+                    user=student1,
+                    panic_device=dev1,
+                    status=EmergencyAlert.STATUS_RESOLVED,
+                    alert_type=EmergencyAlert.TYPE_MEDICAL,
+                    timestamp=timezone.now() - timedelta(minutes=42),
+                    resolved_at=timezone.now() - timedelta(minutes=28),
+                )
+                Location.objects.create(
+                    alert=a1,
+                    latitude=Decimal("-28.742050"),
+                    longitude=Decimal("24.765100"),
+                    accuracy_meters=4.2,
+                    description="Science Block Floor 2, Laboratory B",
+                )
+                AlertResponse.objects.create(
+                    alert=a1,
+                    officer=officer,
+                    status=AlertResponse.STATUS_RESOLVED,
+                    dispatched_at=timezone.now() - timedelta(minutes=41),
+                    acknowledged_at=timezone.now() - timedelta(minutes=40),
+                    resolved_at=timezone.now() - timedelta(minutes=28),
+                    response_notes="Patrol unit on scene. First aid administered for chemical splash burn; student escorted to campus health clinic. Lab ventilated.",
+                )
+
+                a2 = EmergencyAlert.objects.create(
+                    user=student2,
+                    panic_device=dev2,
+                    status=EmergencyAlert.STATUS_RESOLVED,
+                    alert_type=EmergencyAlert.TYPE_CRIME,
+                    timestamp=timezone.now() - timedelta(hours=2, minutes=15),
+                    resolved_at=timezone.now() - timedelta(hours=1, minutes=50),
+                )
+                Location.objects.create(
+                    alert=a2,
+                    latitude=Decimal("-28.743100"),
+                    longitude=Decimal("24.766200"),
+                    accuracy_meters=3.8,
+                    description="East Residence Turnstile Gate",
+                )
+                AlertResponse.objects.create(
+                    alert=a2,
+                    officer=officer,
+                    status=AlertResponse.STATUS_RESOLVED,
+                    dispatched_at=timezone.now() - timedelta(hours=2, minutes=14),
+                    acknowledged_at=timezone.now() - timedelta(hours=2, minutes=13),
+                    resolved_at=timezone.now() - timedelta(hours=1, minutes=50),
+                    response_notes="Perimeter swept and secured by tactical patrol unit. Unauthorized trespasser escorted off campus grounds via North Gate.",
+                )
+                self.stdout.write(self.style.SUCCESS("✓ Demo emergency CAD alerts & officer responses populated."))
+
+            # Demo Incident Reports with Officer Resolution Reports
+            if not IncidentReport.objects.exists():
+                IncidentReport.objects.create(
+                    user=student1,
+                    category=IncidentReport.CATEGORY_MEDICAL,
+                    location_name="Science Block Floor 2, Laboratory B",
+                    description="CAD Emergency Incident #1 [Medical Emergency / Injury]. Triggered by student Brown Nkosi (202474004). Attended and resolved by Officer Rethabile Thuto Pheko (SEC-001).",
+                    status=IncidentReport.STATUS_CLOSED,
+                    admin_notes="Officer Resolution Report by Officer Rethabile Thuto Pheko (SEC-001):\nPatrol unit on scene. First aid administered for chemical splash burn; student escorted to campus health clinic. Lab ventilated.",
+                )
+                IncidentReport.objects.create(
+                    user=student2,
+                    category=IncidentReport.CATEGORY_SUSPICIOUS,
+                    location_name="East Residence Turnstile Gate",
+                    description="CAD Emergency Incident #2 [Active Threat / Crime]. Triggered by student Palesa Hope Ntsane (202437528). Attended and resolved by Officer Rethabile Thuto Pheko (SEC-001).",
+                    status=IncidentReport.STATUS_CLOSED,
+                    admin_notes="Officer Resolution Report by Officer Rethabile Thuto Pheko (SEC-001):\nPerimeter swept and secured by tactical patrol unit. Unauthorized trespasser escorted off campus grounds via North Gate.",
+                )
+                IncidentReport.objects.create(
+                    user=student1,
+                    category=IncidentReport.CATEGORY_THEFT,
+                    location_name="Central Library Quiet Study Area Floor 1",
+                    description="Student laptop bag and textbooks taken from study desk while attending 10:00 lecture.",
+                    status=IncidentReport.STATUS_ACTION,
+                    admin_notes="Officer Rethabile Pheko reviewed security CCTV footage with IT Services. Identified item misplaced at library help desk and returned to student.",
+                )
+                self.stdout.write(self.style.SUCCESS("✓ Demo incident reports with officer resolution notes populated."))
+
             # Usability Testing Metrics (NPRT630 Phase 4 Rubric Compliance)
             if not UsabilityMetric.objects.exists():
                 test_metrics = [

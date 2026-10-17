@@ -10,6 +10,7 @@ from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpR
 from django.views.decorators.csrf import csrf_protect
 from django.utils import timezone
 from .models import PanicDevice, EmergencyAlert, Location, SecurityOfficer, AlertResponse, Notification
+from incidents.models import IncidentReport
 
 
 def haversine_meters(lat1, lon1, lat2, lon2):
@@ -699,6 +700,52 @@ def api_update_alert_status(request, alert_id):
     if notes:
         response_record.response_notes = notes
     response_record.save()
+
+    # Automatically synchronize or create an official IncidentReport when an officer resolves an alert or files field notes
+    if new_status == EmergencyAlert.STATUS_RESOLVED or notes:
+        type_to_cat = {
+            EmergencyAlert.TYPE_MEDICAL: IncidentReport.CATEGORY_MEDICAL,
+            EmergencyAlert.TYPE_FIRE: IncidentReport.CATEGORY_HAZARD,
+            EmergencyAlert.TYPE_CRIME: IncidentReport.CATEGORY_THEFT,
+            EmergencyAlert.TYPE_SILENT: IncidentReport.CATEGORY_SUSPICIOUS,
+            EmergencyAlert.TYPE_STANDARD: IncidentReport.CATEGORY_OTHER,
+        }
+        category = type_to_cat.get(alert.alert_type, IncidentReport.CATEGORY_OTHER)
+        location_desc = alert.location.description if hasattr(alert, 'location') and alert.location else "SPU Campus Grounds"
+        officer_label = f"Officer {officer.officer_name} (Badge: {officer.badge_number})"
+
+        prefix = f"CAD Emergency Incident #{alert.id} "
+        incident = IncidentReport.objects.filter(description__startswith=prefix).first()
+
+        narrative = (
+            f"{prefix}[{alert.get_alert_type_display()}]. "
+            f"Triggered by student {alert.user.full_name} ({alert.user.institutional_id}). "
+            f"Attended and resolved by {officer_label}."
+        )
+        if notes:
+            narrative += f"\n\nOfficer Field Resolution Report:\n{notes}"
+
+        report_status = IncidentReport.STATUS_CLOSED if new_status == EmergencyAlert.STATUS_RESOLVED else IncidentReport.STATUS_ACTION
+        admin_log = f"Officer Resolution Report by {officer_label}:\n{notes}" if notes else f"Resolved on scene by {officer_label}."
+
+        if not incident:
+            IncidentReport.objects.create(
+                user=alert.user,
+                category=category,
+                location_name=location_desc,
+                description=narrative,
+                status=report_status,
+                admin_notes=admin_log,
+            )
+        else:
+            incident.category = category
+            incident.location_name = location_desc
+            incident.description = narrative
+            if new_status == EmergencyAlert.STATUS_RESOLVED:
+                incident.status = IncidentReport.STATUS_CLOSED
+            if notes:
+                incident.admin_notes = admin_log
+            incident.save()
 
     # Broadcast notification to all attending officers when case is accepted or status shifts
     v_lat = float(alert.location.latitude) if hasattr(alert, 'location') else -28.742050

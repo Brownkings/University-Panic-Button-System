@@ -287,13 +287,47 @@ def admin_portal_view(request):
     recent_alerts = EmergencyAlert.objects.select_related('user', 'location').order_by('-timestamp')[:5]
 
     # 4. Incident Reports
+    # Ensure any past emergency alerts resolved with officer response notes are synced to IncidentReport
+    from alerts.models import AlertResponse
+    unlinked_responses = AlertResponse.objects.filter(
+        response_notes__gt=''
+    ).select_related('alert__user', 'alert__location', 'officer')
+
+    for resp in unlinked_responses:
+        alert = resp.alert
+        prefix = f"CAD Emergency Incident #{alert.id} "
+        if not IncidentReport.objects.filter(description__startswith=prefix).exists():
+            type_to_cat = {
+                EmergencyAlert.TYPE_MEDICAL: IncidentReport.CATEGORY_MEDICAL,
+                EmergencyAlert.TYPE_FIRE: IncidentReport.CATEGORY_HAZARD,
+                EmergencyAlert.TYPE_CRIME: IncidentReport.CATEGORY_THEFT,
+                EmergencyAlert.TYPE_SILENT: IncidentReport.CATEGORY_SUSPICIOUS,
+                EmergencyAlert.TYPE_STANDARD: IncidentReport.CATEGORY_OTHER,
+            }
+            category = type_to_cat.get(alert.alert_type, IncidentReport.CATEGORY_OTHER)
+            loc_desc = alert.location.description if hasattr(alert, 'location') and alert.location else "SPU Campus Grounds"
+            officer_str = f"Officer {resp.officer.officer_name} ({resp.officer.badge_number})"
+            narrative = (
+                f"{prefix}[{alert.get_alert_type_display()}]. "
+                f"Triggered by student {alert.user.full_name} ({alert.user.institutional_id}). "
+                f"Attended and resolved by {officer_str}.\n\nOfficer Field Resolution Report:\n{resp.response_notes}"
+            )
+            IncidentReport.objects.create(
+                user=alert.user,
+                category=category,
+                location_name=loc_desc,
+                description=narrative,
+                status=IncidentReport.STATUS_CLOSED if alert.status == EmergencyAlert.STATUS_RESOLVED else IncidentReport.STATUS_ACTION,
+                admin_notes=f"Officer Resolution Report by {officer_str}:\n{resp.response_notes}",
+            )
+
     total_incidents = IncidentReport.objects.count()
     open_incidents = IncidentReport.objects.filter(
         status__in=[IncidentReport.STATUS_SUBMITTED, IncidentReport.STATUS_REVIEW]
     ).count()
     action_incidents = IncidentReport.objects.filter(status=IncidentReport.STATUS_ACTION).count()
     closed_incidents = IncidentReport.objects.filter(status=IncidentReport.STATUS_CLOSED).count()
-    recent_incidents = IncidentReport.objects.select_related('user').order_by('-created_at')[:5]
+    recent_incidents = IncidentReport.objects.select_related('user').order_by('-created_at')[:8]
 
     # 5. Satisfaction & Usability Telemetry
     fb_agg = Feedback.objects.aggregate(avg_rating=Avg('rating'), count=Count('id'))
