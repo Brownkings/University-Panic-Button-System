@@ -118,10 +118,14 @@ WSGI_APPLICATION = 'upbs_project.wsgi.application'
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
+    # When connecting to Supabase via its connection pooler (aws-0-*.pooler.supabase.com:5432),
+    # conn_max_age must default to 0 so Gunicorn workers return connections to the pool immediately
+    # after each request instead of holding all 15 session mode slots open indefinitely (EMAXCONNSESSION).
+    conn_max_age = int(os.environ.get('CONN_MAX_AGE', 0))
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
-            conn_max_age=600,
+            conn_max_age=conn_max_age,
             conn_health_checks=True,
         )
     }
