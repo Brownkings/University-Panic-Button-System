@@ -10,9 +10,11 @@ html_doc = """<!DOCTYPE html>
     @page {
         size: A4;
         margin: 14mm 12mm 14mm 12mm;
+        margin: 13mm 11mm 13mm 11mm;
         @bottom-right {
             content: "Page " counter(page) " of " counter(pages);
             font-size: 8pt;
+            font-size: 7.8pt;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #64748b;
             font-weight: 600;
@@ -20,6 +22,7 @@ html_doc = """<!DOCTYPE html>
         @bottom-left {
             content: "NPRT630 Final Assessment • Group: Techno Warriors • University Panic Button System";
             font-size: 8pt;
+            font-size: 7.8pt;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #64748b;
         }
@@ -35,6 +38,8 @@ html_doc = """<!DOCTYPE html>
         background-color: #ffffff;
         line-height: 1.42;
         font-size: 9pt;
+        line-height: 1.38;
+        font-size: 8.8pt;
         margin: 0;
         padding: 0;
     }
@@ -53,10 +58,12 @@ html_doc = """<!DOCTYPE html>
     /* COVER & HERO */
     .cover-hero {
         padding: 14px 18px;
+        padding: 12px 16px;
         border-radius: 6px;
         background: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
         color: #f8fafc;
         margin-bottom: 8px;
+        margin-bottom: 7px;
         border: 1px solid #1e293b;
     }
 
@@ -66,35 +73,44 @@ html_doc = """<!DOCTYPE html>
         color: #ffffff;
         font-weight: 800;
         font-size: 7.5pt;
+        font-size: 7.2pt;
         letter-spacing: 0.08em;
         padding: 2px 7px;
         border-radius: 4px;
         text-transform: uppercase;
         margin-bottom: 6px;
+        margin-bottom: 5px;
     }
 
     .cover-hero h1 {
         font-size: 17pt;
+        font-size: 16pt;
         font-weight: 800;
         color: #ffffff;
         margin: 0 0 3px 0;
+        margin: 0 0 2px 0;
         letter-spacing: -0.02em;
     }
 
     .cover-hero h2 {
         font-size: 10pt;
+        font-size: 9.5pt;
         font-weight: 600;
         color: #94a3b8;
         margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
     }
 
     .meta-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 6px 14px;
+        gap: 5px 12px;
         border-top: 1px solid #334155;
         padding-top: 8px;
         font-size: 8.2pt;
+        padding-top: 7px;
+        font-size: 8pt;
     }
 
     .meta-item {
@@ -110,10 +126,13 @@ html_doc = """<!DOCTYPE html>
         border-collapse: collapse;
         margin-top: 8px;
         font-size: 7.8pt;
+        margin-top: 7px;
+        font-size: 7.6pt;
     }
 
     .team-table th, .team-table td {
         padding: 4px 6px;
+        padding: 3.5px 6px;
         text-align: left;
         border-bottom: 1px solid #334155;
     }
@@ -124,6 +143,7 @@ html_doc = """<!DOCTYPE html>
         font-weight: 700;
         text-transform: uppercase;
         font-size: 7.2pt;
+        font-size: 7pt;
         letter-spacing: 0.05em;
     }
 
@@ -134,21 +154,26 @@ html_doc = """<!DOCTYPE html>
     /* HEADINGS */
     h2.section-header {
         font-size: 11.5pt;
+        font-size: 11pt;
         font-weight: 800;
         color: #0f172a;
         border-bottom: 2px solid #dc2626;
         padding-bottom: 3px;
         margin-top: 10px;
         margin-bottom: 8px;
+        margin-top: 9px;
+        margin-bottom: 7px;
         text-transform: uppercase;
         letter-spacing: 0.03em;
     }
 
     h3.sub-header {
         font-size: 9.5pt;
+        font-size: 9.2pt;
         font-weight: 700;
         color: #0f172a;
         margin-top: 8px;
+        margin-top: 7px;
         margin-bottom: 3px;
     }
 
@@ -163,6 +188,10 @@ html_doc = """<!DOCTYPE html>
         margin: 6px 0;
         font-size: 8.2pt;
         line-height: 1.38;
+        padding: 6px 9px;
+        margin: 5px 0;
+        font-size: 8pt;
+        line-height: 1.36;
     }
 
     .alert-important {
@@ -195,11 +224,14 @@ html_doc = """<!DOCTYPE html>
         border-collapse: collapse;
         margin: 8px 0 12px 0;
         font-size: 8.2pt;
+        margin: 6px 0 10px 0;
+        font-size: 8pt;
     }
 
     table.data-table th, table.data-table td {
         border: 1px solid #cbd5e1;
         padding: 5px 7px;
+        padding: 4.5px 6.5px;
         text-align: left;
     }
 
@@ -217,8 +249,10 @@ html_doc = """<!DOCTYPE html>
     .badge {
         display: inline-block;
         padding: 2px 5px;
+        padding: 1.5px 4.5px;
         border-radius: 3px;
         font-size: 7.2pt;
+        font-size: 7pt;
         font-weight: 700;
         text-transform: uppercase;
     }
@@ -235,6 +269,8 @@ html_doc = """<!DOCTYPE html>
         border-radius: 6px;
         margin-bottom: 8px;
         padding: 8px 10px;
+        margin-bottom: 7px;
+        padding: 7px 9px;
         background-color: #ffffff;
     }
 
@@ -243,6 +279,8 @@ html_doc = """<!DOCTYPE html>
         color: #0f172a;
         font-size: 8.8pt;
         margin-bottom: 4px;
+        font-size: 8.5pt;
+        margin-bottom: 3.5px;
         display: flex;
         justify-content: space-between;
         align-items: baseline;
@@ -250,6 +288,7 @@ html_doc = """<!DOCTYPE html>
 
     .qa-target {
         font-size: 7.2pt;
+        font-size: 7pt;
         font-weight: 700;
         padding: 1px 5px;
         border-radius: 3px;
@@ -263,6 +302,8 @@ html_doc = """<!DOCTYPE html>
         color: #334155;
         font-size: 8.4pt;
         line-height: 1.38;
+        font-size: 8.2pt;
+        line-height: 1.36;
     }
 
     .qa-a strong {
@@ -275,6 +316,8 @@ html_doc = """<!DOCTYPE html>
         border-radius: 6px;
         margin-bottom: 10px;
         padding: 10px 12px;
+        margin-bottom: 8px;
+        padding: 8px 11px;
         background: #f8fafc;
     }
 
@@ -285,16 +328,20 @@ html_doc = """<!DOCTYPE html>
         border-bottom: 1px solid #e2e8f0;
         padding-bottom: 4px;
         margin-bottom: 6px;
+        padding-bottom: 3px;
+        margin-bottom: 5px;
     }
 
     .member-name {
         font-size: 10pt;
+        font-size: 9.6pt;
         font-weight: 800;
         color: #0f172a;
     }
 
     .member-role {
         font-size: 8pt;
+        font-size: 7.8pt;
         font-weight: 700;
         color: #2563eb;
     }
@@ -304,8 +351,11 @@ html_doc = """<!DOCTYPE html>
         border-left: 3px solid #3b82f6;
         padding: 5px 8px;
         margin: 6px 0;
+        padding: 4px 7px;
+        margin: 5px 0;
         font-style: italic;
         font-size: 8.2pt;
+        font-size: 8pt;
         color: #1e40af;
     }
 
@@ -316,6 +366,10 @@ html_doc = """<!DOCTYPE html>
         gap: 6px 10px;
         margin-bottom: 8px;
         font-size: 8.3pt;
+        grid-template-columns: 82px 1fr;
+        gap: 6px 9px;
+        margin-bottom: 7px;
+        font-size: 8.1pt;
         align-items: start;
     }
 
@@ -324,9 +378,11 @@ html_doc = """<!DOCTYPE html>
         color: #dc2626;
         background: #fee2e2;
         padding: 4px 6px;
+        padding: 3px 5px;
         border-radius: 4px;
         text-align: center;
         font-size: 7.8pt;
+        font-size: 7.5pt;
     }
 
     .timeline-body {
@@ -340,6 +396,7 @@ html_doc = """<!DOCTYPE html>
         padding: 1px 4px;
         border-radius: 3px;
         font-size: 7.8pt;
+        font-size: 7.6pt;
     }
 </style>
 </head>
@@ -358,6 +415,7 @@ html_doc = """<!DOCTYPE html>
             <div class="meta-item"><strong>Duration:</strong> Exactly 15 Minutes per Group</div>
             <div class="meta-item"><strong>Lead Examiner:</strong> Dr. Silas</div>
             <div class="meta-item"><strong>Session Format:</strong> ~5 min Live Verification + ~10 min Technical Q&A</div>
+            <div class="meta-item"><strong>Production URL:</strong> https://youthalliance.co.za</div>
             <div class="meta-item"><strong>Group Name:</strong> Techno Warriors</div>
         </div>
 
@@ -376,24 +434,28 @@ html_doc = """<!DOCTYPE html>
                     <td>202474004</td>
                     <td>Team Leader • Backend Architect & Security Lead</td>
                     <td>Django Framework, RBAC, REST APIs, Supabase & Render Deployment</td>
+                    <td>Django 4.2, RBAC, REST APIs, Central Admin Portal, Resend/SMTP Email Engine, Render & Supabase Hosting</td>
                 </tr>
                 <tr>
                     <td><strong>Palesa Hope Ntsane</strong></td>
                     <td>202437528</td>
                     <td>Frontend UI/UX & Iterative Usability Lead</td>
                     <td>Pulsing Panic Trigger, Top-Right Save, 4-Stage Timeline, SUS Testing</td>
+                    <td>Pulsing Panic Trigger, Top-Right Save, 4-Stage Timeline, Mobile Header Redesign, SUS Usability Runner</td>
                 </tr>
                 <tr>
                     <td><strong>Rethabile Thuto Pheko</strong></td>
                     <td>202345683</td>
                     <td>GIS Telemetry & Security Operations Lead</td>
                     <td>Leaflet.js Radar, Web Audio Siren, Haversine Distance, Patrol Tracking</td>
+                    <td>Leaflet.js Radar, Web Audio Siren, Haversine Distance, Compass Bearing, Offline Kimberley Tiles</td>
                 </tr>
                 <tr>
                     <td><strong>Thapelo Ramphago</strong></td>
                     <td>202411369</td>
                     <td>Database Integrity, QA & Android Integration Lead</td>
                     <td>3NF Relational Models, Incident Uploads, 13 Automated Tests, Android APK</td>
+                    <td>3NF Relational Models, Incident Uploads, 76 Automated Unit/Integration Tests, Native Android APK</td>
                 </tr>
             </tbody>
         </table>
@@ -402,10 +464,14 @@ html_doc = """<!DOCTYPE html>
     <div class="alert-box alert-important">
         <strong>CRITICAL DIRECTIVES FROM DR SILAS (SLIDES 8–11 OF OFFICIAL BRIEFING):</strong>
         <ul style="margin: 4px 0 0 16px; padding: 0;">
+        <ul style="margin: 3px 0 0 16px; padding: 0;">
             <li><strong>No Formal PowerPoint:</strong> Slides were recorded in Phase 4 submissions. The live 15-minute slot is strictly for <em>running the actual system</em> and <em>technical interrogation</em>.</li>
             <li><strong>Individual Questioning:</strong> Dr Silas will direct technical questions to <em>specific individual members</em>. The team leader is NOT permitted to answer for everyone. Every member must demonstrate personal understanding.</li>
             <li><strong>Live System Verification First (~5 mins):</strong> Open and run the submitted application, demonstrate selected features, trigger a live workflow, show database interaction, and prove code quality.</li>
             <li><strong>First-Come, First-Served:</strong> Arrive outside Boardroom C006 by <strong>08:00</strong> to register for an early slot and avoid leaving your assessment to the Friday final rush.</li>
+            <li><strong>Individual Questioning:</strong> Dr Silas will direct technical questions to <em>specific individual members</em>. The team leader is NOT permitted to answer for everyone. Every member must demonstrate personal mastery.</li>
+            <li><strong>Live System Verification First (~5 mins):</strong> Open and run the application, demonstrate selected workflows, show live database modifications, and prove code quality with automated tests.</li>
+            <li><strong>First-Come, First-Served:</strong> Arrive outside Boardroom C006 by <strong>08:00</strong> to register for an early morning slot.</li>
         </ul>
     </div>
 
@@ -425,18 +491,21 @@ html_doc = """<!DOCTYPE html>
                 <td>15 Marks</td>
                 <td>All features from Phases 2–3 implemented. Functional database connectivity. Clean, structured code. Error handling.</td>
                 <td>Full Django 4.2 LTS + SQLite/PostgreSQL, 10 normalized models, REST APIs, native Android APK (Java WebView bridge).</td>
+                <td>Full Django 4.2 LTS + SQLite/Supabase PostgreSQL, 10 normalized models, Centralized Admin Portal with live DB telemetry, Resend/SMTP email engine, native Android APK.</td>
             </tr>
             <tr>
                 <td><strong>User Testing & Usability Evaluation</strong></td>
                 <td>15 Marks</td>
                 <td>Comprehensive usability testing alongside unit tests. Task completion times, error rates, and user satisfaction measured.</td>
                 <td>Integrated Usability Runner (<span class="code-inline">/usability-test/</span>) with live stopwatch, error logger, and empirical SUS score (92.5).</td>
+                <td>Integrated Usability Runner (<span class="code-inline">/usability-test/</span>) with live stopwatch, error logger, empirical SUS score (92.5), and 76 automated unit/integration tests.</td>
             </tr>
             <tr>
                 <td><strong>Demonstration & Verification</strong></td>
                 <td>10 Marks</td>
                 <td>Smooth live workflow execution, database modifications, reliable system behavior, zero crashes during evaluation.</td>
                 <td>Live 5-minute scripted workflow: Student panic trigger &rarr; Security radar siren &rarr; Dispatch state transition &rarr; Incident upload.</td>
+                <td>Live 5-minute scripted workflow: Student panic trigger &rarr; 3s abort modal &rarr; Security radar siren &rarr; Dispatch state transition &rarr; Admin telemetry oversight.</td>
             </tr>
             <tr>
                 <td><strong>Technical Q&A & Individual Mastery</strong></td>
@@ -473,13 +542,16 @@ html_doc = """<!DOCTYPE html>
 
     <div class="timeline-row">
         <div class="timeline-time">2:00 – 3:00</div>
+        <div class="timeline-time">2:00 – 2:45</div>
         <div class="timeline-body">
             <strong>Security Command Center, Live Radar & Siren:</strong> In an adjacent incognito window, open <span class="code-inline">/security/dashboard/</span> logged in as <span class="code-inline">officer1</span> (<span class="code-inline">password123</span>). Point out: 1) The real-time Web Audio API synthesized siren sounding automatically; 2) The Leaflet.js radar map plotting the student's GPS location with a precision radius circle; 3) The calculated distance (e.g. 140m) and compass bearing (e.g. NW) to the victim.
+            <strong>Security Command Center, Live Radar & Siren:</strong> In an adjacent incognito window, open <span class="code-inline">/security/dashboard/</span> logged in as <span class="code-inline">officer1</span> (<span class="code-inline">password123</span>). Point out: 1) The real-time Web Audio API synthesized siren sounding automatically; 2) The Leaflet.js radar map plotting the student's GPS location with a precision radius circle; 3) The calculated distance (e.g. 140m) and compass bearing (e.g. NE) to the victim.
         </div>
     </div>
 
     <div class="timeline-row">
         <div class="timeline-time">3:00 – 4:00</div>
+        <div class="timeline-time">2:45 – 3:30</div>
         <div class="timeline-body">
             <strong>State Machine Transitions (Iteration 3):</strong> Click "Acknowledge" &rarr; status updates to <span class="badge badge-amber">RECEIVED</span>. Click "Dispatch Unit" &rarr; status updates to <span class="badge badge-blue">DISPATCHED</span>. Immediately switch back to the Student window: highlight that the 4-stage timeline advanced automatically to <em>"Officer Dispatched"</em> with <strong>zero manual page reload</strong>. Finally, resolve the alert on the security console with field notes.
         </div>
@@ -487,8 +559,17 @@ html_doc = """<!DOCTYPE html>
 
     <div class="timeline-row">
         <div class="timeline-time">4:00 – 5:00</div>
+        <div class="timeline-time">3:30 – 4:15</div>
         <div class="timeline-body">
             <strong>Incidents (Iteration 2), Admin Reports & Automated Test Suite:</strong> Navigate to <span class="code-inline">/incidents/new/</span> to highlight the top-right green save button from <strong>Iteration 2</strong>. Show <span class="code-inline">/analytics/reports/</span> with live KPI tiles and CSV export. Open terminal and run <span class="code-inline">python manage.py test tests</span> to demonstrate all <strong>13 automated unit/integration tests passing in ~6 seconds</strong>. Say: <em>"System verified, we are ready for your technical questions."</em>
+            <strong>Centralized Admin Portal & Database Telemetry:</strong> In a third window, open <span class="code-inline">/admin-portal/login/</span> and log in as <span class="code-inline">admin</span> (<span class="code-inline">password123</span>). Show the Executive Command Portal (<span class="code-inline">/admin-portal/</span>): live Supabase PostgreSQL connection status and round-trip query latency (ms), Render keepalive pulse, live CAD emergency incident feed, and User Management IAM with instant activation link copy and Resend/SMTP email dispatch.
+        </div>
+    </div>
+
+    <div class="timeline-row">
+        <div class="timeline-time">4:15 – 5:00</div>
+        <div class="timeline-body">
+            <strong>Incidents (Iteration 2), Usability Runner & 44 Automated Tests:</strong> Show <span class="code-inline">/incidents/new/</span> (top-right green save button from Iteration 2) and <span class="code-inline">/usability-test/</span> runner. Open terminal and run <span class="code-inline">python manage.py test</span> to demonstrate all <strong>76 automated unit/integration tests passing in ~19 seconds</strong>. Say: <em>"System verified across all functional, security, and persistence tiers; we are ready for your technical questions."</em>
         </div>
     </div>
 
@@ -500,6 +581,7 @@ html_doc = """<!DOCTYPE html>
     </div>
 
     <h2 class="section-header" style="margin-top: 10px;">Click-by-Click Live Demonstration Cheat Sheet</h2>
+    <h2 class="section-header" style="margin-top: 8px;">Click-by-Click Live Demonstration Cheat Sheet</h2>
     <table class="data-table">
         <thead>
             <tr>
@@ -548,15 +630,25 @@ html_doc = """<!DOCTYPE html>
             </tr>
             <tr>
                 <td><strong>7. Automated Tests</strong></td>
+                <td><strong>7. Admin Portal & Telemetry</strong></td>
+                <td><span class="code-inline">/admin-portal/login/</span></td>
+                <td><span class="code-inline">admin</span> / <span class="code-inline">password123</span></td>
+                <td>Live PostgreSQL query latency telemetry, keepalive pulse, CAD feed, IAM directory, instant link copy.</td>
+            </tr>
+            <tr>
+                <td><strong>8. Automated Tests</strong></td>
                 <td>Terminal</td>
                 <td><span class="code-inline">python manage.py test tests</span></td>
                 <td>Runs 13 tests in 6.3s: verifies RBAC (403), models, APIs, and state machine.</td>
+                <td><span class="code-inline">python manage.py test</span></td>
+                <td>Runs 76 tests across all apps in ~36s: verifies RBAC (403), models, APIs, state machine, admin portal, and email.</td>
             </tr>
         </tbody>
     </table>
 
     <div class="alert-box alert-warning">
         <strong>CRITICAL DEMO TIP:</strong> Set up both browser windows side-by-side (Window 1: Student; Window 2: Security Console in Incognito) <em>before</em> Dr Silas calls you in. Having both screens visible simultaneously makes the real-time asynchronous dispatch updates look remarkably impressive!
+        <strong>CRITICAL DEMO TIP:</strong> Set up browser windows side-by-side (Window 1: Student; Window 2: Security Console in Incognito; Window 3: Admin Portal) <em>before</em> Dr Silas calls you in. Having multiple roles visible simultaneously makes the real-time asynchronous dispatch updates look remarkably impressive!
     </div>
 </div>
 
@@ -583,42 +675,65 @@ html_doc = """<!DOCTYPE html>
                 <td><strong>Database Engines</strong></td>
                 <td>SQLite3 (Local) & PostgreSQL (Supabase)</td>
                 <td>Relational schema in 3NF. SQLite provides portable zero-setup grading; Supabase PostgreSQL provides cloud production resilience.</td>
+                <td>SQLite3 (Local) & PostgreSQL 15.x (Supabase Cloud)</td>
+                <td>Relational schema in 3NF. Connected via <span class="code-inline">dj-database-url</span> and <span class="code-inline">psycopg2-binary</span> with persistent connection pooling (<span class="code-inline">conn_max_age=600</span>).</td>
+            </tr>
+            <tr>
+                <td><strong>Admin Telemetry Portal</strong></td>
+                <td>Dedicated Admin Portal (<span class="code-inline">/admin-portal/</span>)</td>
+                <td>Centralized command gateway with live PostgreSQL round-trip latency (ms), Render keepalive pulse, CAD dispatch feed, and IAM directory.</td>
             </tr>
             <tr>
                 <td><strong>Real-Time Sync</strong></td>
                 <td>2.5-Second HTTP Polling Engine</td>
+                <td>2.5–3.0s HTTP Polling Engine</td>
                 <td>Stateless JSON REST polling. Avoids fragile WebSocket/Redis daemon drops on campus eduroam firewalls; 100% self-healing.</td>
             </tr>
             <tr>
                 <td><strong>GIS & Mapping</strong></td>
                 <td>HTML5 Geolocation + Leaflet.js + OSM</td>
                 <td>Hardware GPS coordinates (lat, lng, accuracy radius), self-hosted tile proxy for Kimberley campus, Haversine distance & bearing math.</td>
+                <td>HTML5 Geolocation + Leaflet.js + OSM / CARTO</td>
+                <td>Hardware GPS coordinates, dark-mode tactical tiles, self-hosted Kimberley tile cache (130+ tiles), Haversine distance & bearing math.</td>
             </tr>
             <tr>
                 <td><strong>Audio Telemetry</strong></td>
                 <td>HTML5 Web Audio API Synthesizer</td>
                 <td>OscillatorNode modulating 650Hz–950Hz siren in security room and countdown beeps during abort window with zero external MP3 assets.</td>
+                <td>In-memory <span class="code-inline">AudioContext</span> modulating 650Hz–950Hz siren in security room and countdown beeps during abort window with zero external MP3 assets.</td>
+            </tr>
+            <tr>
+                <td><strong>Transactional Email</strong></td>
+                <td>Resend API v2 + Plug-and-Play SMTP</td>
+                <td>Dual-mode email engine with verified domain <span class="code-inline">security@youthalliance.co.za</span>; automated HMAC-SHA256 account activation and password setup.</td>
             </tr>
             <tr>
                 <td><strong>Mobile Application</strong></td>
                 <td>Native Android APK (Java + WebView)</td>
                 <td><span class="code-inline">UPBS-Student-Portal.apk</span> bridging native Android GPS sensors and haptic vibration motors via <span class="code-inline">@JavascriptInterface</span>.</td>
+                <td>Native Android APK (Java 17 + WebView)</td>
+                <td><span class="code-inline">UPBS-Student-Portal.apk</span> (API 24–34) bridging native Android GPS sensors and haptic vibration motors via <span class="code-inline">@JavascriptInterface</span>; blocks <span class="code-inline">/admin-portal</span>.</td>
             </tr>
             <tr>
                 <td><strong>Static Assets</strong></td>
                 <td>WhiteNoise 6.6.0</td>
                 <td>Serves optimized, gzip-compressed static CSS/JS directly through Gunicorn WSGI without needing an external Nginx server.</td>
+                <td><strong>Static Assets & Cloud</strong></td>
+                <td>WhiteNoise 6.6.0 + Render PaaS</td>
+                <td>Serves optimized, gzip-compressed static assets directly through Gunicorn WSGI. Deployed on Render Linux PaaS with automated SSL.</td>
             </tr>
         </tbody>
     </table>
 
     <h2 class="section-header" style="margin-top: 10px;">3. Phase 3 Design Compliance & Usability Iterations</h2>
+    <h2 class="section-header" style="margin-top: 8px;">3. Phase 3 Design Compliance & Usability Iterations</h2>
     <p>Dr Silas explicitly evaluates whether the completed system reflects Phase 3. Memorize these 4 design iterations (Phase 3 Section 3.2):</p>
 
     <div class="alert-box alert-important">
         <strong>Iteration 1: Panic Button Visibility (Phase 3 Section 3.2.1)</strong><br>
         <em>Problem Identified in Initial Testing:</em> In initial user trials, students under simulated threat experienced cognitive tunnel vision and took over 4.2 seconds to locate the panic trigger amongst standard navigation menus.<br>
         <em>Implemented Solution:</em> Engineered a massive, centered radial gradient crimson button (<span class="code-inline">#ef4444</span>) with concentric pulsating CSS wave animation (<span class="code-inline">@keyframes pulse-ring</span>). Removed all distracting links. Task initiation dropped to <strong>1.84 seconds</strong>.
+        <em>Implemented Solution:</em> Engineered a massive, centered 216px radial gradient crimson button (<span class="code-inline">#ef4444</span>) with concentric pulsating CSS wave animation (<span class="code-inline">@keyframes pulse-ring</span>). Removed all distracting links. Task initiation dropped to <strong>1.84 seconds</strong>.
     </div>
 
     <div class="alert-box alert-tip">
@@ -720,6 +835,7 @@ html_doc = """<!DOCTYPE html>
     </table>
 
     <h2 class="section-header" style="margin-top: 10px;">Relational Highlights & Normalization Defense</h2>
+    <h2 class="section-header" style="margin-top: 8px;">Relational Highlights & Normalization Defense</h2>
     <div class="alert-box alert-info">
         <strong>1. Why is Location a 1:1 relationship with EmergencyAlert instead of being fields on the Alert?</strong><br>
         <strong>Defense:</strong> <em>"Separating Location satisfies Third Normal Form (3NF). An alert represents a security event entity, whereas Location represents spatial coordinates (latitude, longitude, horizontal accuracy radius, campus landmark description). Normalizing Location into its own entity allows spatial indexing, supports GIS updates without locking the alert row, and prevents coordinate duplication."</em>
@@ -745,21 +861,26 @@ html_doc = """<!DOCTYPE html>
         <div class="member-header">
             <span class="member-name">Brown Nkosi (202474004) — Team Leader</span>
             <span class="member-role">Backend Architecture, Security & Cloud Deployment</span>
+            <span class="member-role">Backend Architecture, Security, Admin Portal & Cloud Deployment</span>
         </div>
         <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">upbs_project/</span>, <span class="code-inline">accounts/models.py</span>, <span class="code-inline">alerts/views.py</span> (APIs), <span class="code-inline">build.sh</span>, Render & Supabase hosting.</p>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">upbs_project/</span>, <span class="code-inline">accounts/</span>, <span class="code-inline">alerts/views.py</span> (APIs), <span class="code-inline">build.sh</span>, Render & Supabase hosting.</p>
         
         <div class="pitch-box">
             "I architected the backend core using Python and Django LTS. I designed the RBAC access control layer enforcing strict role separation between Students, Security, and Administrators. I built the state machine REST endpoints for alert lifecycle transitions, implemented CSRF protection across all asynchronous JSON requests, and configured our production deployment pipeline on Render with Supabase PostgreSQL."
+            "I architected the backend core using Python and Django LTS. I designed the RBAC access control layer enforcing strict role separation between Students, Security, and Administrators, and created the dedicated Admin Portal Gateway with real-time Supabase PostgreSQL telemetry. I built the state machine REST endpoints, implemented CSRF protection across all asynchronous JSON requests, developed our dual-mode Resend/SMTP email engine, and configured our production deployment pipeline on Render with Supabase PostgreSQL."
         </div>
 
         <p><strong>Brown's High-Yield Technical Defense Questions:</strong></p>
         <div class="qa-card">
             <div class="qa-q">
                 <span>Q: How did you implement Role-Based Access Control (RBAC)?</span>
+                <span>Q: How did you implement Role-Based Access Control (RBAC) and Admin Portal Isolation?</span>
                 <span class="qa-target">Brown</span>
             </div>
             <div class="qa-a">
                 <strong>Answer:</strong> "We created a dedicated <code>Role</code> entity (STUDENT, STAFF, SECURITY, ADMIN) linked to our custom <code>User</code> model (extending <code>AbstractUser</code>). In views, we enforce access using decorators like <code>@login_required</code> and custom property checks such as <code>request.user.is_security</code> and <code>request.user.is_admin_user</code>. If an unprivileged user (e.g. a student) attempts to access the security console, the view immediately returns an <strong>HTTP 403 Forbidden</strong>."
+                <strong>Answer:</strong> "We created a dedicated <code>Role</code> entity (STUDENT, STAFF, SECURITY, ADMIN) linked to our custom <code>User</code> model (extending <code>AbstractUser</code>). In views, we enforce access using decorators like <code>@login_required</code> and custom property checks such as <code>request.user.is_security</code> and <code>request.user.is_admin_user</code>. We built a dedicated administrative gateway at <code>/admin-portal/login/</code> that strictly rejects non-admin accounts. If an unprivileged user (e.g. a student) attempts to access security consoles or admin routes, the view immediately returns an <strong>HTTP 403 Forbidden</strong>."
             </div>
         </div>
 
@@ -781,9 +902,11 @@ html_doc = """<!DOCTYPE html>
             <span class="member-role">Frontend UI/UX, Design Systems & Usability Evaluation</span>
         </div>
         <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">templates/</span>, <span class="code-inline">static/js/panic.js</span>, <span class="code-inline">static/js/timeline.js</span>, <span class="code-inline">feedback/models.py</span> (UsabilityMetric), <span class="code-inline">/usability-test/</span>.</p>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">templates/</span>, <span class="code-inline">static/css/style.css</span>, <span class="code-inline">static/js/panic.js</span>, <span class="code-inline">static/js/timeline.js</span>, <span class="code-inline">feedback/models.py</span>, <span class="code-inline">/usability-test/</span>.</p>
         
         <div class="pitch-box">
             "I led frontend user experience, accessibility, and usability evaluation. Grounded in our Phase 3 design specifications, I implemented the three iterative usability refinements: the centered pulsing panic button to eliminate cognitive tunnel vision, the top-right green save button to boost form completion, and the 4-stage tracking timeline to alleviate user anxiety. I also built our live Usability Testing Runner measuring completion times and calculating SUS scores."
+            "I led frontend user experience, accessibility, mobile header redesign, and usability evaluation. Grounded in our Phase 3 design specifications, I implemented the three iterative usability refinements: the centered 216px pulsing panic button to eliminate cognitive tunnel vision, the top-right green save button to boost form completion, and the 4-stage tracking timeline to alleviate user anxiety. I also built our live Usability Testing Runner measuring completion times and calculating empirical SUS scores."
         </div>
 
         <p><strong>Palesa's High-Yield Technical Defense Questions:</strong></p>
@@ -854,9 +977,11 @@ html_doc = """<!DOCTYPE html>
             <span class="member-role">Database Architecture, Incident Reporting, QA & Android Integration</span>
         </div>
         <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">incidents/</span>, <span class="code-inline">tests/test_models.py</span>, <span class="code-inline">tests/test_views.py</span>, <span class="code-inline">android_student_portal/</span> (Java APK), SQLite & PostgreSQL schemas.</p>
+        <p><strong>Assigned Modules & Files:</strong> <span class="code-inline">incidents/</span>, <span class="code-inline">tests/test_models.py</span>, <span class="code-inline">tests/test_views.py</span>, <span class="code-inline">accounts/tests.py</span>, <span class="code-inline">android_student_portal/</span> (Java APK).</p>
         
         <div class="pitch-box">
             "I managed relational database modeling, incident reporting, automated QA testing, and our mobile application integration. I ensured our relational schema strictly satisfies 3NF and handles foreign key constraints. I built the non-emergency incident reporting module with multipart file handling, wrote our comprehensive 13-test automated test suite covering models, RBAC, and state transitions, and built our native Android APK wrapper bridging hardware GPS."
+            "I managed relational database modeling, incident reporting, automated QA testing, and our mobile application integration. I ensured our relational schema strictly satisfies 3NF and handles foreign key constraints. I built the non-emergency incident reporting module with multipart file handling, engineered our comprehensive 76-test automated test suite covering models, RBAC, keepalive, and email delivery, and built our native Android APK wrapper bridging hardware GPS."
         </div>
 
         <p><strong>Thapelo's High-Yield Technical Defense Questions:</strong></p>
@@ -867,6 +992,7 @@ html_doc = """<!DOCTYPE html>
             </div>
             <div class="qa-a">
                 <strong>Answer:</strong> "We engineered a comprehensive automated test suite in <code>tests/test_models.py</code> and <code>tests/test_views.py</code> containing <strong>13 automated tests</strong>. It verifies: 1) Model relationships and unique constraints; 2) RBAC access controls (asserting students receive HTTP 403 on security views); 3) Alert lifecycle transitions (<code>SENT</code> &rarr; <code>RECEIVED</code> &rarr; <code>DISPATCHED</code> &rarr; <code>RESOLVED</code>); 4) Incident submission with media uploads; 5) Usability metric persistence. All 13 tests execute and pass in ~6 seconds."
+                <strong>Answer:</strong> "We engineered a comprehensive automated test suite across <code>tests/test_views.py</code>, <code>tests/test_models.py</code>, and <code>accounts/tests.py</code> containing <strong>76 automated unit and integration tests</strong>. It verifies: 1) Model relationships and unique constraints; 2) Strict RBAC enforcement (asserting unprivileged users receive HTTP 403 on security/admin views); 3) Alert lifecycle state transitions; 4) Centralized Admin Portal security, RBAC protection, and live database telemetry; 5) Keepalive daemon health checks; 6) Safe test account purging preserving master admin; 7) Resend/SMTP email delivery and token verification. All 76 tests execute and pass in ~36 seconds."
             </div>
         </div>
 
@@ -877,6 +1003,7 @@ html_doc = """<!DOCTYPE html>
             </div>
             <div class="qa-a">
                 <strong>Answer:</strong> "Our native Android application (<code>UPBS-Student-Portal.apk</code>) is built in Java using Android SDK. It hosts a full-bleed WebView connected to our backend, and exposes a native Java bridge via <code>@JavascriptInterface</code> in <code>MainActivity.java</code>. This gives our web portal direct access to native mobile hardware: real-time GPS coordinates via Android's <code>LocationManager</code> and physical haptic feedback via the Android <code>Vibrator</code> service."
+                <strong>Answer:</strong> "Our native Android application (<code>UPBS-Student-Portal.apk</code>) is built in Java 17 using the Android SDK (API 24–34). It hosts a full-bleed WebView configured with <code>CookieManager</code> to maintain authenticated Django session cookies. It exposes a native Java bridge via <code>@JavascriptInterface</code> in <code>MainActivity.java</code>, providing hardware GPS coordinates via <code>LocationManager</code> and haptic vibration feedback, while enforcing security policies that prevent student WebView access to administrative routes."
             </div>
         </div>
     </div>
@@ -914,6 +1041,7 @@ html_doc = """<!DOCTYPE html>
         </div>
         <div class="qa-a">
             <strong>Answer:</strong> "We use defense-in-depth: 1) Session authentication requiring authenticated users; 2) Custom property checks in <code>accounts/models.py</code> (<code>is_security</code> and <code>is_admin_user</code>); 3) View-level guards in <code>alerts/views.py</code> that return an immediate <code>HttpResponseForbidden</code> (HTTP 403) if a student user attempts to load the console or call security APIs; 4) CSRF token validation on all state mutation requests."
+            <strong>Answer:</strong> "We use defense-in-depth: 1) Session authentication requiring authenticated users; 2) Custom property checks in <code>accounts/models.py</code> (<code>is_security</code> and <code>is_admin_user</code>); 3) View-level guards in <code>alerts/views.py</code> and <code>accounts/views.py</code> that return an immediate <code>HttpResponseForbidden</code> (HTTP 403) if a student user attempts to load the console or call security/admin APIs; 4) Dedicated executive login portal at <code>/admin-portal/login/</code>; 5) CSRF token validation on all state mutation requests."
         </div>
     </div>
 
@@ -1020,6 +1148,7 @@ html_doc = """<!DOCTYPE html>
         </div>
         <div class="qa-a">
             <strong>Answer:</strong> "We built a self-hosted tile caching proxy endpoint in <code>alerts/views.py</code> (<code>kimberley_map_tile</code>). Pre-rendered OpenStreetMap raster tiles for the Kimberley campus sector are stored locally in <code>static/tiles/kimberley/{z}/{x}/{y}.png</code> and served with HTTP <code>Cache-Control: immutable</code>. For coordinates outside the bundle, it redirects to the global OSM CDN, loading in &lt;200ms."
+            <strong>Answer:</strong> "We built a self-hosted tile caching proxy endpoint in <code>alerts/views.py</code> (<code>kimberley_map_tile</code>). Pre-rendered OpenStreetMap raster tiles for the Kimberley campus sector are stored locally in <code>static/tiles/kimberley/{z}/{x}/{y}.png</code> (over 130 offline tiles) and served with HTTP <code>Cache-Control: immutable</code>. For coordinates outside the bundle, it redirects to the global OSM CDN, loading in &lt;200ms."
         </div>
     </div>
 
@@ -1040,6 +1169,7 @@ html_doc = """<!DOCTYPE html>
         </div>
         <div class="qa-a">
             <strong>Answer:</strong> "We created 13 automated tests using Django's <code>TestCase</code> in <code>tests/test_models.py</code> and <code>tests/test_views.py</code>. We use Django's test client to simulate HTTP requests, verify database transactions, check authentication redirects, assert HTTP 403 status codes on RBAC breaches, and validate state transitions from <code>SENT</code> to <code>RESOLVED</code>."
+            <strong>Answer:</strong> "We created <strong>76 automated unit and integration tests</strong> using Django's <code>TestCase</code> in <code>tests/test_views.py</code>, <code>tests/test_models.py</code>, and <code>accounts/tests.py</code>. We use Django's test client to simulate HTTP requests, verify database transactions, check authentication redirects, assert HTTP 403 status codes on RBAC breaches, validate state transitions from <code>SENT</code> to <code>RESOLVED</code>, test admin portal telemetry, keepalive daemons, and transactional email token delivery. All 76 tests pass in ~36 seconds."
         </div>
     </div>
 
@@ -1050,6 +1180,7 @@ html_doc = """<!DOCTYPE html>
         </div>
         <div class="qa-a">
             <strong>Answer:</strong> "The native Android APK (<code>MainActivity.java</code>) hosts a full-bleed <code>WebView</code> configured with <code>CookieManager</code> to maintain authenticated Django session cookies. It exposes a Java class annotated with <code>@JavascriptInterface</code> containing <code>getLatitude()</code>, <code>getLongitude()</code>, <code>getAccuracy()</code>, and <code>vibrate()</code>, giving the web interface native mobile sensor powers."
+            <strong>Answer:</strong> "The native Android APK (<code>MainActivity.java</code>) hosts a full-bleed <code>WebView</code> configured with <code>CookieManager</code> to maintain authenticated Django session cookies. It exposes a Java class annotated with <code>@JavascriptInterface</code> containing <code>getLatitude()</code>, <code>getLongitude()</code>, <code>getAccuracy()</code>, and <code>vibrate()</code>, giving the web interface native mobile sensor powers while blocking access to administrative URLs."
         </div>
     </div>
 </div>
@@ -1170,10 +1301,13 @@ html_doc = """<!DOCTYPE html>
                     <strong>Demonstration Setup & System Pre-Warming:</strong><br>
                     1. Plug laptop into power; connect to stable Wi-Fi or phone hotspot.<br>
                     2. In terminal, seed clean data: <span class="code-inline">python manage.py seed_upbs</span>.<br>
+                    2. In terminal, seed clean demo accounts: <span class="code-inline">python manage.py seed_upbs --demo</span>.<br>
                     3. Launch development server: <span class="code-inline">python manage.py runserver 0.0.0.0:8000</span>.<br>
                     4. Open Browser Window 1: <span class="code-inline">http://127.0.0.1:8000/login/</span> (Log in as <span class="code-inline">student1</span>).<br>
                     5. Open Browser Window 2 (Incognito): <span class="code-inline">http://127.0.0.1:8000/login/</span> (Log in as <span class="code-inline">officer1</span>).<br>
                     6. Open second terminal tab with command typed and ready: <span class="code-inline">python manage.py test tests</span>.
+                    6. Open Browser Window 3: <span class="code-inline">http://127.0.0.1:8000/admin-portal/login/</span> (Log in as <span class="code-inline">admin</span>).<br>
+                    7. Open second terminal tab with command typed and ready: <span class="code-inline">python manage.py test</span>.
                 </td>
                 <td>Thapelo & Rethabile</td>
             </tr>
@@ -1186,11 +1320,13 @@ html_doc = """<!DOCTYPE html>
     </table>
 
     <h2 class="section-header" style="margin-top: 10px;">Pre-Seeded Demo Credentials Cheat Sheet</h2>
+    <h2 class="section-header" style="margin-top: 8px;">Pre-Seeded Demo Credentials Cheat Sheet</h2>
     <table class="data-table">
         <thead>
             <tr>
                 <th>System Role</th>
                 <th>Username</th>
+                <th>Username / ID</th>
                 <th>Password</th>
                 <th>Landing Interface</th>
                 <th>Core Features to Demonstrate to Dr Silas</th>
@@ -1203,6 +1339,7 @@ html_doc = """<!DOCTYPE html>
                 <td><span class="code-inline">password123</span></td>
                 <td><span class="code-inline">/home/</span></td>
                 <td>Pulsing SOS trigger (Iteration 1), 3s abort window, GPS status pill, 4-stage tracking timeline (Iteration 3).</td>
+                <td>Pulsing 216px SOS trigger (Iteration 1), 3s audible abort window, GPS status pill, 4-stage tracking timeline (Iteration 3).</td>
             </tr>
             <tr>
                 <td><span class="badge badge-amber">Student 2</span></td>
@@ -1210,6 +1347,7 @@ html_doc = """<!DOCTYPE html>
                 <td><span class="code-inline">password123</span></td>
                 <td><span class="code-inline">/home/</span></td>
                 <td>Secondary student account for multi-alert concurrency demonstration.</td>
+                <td>Secondary student account for multi-alert concurrency demonstration and incident submissions.</td>
             </tr>
             <tr>
                 <td><span class="badge badge-blue">Security Officer</span></td>
@@ -1217,18 +1355,24 @@ html_doc = """<!DOCTYPE html>
                 <td><span class="code-inline">password123</span></td>
                 <td><span class="code-inline">/security/dashboard/</span></td>
                 <td>Live Leaflet GIS radar, audio alarm siren, case claiming, unit dispatch, Haversine distance, incident resolution notes.</td>
+                <td>Live Leaflet GIS radar, in-memory Web Audio siren, case claiming, unit dispatch, Haversine distance, incident resolution notes.</td>
             </tr>
             <tr>
                 <td><span class="badge badge-purple">Administrator</span></td>
                 <td><span class="code-inline">admin</span> (<span class="code-inline">ADMIN001</span>)</td>
+                <td><span class="badge badge-purple">Master Admin</span></td>
+                <td><span class="code-inline">admin</span> (<span class="code-inline">mnnhlnkosi@gmail.com</span>)</td>
                 <td><span class="code-inline">password123</span></td>
                 <td><span class="code-inline">/analytics/reports/</span></td>
                 <td>Campus emergency KPI tiles, resolution rates, CSV report download, user role management panel.</td>
+                <td><span class="code-inline">/admin-portal/login/</span> &rarr; <span class="code-inline">/admin-portal/</span></td>
+                <td>Live PostgreSQL query latency telemetry, Render keepalive pulse, live CAD feed, IAM directory, instant user verification & link copy.</td>
             </tr>
         </tbody>
     </table>
 
     <h2 class="section-header" style="margin-top: 10px;">Emergency Contingency Protocols (If Hardware / Network Glitches)</h2>
+    <h2 class="section-header" style="margin-top: 8px;">Emergency Contingency Protocols (If Hardware / Network Glitches)</h2>
     <div class="alert-box alert-important">
         <strong>1. If Local Campus Wi-Fi drops:</strong> Immediately enable phone 4G/5G mobile hotspot. Or navigate directly to our live production cloud deployment on Render: <strong><span class="code-inline">https://youthalliance.co.za</span></strong>. It is connected to Supabase PostgreSQL and runs the identical codebase.
     </div>
@@ -1242,6 +1386,7 @@ html_doc = """<!DOCTYPE html>
     </div>
 
     <div style="margin-top: 16px; text-align: center; font-size: 8.5pt; color: #64748b; border-top: 1px solid #cbd5e1; padding-top: 8px;">
+    <div style="margin-top: 12px; text-align: center; font-size: 8pt; color: #64748b; border-top: 1px solid #cbd5e1; padding-top: 6px;">
         <strong>Techno Warriors • Department of Computer Science & ICT • Sol Plaatje University</strong><br>
         NPRT630 Final Live Project Assessment Master Defense Manual • Thursday, 15 October 2026
     </div>

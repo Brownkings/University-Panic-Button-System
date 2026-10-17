@@ -11,6 +11,7 @@ from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.db import connection
 from django.db.models import Count, Avg, Q
+from django.conf import settings
 from .models import User, Role
 from .email_service import (
     send_account_verification_email,
@@ -172,7 +173,8 @@ def verify_otp_view(request):
 
     if request.method == 'POST':
         entered_code = request.POST.get('otp_code', '').strip()
-        if entered_code == user.otp_code or entered_code == "123456": # 123456 as universal test code
+        is_valid_otp = entered_code == user.otp_code or (settings.DEBUG and entered_code == "123456")
+        if is_valid_otp:
             user.is_verified = True
             user.otp_code = None
             user.save()
@@ -184,7 +186,7 @@ def verify_otp_view(request):
     return render(request, 'accounts/verify_otp.html', {
         'user_phone': user.contact_number,
         'user_email': user.email,
-        'debug_otp': user.otp_code
+        'debug_otp': user.otp_code if settings.DEBUG else None
     })
 
 

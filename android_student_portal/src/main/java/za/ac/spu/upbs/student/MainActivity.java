@@ -669,14 +669,14 @@ public class MainActivity extends Activity implements LocationListener {
 
     void showLocationCalibrationDialog() {
         final String[] options = {
-                "🛰️ Live Hardware GNSS (Auto-Detect)",
-                "🏫 SPU Central Campus (-28.7421, 24.7651)",
-                "📚 SPU Main Library (-28.7416, 24.7647)",
-                "💻 Science Block B - Labs (-28.7415, 24.7660)",
-                "🏢 Student Centre (-28.7426, 24.7636)",
-                "🏠 North Student Residence (-28.7388, 24.7654)",
-                "🚪 Campus South Gate (-28.7452, 24.7650)",
-                "🎯 Enter Custom Coordinates..."
+                "Live Hardware GNSS (Auto-Detect)",
+                "SPU Central Campus (-28.7421, 24.7651)",
+                "SPU Main Library (-28.7416, 24.7647)",
+                "Science Block B - Labs (-28.7415, 24.7660)",
+                "Student Centre (-28.7426, 24.7636)",
+                "North Student Residence (-28.7388, 24.7654)",
+                "Campus South Gate (-28.7452, 24.7650)",
+                "Enter Custom Coordinates..."
         };
 
         final double[][] coords = {
@@ -1004,7 +1004,9 @@ public class MainActivity extends Activity implements LocationListener {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-            handler.proceed();
+            handler.cancel();
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(MainActivity.this, "SSL Security Warning: Untrusted connection rejected.", Toast.LENGTH_LONG).show();
         }
     }
 

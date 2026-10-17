@@ -1,0 +1,28 @@
+name: UPBS & Supabase 24/7 Keep-Alive Heartbeat
+
+on:
+  schedule:
+    # Run every 10 minutes to stay well under Render's 15-minute spin-down threshold
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  heartbeat:
+    name: Ping UPBS & Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping Primary Domain (youthalliance.co.za)
+        run: |
+          echo "Dispatching heartbeat to https://youthalliance.co.za/healthz/..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 45 "https://youthalliance.co.za/healthz/" || echo "FAILED")
+          echo "Primary domain HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✓ Primary domain active and Supabase database responsive!"
+          fi
+
+      - name: Fallback Ping to Render Subdomain (if primary differs)
+        run: |
+          echo "Dispatching heartbeat to Render edge proxy..."
+          curl -s -o /dev/null -w "Render subdomain status: %{http_code}\n" --max-time 45 "https://upbs-campus-safety.onrender.com/healthz/" || true

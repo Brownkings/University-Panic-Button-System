@@ -30,4 +30,5 @@ android_student_portal/build/
 .vscode/
 .idea/
 .env
+.github/
 

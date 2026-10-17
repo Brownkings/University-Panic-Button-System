@@ -1,7 +1,11 @@
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import IncidentReport
+
+
+ALLOWED_EVIDENCE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mov', '.pdf', '.webp', '.doc', '.docx'}
 
 
 @login_required
@@ -22,12 +26,19 @@ def incident_create_view(request):
                 'user_reports': IncidentReport.objects.filter(user=request.user).order_by('-created_at')
             })
 
-        # File size validation (Max 10MB)
-        if media_file and media_file.size > 10 * 1024 * 1024:
-            messages.error(request, "Uploaded file exceeds the maximum limit of 10 MB.")
-            return render(request, 'incidents/report_form.html', {
-                'user_reports': IncidentReport.objects.filter(user=request.user).order_by('-created_at')
-            })
+        # File validation: Size (Max 10MB) and extension safety
+        if media_file:
+            if media_file.size > 10 * 1024 * 1024:
+                messages.error(request, "Uploaded file exceeds the maximum limit of 10 MB.")
+                return render(request, 'incidents/report_form.html', {
+                    'user_reports': IncidentReport.objects.filter(user=request.user).order_by('-created_at')
+                })
+            ext = os.path.splitext(media_file.name)[1].lower()
+            if ext not in ALLOWED_EVIDENCE_EXTENSIONS:
+                messages.error(request, f"Unsupported file type ({ext}). Allowed formats: images (JPG, PNG, GIF, WEBP), videos (MP4, MOV), and documents (PDF, DOC).")
+                return render(request, 'incidents/report_form.html', {
+                    'user_reports': IncidentReport.objects.filter(user=request.user).order_by('-created_at')
+                })
 
         report = IncidentReport.objects.create(
             user=request.user,

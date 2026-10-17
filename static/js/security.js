@@ -32,6 +32,16 @@ const SVG_CROSSHAIR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="non
 const SVG_BEACON_PIN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle></svg>`;
 const SVG_SHIELD_UNIT = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
 
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initCampusMap();
     initOfficerHardwareGPS();
@@ -488,14 +498,14 @@ function renderAlertList(alerts) {
             responderRowsHtml += `
                 <div class="mdt-responder-row">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.4rem;">
-                        <span style="font-weight: 700; color: #f8fafc;">${r.officer_name} <span style="font-family: var(--font-mono); color: #94a3b8; font-size: 0.72rem;">(${r.badge_number})</span></span>
+                        <span style="font-weight: 700; color: #f8fafc;">${escapeHtml(r.officer_name)} <span style="font-family: var(--font-mono); color: #94a3b8; font-size: 0.72rem;">(${escapeHtml(r.badge_number)})</span></span>
                         ${unitTag}
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.72rem; color: ${distBadgeColor}; margin-top: 0.18rem;">
-                        <span>Relative to Victim: <strong>${r.distance_to_victim_m}m</strong> (${r.bearing_from_victim || r.bearing_to_victim} of Victim)</span>
+                        <span>Relative to Victim: <strong>${r.distance_to_victim_m}m</strong> (${escapeHtml(r.bearing_from_victim || r.bearing_to_victim)} of Victim)</span>
                         <span style="color: #34d399; font-weight: 700;">${etaText}</span>
                     </div>
-                    ${r.route_summary ? `<div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.12rem;">Route to Victim: <span style="color: #e2e8f0;">${r.route_summary}</span></div>` : ''}
+                    ${r.route_summary ? `<div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.12rem;">Route to Victim: <span style="color: #e2e8f0;">${escapeHtml(r.route_summary)}</span></div>` : ''}
                 </div>
             `;
         });
@@ -523,7 +533,7 @@ function renderAlertList(alerts) {
                 ${!a.is_accepted_by_me ? `
                     <div style="font-family: var(--font-mono); font-size: 0.72rem; color: #93c5fd; padding-bottom: ${responders.length ? '0.4rem' : '0'}; border-bottom: ${responders.length ? '1px dashed rgba(148, 163, 184, 0.14)' : 'none'};">
                         <div>Your Unit Relative to Victim: <strong>${a.my_distance_to_victim_m}m</strong> (ETA ~${a.my_eta_seconds}s)</div>
-                        ${a.my_route_summary ? `<div style="font-family: var(--font-sans); font-size: 0.7rem; color: #94a3b8; margin-top: 0.12rem;">Route to Victim: <span style="color: #e2e8f0;">${a.my_route_summary}</span></div>` : ''}
+                        ${a.my_route_summary ? `<div style="font-family: var(--font-sans); font-size: 0.7rem; color: #94a3b8; margin-top: 0.12rem;">Route to Victim: <span style="color: #e2e8f0;">${escapeHtml(a.my_route_summary)}</span></div>` : ''}
                     </div>
                 ` : ''}
                 ${responderRowsHtml}
@@ -536,24 +546,24 @@ function renderAlertList(alerts) {
                     <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
                         <span class="badge ${badgeClass}" style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem;">
                             ${SVG_STATUS_DOT}
-                            ${a.status}
+                            ${escapeHtml(a.status)}
                         </span>
-                        <strong style="font-size: 0.92rem; color: #ffffff; font-variant-numeric: tabular-nums;">#${a.id} • ${a.alert_type}</strong>
+                        <strong style="font-size: 0.92rem; color: #ffffff; font-variant-numeric: tabular-nums;">#${a.id} • ${escapeHtml(a.alert_type)}</strong>
                     </div>
-                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: var(--font-mono); font-variant-numeric: tabular-nums;">${a.timestamp_formatted}</span>
+                    <span style="font-size: 0.75rem; color: #94a3b8; font-family: var(--font-mono); font-variant-numeric: tabular-nums;">${escapeHtml(a.timestamp_formatted)}</span>
                 </div>
 
                 <div style="display: grid; gap: 0.28rem; font-size: 0.83rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.4rem;">
-                        <span style="color: #f8fafc; font-weight: 700;">Victim: ${a.user_full_name}</span>
-                        <span style="font-family: var(--font-mono); font-size: 0.73rem; color: #cbd5e1; background: rgba(15, 23, 42, 0.8); padding: 0.12rem 0.45rem; border-radius: 4px; border: 1px solid rgba(148, 163, 184, 0.18);">ID: ${a.institutional_id}</span>
+                        <span style="color: #f8fafc; font-weight: 700;">Victim: ${escapeHtml(a.user_full_name)}</span>
+                        <span style="font-family: var(--font-mono); font-size: 0.73rem; color: #cbd5e1; background: rgba(15, 23, 42, 0.8); padding: 0.12rem 0.45rem; border-radius: 4px; border: 1px solid rgba(148, 163, 184, 0.18);">ID: ${escapeHtml(a.institutional_id)}</span>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-                        <span style="color: #fcd34d; font-weight: 700;">${a.location_description}</span>
-                        <a href="tel:${a.contact_number}" style="color: #60a5fa; text-decoration: none; font-family: var(--font-mono); font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(37, 99, 235, 0.16); padding: 0.16rem 0.5rem; border-radius: 5px; border: 1px solid rgba(96, 165, 250, 0.3);">
+                        <span style="color: #fcd34d; font-weight: 700;">${escapeHtml(a.location_description)}</span>
+                        <a href="tel:${encodeURIComponent(a.contact_number)}" style="color: #60a5fa; text-decoration: none; font-family: var(--font-mono); font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(37, 99, 235, 0.16); padding: 0.16rem 0.5rem; border-radius: 5px; border: 1px solid rgba(96, 165, 250, 0.3);">
                             ${SVG_PHONE}
-                            ${a.contact_number}
+                            ${escapeHtml(a.contact_number)}
                         </a>
                     </div>
                 </div>
