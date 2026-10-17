@@ -41,34 +41,47 @@ class Command(BaseCommand):
 
         # 2. Ensure Master Admin Account Exists
         # NOTE: NEVER overwrites or resets an existing administrator password.
-        admin_user, created = User.objects.get_or_create(
-            username="admin",
-            defaults={
-                'full_name': "Brown Nkosi (Master Administrator)",
-                'institutional_id': "ADMIN001",
-                'email': "mnnhlnkosi@gmail.com",
-                'contact_number': "+27820000001",
-                'role': roles[Role.ADMIN],
-                'is_staff': True,
-                'is_superuser': True,
-                'is_verified': True,
-            }
-        )
-        if created:
-            admin_user.set_password("password123")
-            admin_user.save()
-            self.stdout.write(self.style.SUCCESS(f"✓ Created initial master admin account: {admin_user.username}"))
-        else:
-            updated = False
-            if admin_user.email != "mnnhlnkosi@gmail.com":
-                admin_user.email = "mnnhlnkosi@gmail.com"
-                updated = True
-            if admin_user.full_name != "Brown Nkosi (Master Administrator)":
-                admin_user.full_name = "Brown Nkosi (Master Administrator)"
-                updated = True
-            if updated:
+        try:
+            target_email = "mnnhlnkosi@gmail.com"
+            email_owner = User.objects.filter(email=target_email).exclude(username="admin").first()
+            safe_email = "admin@campus.ac.za" if email_owner else target_email
+
+            target_inst_id = "ADMIN001"
+            id_owner = User.objects.filter(institutional_id=target_inst_id).exclude(username="admin").first()
+            safe_inst_id = "ADMIN-MASTER-001" if id_owner else target_inst_id
+
+            admin_user = User.objects.filter(username="admin").first()
+            if not admin_user:
+                admin_user = User.objects.create_user(
+                    username="admin",
+                    full_name="Brown Nkosi (Master Administrator)",
+                    institutional_id=safe_inst_id,
+                    email=safe_email,
+                    contact_number="+27820000001",
+                    role=roles.get(Role.ADMIN),
+                    is_staff=True,
+                    is_superuser=True,
+                    is_verified=True,
+                )
+                admin_user.set_password("password123")
                 admin_user.save()
-            self.stdout.write(self.style.SUCCESS(f"✓ Master admin account verified: {admin_user.username} ({admin_user.email}) - existing password preserved."))
+                self.stdout.write(self.style.SUCCESS(f"✓ Created initial master admin account: {admin_user.username}"))
+            else:
+                updated = False
+                if admin_user.email != target_email and not email_owner:
+                    admin_user.email = target_email
+                    updated = True
+                if admin_user.full_name != "Brown Nkosi (Master Administrator)":
+                    admin_user.full_name = "Brown Nkosi (Master Administrator)"
+                    updated = True
+                if updated:
+                    try:
+                        admin_user.save()
+                    except Exception as e:
+                        self.stdout.write(self.style.WARNING(f"Note: Could not update admin attributes: {e}"))
+                self.stdout.write(self.style.SUCCESS(f"✓ Master admin account verified: {admin_user.username} ({admin_user.email}) - existing password preserved."))
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f"Master admin setup non-fatal warning: {e}"))
 
         # 3. Optional Demo Seeding
         if options.get('demo'):
